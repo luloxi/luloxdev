@@ -1,0 +1,266 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #0b0712;
+  --foreground: #f2ecff;
+  --muted: #9b90b5;
+  --border: color-mix(in oklab, #c4b5fd 18%, transparent);
+  --accent: #c084fc;
+  --accent-2: #fb923c;
+  --surface: color-mix(in oklab, #1a1030 80%, transparent);
+  --neon-violet: #a855f7;
+  --neon-orange: #f97316;
+  --glow-violet: color-mix(in oklab, #a855f7 45%, transparent);
+  --glow-orange: color-mix(in oklab, #f97316 35%, transparent);
+  --email-bg: color-mix(in oklab, #f97316 18%, transparent);
+  --email-border: color-mix(in oklab, #fb923c 55%, transparent);
+  --email-fg: #fdba74;
+  --email-btn-bg: color-mix(in oklab, #f97316 28%, transparent);
+}
+
+/* Light mode still techno, just softer */
+:root:not(.dark) {
+  --background: #f4f0fb;
+  --foreground: #160f24;
+  --muted: #6b5f85;
+  --border: color-mix(in oklab, #7c3aed 16%, transparent);
+  --accent: #7c3aed;
+  --accent-2: #c2410c;
+  --surface: color-mix(in oklab, #ffffff 75%, #ede5ff);
+  --neon-violet: #7c3aed;
+  --neon-orange: #ea580c;
+  --glow-violet: color-mix(in oklab, #7c3aed 22%, transparent);
+  --glow-orange: color-mix(in oklab, #ea580c 32%, transparent);
+  --email-bg: #ffedd5;
+  --email-border: #ea580c;
+  --email-fg: #9a3412;
+  --email-btn-bg: #fed7aa;
+}
+
+.dark {
+  --background: #08060e;
+  --foreground: #f2ecff;
+  --muted: #9b90b5;
+  --border: color-mix(in oklab, #c4b5fd 16%, transparent);
+  --accent: #c084fc;
+  --accent-2: #fb923c;
+  --surface: color-mix(in oklab, #140f24 85%, transparent);
+  --neon-violet: #a855f7;
+  --neon-orange: #f97316;
+  --glow-violet: color-mix(in oklab, #a855f7 50%, transparent);
+  --glow-orange: color-mix(in oklab, #f97316 40%, transparent);
+  --email-bg: color-mix(in oklab, #f97316 18%, transparent);
+  --email-border: color-mix(in oklab, #fb923c 55%, transparent);
+  --email-fg: #fdba74;
+  --email-btn-bg: color-mix(in oklab, #f97316 28%, transparent);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-surface: var(--surface);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    min-height: 100dvh;
+    background-color: var(--background);
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--accent) 40%, transparent);
+    color: var(--foreground);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-syne), var(--font-display);
+  }
+
+  .neon-text {
+    text-shadow:
+      0 0 18px var(--glow-violet),
+      0 0 2px color-mix(in oklab, var(--accent) 50%, transparent);
+  }
+
+  .neon-panel {
+    border: 1px solid color-mix(in oklab, var(--accent) 28%, transparent);
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--surface) 92%, transparent),
+        color-mix(in oklab, var(--neon-violet) 8%, transparent)
+      );
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--neon-orange) 8%, transparent) inset,
+      0 0 24px color-mix(in oklab, var(--neon-violet) 12%, transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  .neon-panel:hover {
+    border-color: color-mix(in oklab, var(--accent) 55%, transparent);
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--neon-orange) 18%, transparent) inset,
+      0 0 28px color-mix(in oklab, var(--neon-violet) 28%, transparent),
+      0 0 48px color-mix(in oklab, var(--neon-orange) 10%, transparent);
+  }
+
+  .neon-icon {
+    border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+    background: color-mix(in oklab, var(--background) 70%, transparent);
+    box-shadow: 0 0 12px color-mix(in oklab, var(--neon-violet) 20%, transparent);
+  }
+
+  .glass-bar {
+    border: 1px solid color-mix(in oklab, var(--accent) 20%, transparent);
+    background: color-mix(in oklab, var(--surface) 70%, transparent);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 20px color-mix(in oklab, var(--neon-violet) 10%, transparent);
+  }
+
+  .email-cta {
+    border: 1.5px solid var(--email-border);
+    background: var(--email-bg);
+    color: var(--email-fg);
+    box-shadow: 0 0 20px var(--glow-orange);
+  }
+
+  .email-cta-btn {
+    border: 1.5px solid var(--email-border);
+    background: var(--email-btn-bg);
+    color: var(--email-fg);
+  }
+}
+
+/* ── Cosmic background ───────────────────────────────────── */
+
+.cosmic-base {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in oklab, var(--neon-violet) 18%, transparent), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, color-mix(in oklab, var(--neon-orange) 12%, transparent), transparent 50%),
+    radial-gradient(ellipse 50% 35% at 0% 80%, color-mix(in oklab, var(--neon-violet) 10%, transparent), transparent 45%),
+    var(--background);
+}
+
+.cosmic-grid {
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--neon-violet) 22%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--neon-violet) 22%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent 75%);
+}
+
+.cosmic-wave {
+  mix-blend-mode: screen;
+  will-change: opacity, transform;
+}
+
+.dark .cosmic-wave {
+  mix-blend-mode: screen;
+}
+
+:root:not(.dark) .cosmic-wave {
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+
+.cosmic-wave-a {
+  background:
+    radial-gradient(circle at 30% 40%, var(--glow-violet), transparent 42%),
+    radial-gradient(circle at 70% 60%, var(--glow-orange), transparent 38%);
+  animation: wave-pulse-a 14s ease-in-out infinite;
+}
+
+.cosmic-wave-b {
+  background:
+    radial-gradient(circle at 80% 20%, color-mix(in oklab, var(--neon-orange) 40%, transparent), transparent 36%),
+    radial-gradient(circle at 15% 75%, color-mix(in oklab, var(--neon-violet) 45%, transparent), transparent 40%);
+  animation: wave-pulse-b 18s ease-in-out infinite;
+}
+
+.cosmic-wave-c {
+  background:
+    radial-gradient(ellipse 50% 30% at 50% 50%, color-mix(in oklab, var(--neon-violet) 25%, transparent), transparent 70%),
+    radial-gradient(ellipse 40% 25% at 40% 70%, color-mix(in oklab, var(--neon-orange) 20%, transparent), transparent 65%);
+  animation: wave-pulse-c 22s ease-in-out infinite;
+}
+
+.cosmic-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+.cosmic-vignette {
+  background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 40%, color-mix(in oklab, var(--background) 85%, black) 100%);
+}
+
+@keyframes wave-pulse-a {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(1) translate(0, 0);
+  }
+  40% {
+    opacity: 0.55;
+    transform: scale(1.08) translate(2%, -1%);
+  }
+  70% {
+    opacity: 0.25;
+    transform: scale(1.02) translate(-1%, 2%);
+  }
+}
+
+@keyframes wave-pulse-b {
+  0%,
+  100% {
+    opacity: 0.1;
+    transform: scale(1.05) translate(0, 0);
+  }
+  35% {
+    opacity: 0.45;
+    transform: scale(1.12) translate(-3%, 2%);
+  }
+  65% {
+    opacity: 0.2;
+    transform: scale(0.98) translate(2%, -2%);
+  }
+}
+
+@keyframes wave-pulse-c {
+  0%,
+  100% {
+    opacity: 0.08;
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.15) rotate(2deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cosmic-wave-a,
+  .cosmic-wave-b,
+  .cosmic-wave-c {
+    animation: none;
+    opacity: 0.25;
+  }
+}
