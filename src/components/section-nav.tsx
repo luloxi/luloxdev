@@ -12,7 +12,7 @@ const accents: Record<SectionId, string> = {
   contact: "#fb923c",
 };
 
-/** Minimal angled glass links - color accent only, no generic icons */
+/** Minimal angled glass links - color accent, no side dots */
 export function SectionNav() {
   const { t } = useLocale();
 
@@ -31,17 +31,9 @@ export function SectionNav() {
             className="future-nav-item group flex h-12 items-center px-5 sm:h-14 sm:px-6"
             style={{ ["--fn-accent" as string]: accent }}
           >
-            <span className="flex-1 text-left text-[15px] font-medium tracking-tight sm:text-base">
+            <span className="font-display flex-1 text-left text-sm font-medium tracking-[0.08em] sm:text-[15px]">
               {label}
             </span>
-            <span
-              aria-hidden
-              className="h-1 w-1 shrink-0 rounded-full opacity-70 transition-all duration-300 group-hover:scale-150 group-hover:opacity-100"
-              style={{
-                background: accent,
-                boxShadow: `0 0 10px ${accent}`,
-              }}
-            />
           </Link>
         );
       })}

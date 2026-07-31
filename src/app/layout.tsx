@@ -1,20 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Syne } from "next/font/google";
+import { Orbitron, Space_Grotesk } from "next/font/google";
 import { CosmicBg } from "@/components/cosmic-bg";
 import { LocaleProvider } from "@/i18n/locale-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { site } from "@/content/site";
 import "./globals.css";
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-space",
   display: "swap",
 });
 
-const syne = Syne({
+const orbitron = Orbitron({
   subsets: ["latin"],
-  variable: "--font-syne",
+  variable: "--font-orbitron",
   display: "swap",
 });
 
@@ -44,10 +44,10 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
-      className={`${inter.variable} ${syne.variable} dark h-full`}
+      className={`${spaceGrotesk.variable} ${orbitron.variable} dark h-full`}
     >
       <body
-        className={`${inter.className} relative min-h-full`}
+        className={`${spaceGrotesk.className} relative min-h-full`}
         suppressHydrationWarning
       >
         <ThemeProvider>
