@@ -149,109 +149,67 @@
     color: var(--email-fg);
   }
 
-  /* Home section links — future HUD, not generic cards */
+  /* Home section links - quiet future glass, not gamer HUD */
   .future-nav-item {
     --fn-accent: var(--accent);
     position: relative;
     isolation: isolate;
-    /* Cut corner, angled rail */
     clip-path: polygon(
       0 0,
-      calc(100% - 14px) 0,
-      100% 14px,
+      calc(100% - 12px) 0,
+      100% 12px,
       100% 100%,
-      14px 100%,
-      0 calc(100% - 14px)
+      12px 100%,
+      0 calc(100% - 12px)
     );
     background:
       linear-gradient(
-        105deg,
-        color-mix(in oklab, var(--fn-accent) 16%, transparent) 0%,
-        color-mix(in oklab, var(--background) 55%, transparent) 28%,
-        color-mix(in oklab, var(--surface) 70%, transparent) 100%
+        100deg,
+        color-mix(in oklab, var(--fn-accent) 12%, transparent) 0%,
+        color-mix(in oklab, var(--surface) 72%, transparent) 40%,
+        color-mix(in oklab, var(--background) 50%, transparent) 100%
       );
     box-shadow:
-      inset 0 1px 0 color-mix(in oklab, white 8%, transparent),
-      inset 0 -1px 0 color-mix(in oklab, var(--fn-accent) 12%, transparent),
-      0 0 0 1px color-mix(in oklab, var(--fn-accent) 22%, transparent),
-      0 8px 28px color-mix(in oklab, black 35%, transparent);
-    backdrop-filter: blur(14px) saturate(1.2);
+      inset 0 1px 0 color-mix(in oklab, white 6%, transparent),
+      0 0 0 1px color-mix(in oklab, var(--fn-accent) 18%, transparent);
+    backdrop-filter: blur(12px);
     transition:
-      transform 0.25s ease,
-      box-shadow 0.25s ease,
-      background 0.25s ease;
-  }
-
-  .future-nav-item::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background:
-      repeating-linear-gradient(
-        -12deg,
-        transparent,
-        transparent 3px,
-        color-mix(in oklab, var(--fn-accent) 4%, transparent) 3px,
-        color-mix(in oklab, var(--fn-accent) 4%, transparent) 4px
-      );
-    opacity: 0.55;
-    pointer-events: none;
+      transform 0.22s ease,
+      box-shadow 0.22s ease,
+      background 0.22s ease;
   }
 
   .future-nav-item::after {
     content: "";
     position: absolute;
     left: 0;
-    top: 18%;
-    bottom: 18%;
-    width: 3px;
+    top: 22%;
+    bottom: 22%;
+    width: 2px;
     border-radius: 999px;
-    background: linear-gradient(
-      180deg,
-      transparent,
-      var(--fn-accent),
-      transparent
-    );
-    box-shadow: 0 0 12px var(--fn-accent);
+    background: var(--fn-accent);
+    opacity: 0.75;
+    box-shadow: 0 0 10px color-mix(in oklab, var(--fn-accent) 50%, transparent);
     pointer-events: none;
   }
 
   .future-nav-item:hover {
-    transform: translateX(3px);
+    transform: translateX(2px);
     background:
       linear-gradient(
-        105deg,
-        color-mix(in oklab, var(--fn-accent) 28%, transparent) 0%,
-        color-mix(in oklab, var(--background) 40%, transparent) 32%,
-        color-mix(in oklab, var(--surface) 75%, transparent) 100%
+        100deg,
+        color-mix(in oklab, var(--fn-accent) 20%, transparent) 0%,
+        color-mix(in oklab, var(--surface) 78%, transparent) 45%,
+        color-mix(in oklab, var(--background) 45%, transparent) 100%
       );
     box-shadow:
-      inset 0 1px 0 color-mix(in oklab, white 12%, transparent),
-      0 0 0 1px color-mix(in oklab, var(--fn-accent) 45%, transparent),
-      0 0 28px color-mix(in oklab, var(--fn-accent) 28%, transparent),
-      0 12px 32px color-mix(in oklab, black 40%, transparent);
+      inset 0 1px 0 color-mix(in oklab, white 8%, transparent),
+      0 0 0 1px color-mix(in oklab, var(--fn-accent) 35%, transparent),
+      0 0 22px color-mix(in oklab, var(--fn-accent) 16%, transparent);
   }
 
   .future-nav-item:active {
-    transform: translateX(1px) scale(0.99);
-  }
-
-  .future-nav-chevron {
-    width: 10px;
-    height: 10px;
-    border-right: 1.5px solid color-mix(in oklab, var(--fn-accent) 70%, transparent);
-    border-top: 1.5px solid color-mix(in oklab, var(--fn-accent) 70%, transparent);
-    transform: rotate(45deg);
-    opacity: 0.45;
-    transition:
-      opacity 0.25s ease,
-      transform 0.25s ease;
-  }
-
-  .future-nav-item:hover .future-nav-chevron {
-    opacity: 1;
-    transform: rotate(45deg) translate(2px, -2px);
+    transform: translateX(1px) scale(0.995);
   }
 }
 
