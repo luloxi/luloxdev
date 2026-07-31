@@ -19,14 +19,14 @@ const icons = {
   mail: Mail,
 } as const;
 
-/** Stacked neon buttons that share remaining viewport height */
+/** Compact elegant buttons - never stretch to fill the viewport */
 export function SectionNav() {
   const { t } = useLocale();
 
   return (
     <nav
       aria-label="Sections"
-      className="flex h-full min-h-0 w-full flex-1 flex-col gap-1.5 sm:gap-2"
+      className="flex w-full flex-col gap-1.5 sm:gap-2"
     >
       {sections.map((s) => {
         const Icon = icons[s.icon];
@@ -35,12 +35,12 @@ export function SectionNav() {
           <Link
             key={s.href}
             href={s.href}
-            className="neon-panel group flex min-h-0 flex-1 items-center gap-3 rounded-2xl px-4 transition-all duration-300 active:scale-[0.99]"
+            className="neon-panel group flex h-11 items-center gap-3 rounded-2xl px-4 transition-all duration-300 active:scale-[0.99] sm:h-12"
           >
-            <span className="neon-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-accent transition-colors group-hover:text-accent-2">
-              <Icon className="h-4 w-4" strokeWidth={1.75} />
+            <span className="neon-icon flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-accent transition-colors group-hover:text-accent-2 sm:h-8 sm:w-8 sm:rounded-xl">
+              <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={1.75} />
             </span>
-            <span className="flex-1 text-left text-[15px] font-medium tracking-tight sm:text-base">
+            <span className="flex-1 text-left text-sm font-medium tracking-tight">
               {label}
             </span>
             <span

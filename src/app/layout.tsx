@@ -46,7 +46,10 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${syne.variable} dark h-full`}
     >
-      <body className={`${inter.className} relative min-h-full`}>
+      <body
+        className={`${inter.className} relative min-h-full`}
+        suppressHydrationWarning
+      >
         <ThemeProvider>
           <LocaleProvider>
             <CosmicBg />
