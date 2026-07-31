@@ -17,7 +17,6 @@ const platforms = [
     label: "Letterboxd",
     href: tasteLinks.letterboxd,
     Icon: LetterboxdBrandIcon,
-    // Multi-color mark baked into the SVG
     iconClass: undefined as string | undefined,
   },
   {
@@ -75,24 +74,21 @@ function PlatformCard({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="neon-panel group flex items-start gap-3.5 rounded-2xl px-4 py-4"
+      className="neon-panel group flex items-center gap-4 rounded-2xl px-4 py-4 sm:gap-5 sm:px-5 sm:py-5"
     >
       <span
         className={cn(
-          "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background/50",
+          "inline-flex h-10 w-10 shrink-0 items-center justify-center sm:h-12 sm:w-12",
           iconClass,
         )}
       >
-        <Icon className="h-5 w-5" />
+        <Icon className="h-9 w-9 sm:h-11 sm:w-11" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="flex items-baseline justify-between gap-3">
-          <span className="text-[15px] font-medium tracking-tight group-hover:text-accent">
-            {label}
-          </span>
-          <span className="shrink-0 text-xs text-accent-2">↗</span>
+        <span className="block text-[15px] font-medium tracking-tight group-hover:text-accent sm:text-base">
+          {label}
         </span>
-        <span className="mt-1.5 block text-sm leading-relaxed text-muted">
+        <span className="mt-1 block text-sm leading-relaxed text-muted">
           {blurb}
         </span>
       </span>
