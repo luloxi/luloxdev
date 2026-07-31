@@ -15,31 +15,41 @@ import { cn } from "@/lib/utils";
 
 const sectionVisual: Record<
   SectionId,
-  { Icon: LucideIcon; color: string }
+  { Icon: LucideIcon; accent: string; code: string; signal: string }
 > = {
   about: {
     Icon: CircleUserRound,
-    color: "text-violet-400",
+    accent: "#a78bfa",
+    code: "01",
+    signal: "ID",
   },
   projects: {
     Icon: Boxes,
-    color: "text-sky-400",
+    accent: "#38bdf8",
+    code: "02",
+    signal: "BUILD",
   },
   blog: {
     Icon: BookOpenText,
-    color: "text-amber-400",
+    accent: "#fbbf24",
+    code: "03",
+    signal: "LOG",
   },
   tastes: {
     Icon: Music2,
-    color: "text-rose-400",
+    accent: "#fb7185",
+    code: "04",
+    signal: "SIGNAL",
   },
   contact: {
     Icon: Mail,
-    color: "text-orange-400",
+    accent: "#fb923c",
+    code: "05",
+    signal: "LINK",
   },
 };
 
-/** Fixed-height elegant buttons that stay within the home viewport */
+/** Future-HUD section links — angled glass, color rail, index codes */
 export function SectionNav() {
   const { t } = useLocale();
 
@@ -49,26 +59,44 @@ export function SectionNav() {
       className="flex w-full flex-col gap-2 sm:gap-2.5"
     >
       {sections.map((s) => {
-        const { Icon, color } = sectionVisual[s.id];
+        const { Icon, accent, code, signal } = sectionVisual[s.id];
         const label = t.sections[s.id];
         return (
           <Link
             key={s.href}
             href={s.href}
-            className="neon-panel group flex h-12 items-center gap-3.5 rounded-2xl px-4 transition-all duration-300 active:scale-[0.99] sm:h-14 sm:px-5"
+            className="future-nav-item group flex h-12 items-center gap-3.5 pl-5 pr-4 sm:h-14 sm:gap-4 sm:pl-6 sm:pr-5"
+            style={{ ["--fn-accent" as string]: accent }}
           >
-            <Icon
-              className={cn(
-                "h-6 w-6 shrink-0 sm:h-7 sm:w-7",
-                color,
-                "transition-transform duration-300 group-hover:scale-105",
-              )}
-              strokeWidth={1.6}
-              aria-hidden
-            />
-            <span className="flex-1 text-left text-[15px] font-medium tracking-tight sm:text-base">
-              {label}
+            <span className="flex min-w-0 flex-1 items-center gap-3 sm:gap-3.5">
+              <span
+                className="font-mono text-[10px] tracking-[0.18em] tabular-nums opacity-60 sm:text-[11px]"
+                style={{ color: accent }}
+              >
+                {code}
+              </span>
+
+              <Icon
+                className="h-6 w-6 shrink-0 sm:h-7 sm:w-7"
+                style={{ color: accent }}
+                strokeWidth={1.5}
+                aria-hidden
+              />
+
+              <span className="min-w-0 flex-1 text-left">
+                <span className="block truncate text-[15px] font-medium tracking-tight sm:text-base">
+                  {label}
+                </span>
+                <span
+                  className="mt-0.5 hidden font-mono text-[9px] tracking-[0.22em] uppercase opacity-50 sm:block"
+                  style={{ color: accent }}
+                >
+                  {signal}
+                </span>
+              </span>
             </span>
+
+            <span className="future-nav-chevron shrink-0" aria-hidden />
           </Link>
         );
       })}
