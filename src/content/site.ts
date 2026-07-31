@@ -21,12 +21,13 @@ export type SectionId =
 
 /** Main sections - stacked Linktree-style buttons */
 export const sections = [
-  { id: "about" as const, href: "/about", icon: "user" as const },
-  { id: "projects" as const, href: "/projects", icon: "folder" as const },
-  { id: "blog" as const, href: "/blog", icon: "pen" as const },
-  { id: "tastes" as const, href: "/tastes", icon: "heart" as const },
-  { id: "contact" as const, href: "/contact", icon: "mail" as const },
+  { id: "about" as const, href: "/about" },
+  { id: "projects" as const, href: "/projects" },
+  { id: "blog" as const, href: "/blog" },
+  { id: "tastes" as const, href: "/tastes" },
+  { id: "contact" as const, href: "/contact" },
 ];
+
 
 export const socials = [
   { id: "x", label: "X", href: "https://x.com/LuloxDev" },

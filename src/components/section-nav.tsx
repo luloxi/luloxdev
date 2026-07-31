@@ -2,24 +2,44 @@
 
 import Link from "next/link";
 import {
-  FolderKanban,
-  Heart,
+  BookOpenText,
+  Boxes,
+  CircleUserRound,
   Mail,
-  PenLine,
-  User,
+  Music2,
+  type LucideIcon,
 } from "lucide-react";
-import { sections } from "@/content/site";
+import { sections, type SectionId } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
+import { cn } from "@/lib/utils";
 
-const icons = {
-  user: User,
-  folder: FolderKanban,
-  pen: PenLine,
-  heart: Heart,
-  mail: Mail,
-} as const;
+const sectionVisual: Record<
+  SectionId,
+  { Icon: LucideIcon; color: string }
+> = {
+  about: {
+    Icon: CircleUserRound,
+    color: "text-violet-400",
+  },
+  projects: {
+    Icon: Boxes,
+    color: "text-sky-400",
+  },
+  blog: {
+    Icon: BookOpenText,
+    color: "text-amber-400",
+  },
+  tastes: {
+    Icon: Music2,
+    color: "text-rose-400",
+  },
+  contact: {
+    Icon: Mail,
+    color: "text-orange-400",
+  },
+};
 
-/** Comfortable buttons - fixed height (not stretched), easy to tap */
+/** Comfortable buttons - large colored icons, no icon box */
 export function SectionNav() {
   const { t } = useLocale();
 
@@ -29,24 +49,26 @@ export function SectionNav() {
       className="flex w-full flex-col gap-2.5 sm:gap-3"
     >
       {sections.map((s) => {
-        const Icon = icons[s.icon];
+        const { Icon, color } = sectionVisual[s.id];
         const label = t.sections[s.id];
         return (
           <Link
             key={s.href}
             href={s.href}
-            className="neon-panel group flex h-14 items-center gap-3.5 rounded-2xl px-4 transition-all duration-300 active:scale-[0.99] sm:h-16 sm:gap-4 sm:px-5"
+            className="neon-panel group flex h-14 items-center gap-4 rounded-2xl px-4 transition-all duration-300 active:scale-[0.99] sm:h-16 sm:gap-4 sm:px-5"
           >
-            <span className="neon-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-accent transition-colors group-hover:text-accent-2 sm:h-10 sm:w-10">
-              <Icon className="h-4 w-4 sm:h-[18px] sm:w-[18px]" strokeWidth={1.75} />
-            </span>
+            <Icon
+              className={cn(
+                "h-7 w-7 shrink-0 sm:h-8 sm:w-8",
+                color,
+                "transition-transform duration-300 group-hover:scale-105",
+              )}
+              strokeWidth={1.6}
+              aria-hidden
+            />
             <span className="flex-1 text-left text-[15px] font-medium tracking-tight sm:text-base">
               {label}
             </span>
-            <span
-              aria-hidden
-              className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent opacity-50 shadow-[0_0_8px_var(--glow-violet)] transition-opacity group-hover:opacity-100 group-hover:bg-accent-2 group-hover:shadow-[0_0_10px_var(--glow-orange)]"
-            />
           </Link>
         );
       })}
