@@ -94,18 +94,29 @@ export function ProjectsAccordion() {
                   rel="noopener noreferrer"
                   className="neon-panel group block rounded-2xl px-4 py-4"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="text-[15px] font-medium tracking-tight group-hover:text-accent">
-                      {copy.title}
-                    </h3>
-                    <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-2 opacity-70 transition-opacity group-hover:opacity-100" />
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={project.icon}
+                      alt=""
+                      width={22}
+                      height={22}
+                      className="mt-0.5 h-[22px] w-[22px] shrink-0 rounded-md object-cover ring-1 ring-border/60"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <h3 className="text-[15px] font-medium tracking-tight group-hover:text-accent">
+                          {copy.title}
+                        </h3>
+                        <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-2 opacity-70 transition-opacity group-hover:opacity-100" />
+                      </div>
+                      <p className="mt-1.5 text-sm leading-relaxed text-muted">
+                        {copy.body}
+                      </p>
+                      <p className="mt-2 text-xs text-muted/80">
+                        {project.tags.join(" · ")}
+                      </p>
+                    </div>
                   </div>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted">
-                    {copy.body}
-                  </p>
-                  <p className="mt-2 text-xs text-muted/80">
-                    {project.tags.join(" · ")}
-                  </p>
                 </a>
               </li>
             );

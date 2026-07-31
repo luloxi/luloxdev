@@ -28,20 +28,24 @@ export const pastProjects: {
   id: PastProjectId;
   href: string;
   tags: string[];
+  icon: string;
 }[] = [
   {
     id: "mochi",
     href: "https://github.com/luloxi/Mochi",
     tags: ["AI Agents", "Avalanche", "Marketplace"],
+    icon: "/projects/mochi.svg",
   },
   {
     id: "sami",
     href: "https://github.com/luloxi/sami",
     tags: ["AI", "Eliza", "Game"],
+    icon: "/projects/sami.svg",
   },
   {
     id: "punksociety",
     href: "https://github.com/luloxi/PunkSociety",
     tags: ["Social", "NFT", "USDC", "Scaffold-ETH"],
+    icon: "/projects/punksociety.svg",
   },
 ];
