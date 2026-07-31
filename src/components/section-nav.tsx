@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { sections, type SectionId } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
-import { cn } from "@/lib/utils";
 
 const sectionVisual: Record<
   SectionId,
