@@ -92,13 +92,64 @@
 
 @layer utilities {
   .font-display {
-    font-family: var(--font-syne), var(--font-display);
+    font-family: var(--font-orbitron), var(--font-display);
+    letter-spacing: 0.06em;
   }
 
   .neon-text {
     text-shadow:
       0 0 18px var(--glow-violet),
       0 0 2px color-mix(in oklab, var(--accent) 50%, transparent);
+  }
+
+  /* Unnecessary decorative flair */
+  .deco-ring {
+    position: absolute;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in oklab, var(--accent) 35%, transparent);
+    pointer-events: none;
+  }
+
+  .deco-bracket {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: color-mix(in oklab, var(--accent) 55%, transparent);
+    pointer-events: none;
+  }
+
+  .deco-float {
+    position: absolute;
+    border-radius: 9999px;
+    background: var(--accent);
+    opacity: 0.45;
+    pointer-events: none;
+    animation: deco-drift 8s ease-in-out infinite;
+  }
+
+  .deco-float-b {
+    background: var(--accent-2);
+    animation-duration: 11s;
+    animation-delay: -3s;
+  }
+
+  @keyframes deco-drift {
+    0%,
+    100% {
+      transform: translate(0, 0);
+      opacity: 0.35;
+    }
+    50% {
+      transform: translate(4px, -6px);
+      opacity: 0.7;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .deco-float,
+    .deco-float-b {
+      animation: none;
+    }
   }
 
   .neon-panel {
@@ -149,67 +200,91 @@
     color: var(--email-fg);
   }
 
-  /* Home section links - quiet future glass, not gamer HUD */
-  .future-nav-item {
+  /* Home section mosaic - compact glass tiles */
+  .future-nav-tile {
     --fn-accent: var(--accent);
     position: relative;
     isolation: isolate;
-    clip-path: polygon(
-      0 0,
-      calc(100% - 12px) 0,
-      100% 12px,
-      100% 100%,
-      12px 100%,
-      0 calc(100% - 12px)
-    );
+    overflow: hidden;
+    border-radius: 1.15rem;
     background:
+      radial-gradient(
+        120% 90% at 0% 0%,
+        color-mix(in oklab, var(--fn-accent) 22%, transparent),
+        transparent 55%
+      ),
       linear-gradient(
-        100deg,
-        color-mix(in oklab, var(--fn-accent) 12%, transparent) 0%,
-        color-mix(in oklab, var(--surface) 72%, transparent) 40%,
-        color-mix(in oklab, var(--background) 50%, transparent) 100%
+        160deg,
+        color-mix(in oklab, var(--surface) 88%, transparent),
+        color-mix(in oklab, var(--background) 55%, transparent)
       );
     box-shadow:
-      inset 0 1px 0 color-mix(in oklab, white 6%, transparent),
-      0 0 0 1px color-mix(in oklab, var(--fn-accent) 18%, transparent);
-    backdrop-filter: blur(12px);
+      inset 0 1px 0 color-mix(in oklab, white 8%, transparent),
+      0 0 0 1px color-mix(in oklab, var(--fn-accent) 22%, transparent);
+    backdrop-filter: blur(14px);
     transition:
       transform 0.22s ease,
       box-shadow 0.22s ease,
       background 0.22s ease;
   }
 
-  .future-nav-item::after {
+  .future-nav-tile::before {
     content: "";
     position: absolute;
-    left: 0;
-    top: 22%;
-    bottom: 22%;
-    width: 2px;
-    border-radius: 999px;
-    background: var(--fn-accent);
-    opacity: 0.75;
-    box-shadow: 0 0 10px color-mix(in oklab, var(--fn-accent) 50%, transparent);
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      color-mix(in oklab, white 7%, transparent) 48%,
+      transparent 56%
+    );
+    opacity: 0;
+    transition: opacity 0.35s ease, transform 0.45s ease;
+    transform: translateX(-30%);
     pointer-events: none;
   }
 
-  .future-nav-item:hover {
-    transform: translateX(2px);
-    background:
-      linear-gradient(
-        100deg,
-        color-mix(in oklab, var(--fn-accent) 20%, transparent) 0%,
-        color-mix(in oklab, var(--surface) 78%, transparent) 45%,
-        color-mix(in oklab, var(--background) 45%, transparent) 100%
-      );
-    box-shadow:
-      inset 0 1px 0 color-mix(in oklab, white 8%, transparent),
-      0 0 0 1px color-mix(in oklab, var(--fn-accent) 35%, transparent),
-      0 0 22px color-mix(in oklab, var(--fn-accent) 16%, transparent);
+  .future-nav-tile::after {
+    content: "";
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--fn-accent),
+      transparent
+    );
+    opacity: 0.55;
+    pointer-events: none;
   }
 
-  .future-nav-item:active {
-    transform: translateX(1px) scale(0.995);
+  .future-nav-tile:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, white 10%, transparent),
+      0 0 0 1px color-mix(in oklab, var(--fn-accent) 42%, transparent),
+      0 10px 28px color-mix(in oklab, var(--fn-accent) 14%, transparent);
+  }
+
+  .future-nav-tile:hover::before {
+    opacity: 1;
+    transform: translateX(30%);
+  }
+
+  .future-nav-tile:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .future-nav-tile-wide {
+    border-radius: 999px;
+  }
+
+  .future-nav-tile-wide::after {
+    left: 20%;
+    right: 20%;
   }
 }
 
