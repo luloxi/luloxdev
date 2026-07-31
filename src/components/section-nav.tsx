@@ -39,14 +39,14 @@ const sectionVisual: Record<
   },
 };
 
-/** Comfortable buttons - large colored icons, no icon box */
+/** Fixed-height elegant buttons that stay within the home viewport */
 export function SectionNav() {
   const { t } = useLocale();
 
   return (
     <nav
       aria-label="Sections"
-      className="flex w-full flex-col gap-2.5 sm:gap-3"
+      className="flex w-full flex-col gap-2 sm:gap-2.5"
     >
       {sections.map((s) => {
         const { Icon, color } = sectionVisual[s.id];
@@ -55,11 +55,11 @@ export function SectionNav() {
           <Link
             key={s.href}
             href={s.href}
-            className="neon-panel group flex h-14 items-center gap-4 rounded-2xl px-4 transition-all duration-300 active:scale-[0.99] sm:h-16 sm:gap-4 sm:px-5"
+            className="neon-panel group flex h-12 items-center gap-3.5 rounded-2xl px-4 transition-all duration-300 active:scale-[0.99] sm:h-13 sm:px-5 md:h-14"
           >
             <Icon
               className={cn(
-                "h-7 w-7 shrink-0 sm:h-8 sm:w-8",
+                "h-6 w-6 shrink-0 sm:h-7 sm:w-7",
                 color,
                 "transition-transform duration-300 group-hover:scale-105",
               )}
