@@ -55,7 +55,7 @@ export function SectionNav() {
           <Link
             key={s.href}
             href={s.href}
-            className="neon-panel group flex h-12 items-center gap-3.5 rounded-2xl px-4 transition-all duration-300 active:scale-[0.99] sm:h-13 sm:px-5 md:h-14"
+            className="neon-panel group flex h-12 items-center gap-3.5 rounded-2xl px-4 transition-all duration-300 active:scale-[0.99] sm:h-14 sm:px-5"
           >
             <Icon
               className={cn(
