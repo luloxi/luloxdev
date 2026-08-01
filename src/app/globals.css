@@ -254,8 +254,14 @@
 .cp-nav {
   display: grid;
   width: 100%;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 0.4rem;
+}
+
+@media (min-width: 640px) {
+  .cp-nav {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .cp-nav-item {
