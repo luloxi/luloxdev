@@ -27,34 +27,27 @@ export const messages = {
         "Hoy combino producto, community y advisory: menos ruido, más signal. Me interesa RealFi, privacy tech, y agentes que hagan trabajo de verdad.",
         "Fuera de la pantalla: asados, meetups, cine y conversaciones largas. Creo que la mejor tech se construye con gente y con paciencia.",
       ],
-      philosophy: "Build slowly. Ship honestly. Stay curious.",
       timeline: [
         {
-          period: "2024 - Presente",
-          title: "Midnight Ambassador & Builder",
-          org: "IOG / Midnight",
+          period: "Jul 2025 - Presente",
+          title: "Research & Development",
+          org: "Input Output Global",
           description:
-            "Advocacy, community y exploración de privacy-preserving smart contracts.",
+            "Investigación económica y técnica en blockchain, finanzas y AI. Desarrollo de automatizaciones, agentes de AI y webapps.",
         },
         {
-          period: "2023 - Presente",
-          title: "Builder",
+          period: "Abr 2023 - May 2024",
+          title: "Fullstack Web3 developer",
           org: "BuidlGuidl",
           description:
-            "Scaffolding, experiments y learning en el ecosystem Ethereum.",
-        },
-        {
-          period: "2022 - Presente",
-          title: "Angel Investor & Strategic Advisor",
-          org: "Early-stage",
-          description:
-            "Apoyo a founders en crypto, AI y community: producto, narrative y red.",
+            "Desarrollo de aplicaciones web3 con Scaffold-ETH 2 y Solidity para el ecosistema Ethereum como bien público.",
         },
       ],
+      linkedInCta: "Ver mi LinkedIn",
     },
     projects: {
       title: "Proyectos",
-      focusHeading: "Enfocándome en",
+      focusHeading: "Investigando sobre",
       pastHeading: "Proyectos anteriores",
       focus: {
         tokenization: {
@@ -134,30 +127,23 @@ export const messages = {
         "Today I mix product, community, and advisory: less noise, more signal. I'm into RealFi, privacy tech, and agents that do real work.",
         "Off-screen: asados, meetups, film, and long conversations. I believe the best tech is built with people and patience.",
       ],
-      philosophy: "Build slowly. Ship honestly. Stay curious.",
       timeline: [
         {
-          period: "2024 - Present",
-          title: "Midnight Ambassador & Builder",
-          org: "IOG / Midnight",
+          period: "Jul 2025 - Present",
+          title: "Research & Development",
+          org: "Input Output Global",
           description:
-            "Advocacy, community, and exploration of privacy-preserving smart contracts.",
+            "Economic and technical research on blockchain, finance and AI. Development of automations, AI agents and webapps.",
         },
         {
-          period: "2023 - Present",
-          title: "Builder",
+          period: "Apr 2023 - May 2024",
+          title: "Fullstack Web3 developer",
           org: "BuidlGuidl",
           description:
-            "Scaffolding, experiments, and learning in the Ethereum ecosystem.",
-        },
-        {
-          period: "2022 - Present",
-          title: "Angel Investor & Strategic Advisor",
-          org: "Early-stage",
-          description:
-            "Supporting founders in crypto, AI, and community: product, narrative, and network.",
+            "Development of web3 applications with Scaffold-ETH 2 and Solidity for the Ethereum ecosystem as a public good.",
         },
       ],
+      linkedInCta: "View my LinkedIn",
     },
     projects: {
       title: "Projects",

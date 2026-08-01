@@ -6,8 +6,12 @@ import { site } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
-/** Same row height as social links (px-4 py-3.5 text-sm); orange CTA tokens for light/dark */
-export function EmailContact() {
+type EmailContactProps = {
+  code?: string;
+};
+
+/** Cyberpunk-styled email row with copy action */
+export function EmailContact({ code = "06" }: EmailContactProps) {
   const { t } = useLocale();
   const [copied, setCopied] = useState(false);
 
@@ -35,15 +39,28 @@ export function EmailContact() {
   }, []);
 
   return (
-    <div className="email-cta flex items-center gap-3 rounded-2xl px-4 py-3.5">
-      <a
-        href={`mailto:${site.email}`}
-        className="flex min-w-0 flex-1 items-center gap-3 truncate text-sm transition-opacity hover:opacity-85"
-      >
+    <div className="cp-email">
+      <span className="cp-nav-frame" aria-hidden>
+        <span className="cp-nav-corner cp-nav-corner-tl" />
+        <span className="cp-nav-corner cp-nav-corner-br" />
+      </span>
+
+      <span className="cp-nav-meta z-[1]">
+        <span className="cp-nav-code">{code}</span>
+        <span className="cp-nav-slash" aria-hidden>
+          //
+        </span>
+      </span>
+
+      <a href={`mailto:${site.email}`} className="cp-email-main">
         <Mail className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden />
         <span className="min-w-0 truncate">
-          <span className="mr-2 opacity-75">{t.contact.emailLabel}</span>
-          <span className="font-mono text-[13px] sm:text-sm">{site.email}</span>
+          <span className="cp-row-label mr-2 inline text-[0.85rem]">
+            {t.contact.emailLabel}
+          </span>
+          <span className="font-mono text-[12px] opacity-90 sm:text-[13px]">
+            {site.email}
+          </span>
         </span>
       </a>
 
@@ -51,11 +68,7 @@ export function EmailContact() {
         type="button"
         onClick={copyEmail}
         aria-label={copied ? t.contact.copied : t.contact.copy}
-        className={cn(
-          "email-cta-btn group/copy inline-flex h-7 shrink-0 items-center justify-center rounded-lg",
-          "transition-all duration-200 hover:brightness-110",
-          copied ? "min-w-7 gap-1 px-2" : "w-7 hover:w-auto hover:gap-1 hover:px-2",
-        )}
+        className={cn("cp-email-copy", copied && "min-w-0")}
       >
         <span className="inline-flex h-3.5 w-3.5 items-center justify-center">
           {copied ? (
@@ -64,14 +77,7 @@ export function EmailContact() {
             <Copy className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
           )}
         </span>
-        <span
-          className={cn(
-            "text-[11px] font-medium whitespace-nowrap",
-            copied ? "inline" : "hidden group-hover/copy:inline",
-          )}
-        >
-          {copied ? t.contact.copied : t.contact.copy}
-        </span>
+        <span>{copied ? t.contact.copied : t.contact.copy}</span>
       </button>
     </div>
   );

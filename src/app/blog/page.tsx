@@ -8,13 +8,29 @@ export default function BlogPage() {
 
   return (
     <PageShell title={t.blog.title}>
-      <div className="neon-panel rounded-2xl px-5 py-10 text-center">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
-          {t.blog.comingSoon}
-        </p>
-        <p className="mt-3 text-sm leading-relaxed text-muted">
-          {t.blog.note}
-        </p>
+      <div
+        className="cp-panel"
+        style={{ ["--cp-accent" as string]: "var(--section-blog)" }}
+      >
+        <span className="cp-nav-frame" aria-hidden>
+          <span className="cp-nav-corner cp-nav-corner-tl" />
+          <span className="cp-nav-corner cp-nav-corner-br" />
+          <span className="cp-nav-scan" style={{ opacity: 0.4 }} />
+        </span>
+
+        <div className="cp-panel-inner py-6 text-center sm:py-8">
+          <p className="cp-nav-meta justify-center">
+            <span className="cp-nav-code">00</span>
+            <span className="cp-nav-slash">//</span>
+            <span className="uppercase tracking-[0.18em]">
+              {t.blog.comingSoon}
+            </span>
+          </p>
+          <p className="cp-headline mt-4 text-[1rem] sm:text-[1.1rem]">
+            {t.blog.title}
+          </p>
+          <p className="cp-prose mx-auto mt-3 max-w-sm">{t.blog.note}</p>
+        </div>
       </div>
     </PageShell>
   );

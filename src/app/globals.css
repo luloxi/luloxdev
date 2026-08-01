@@ -18,25 +18,36 @@
   --email-border: color-mix(in oklab, #fb923c 55%, transparent);
   --email-fg: #fdba74;
   --email-btn-bg: color-mix(in oklab, #f97316 28%, transparent);
+  --section-about: #a78bfa;
+  --section-projects: #38bdf8;
+  --section-blog: #fbbf24;
+  --section-tastes: #fb7185;
+  --section-contact: #fb923c;
 }
 
-/* Light mode still techno, just softer */
+/* Light mode: vivid accents (readable but as punchy as dark neon) */
 :root:not(.dark) {
-  --background: #f4f0fb;
-  --foreground: #160f24;
-  --muted: #6b5f85;
-  --border: color-mix(in oklab, #7c3aed 16%, transparent);
+  --background: #ebe4f8;
+  --foreground: #0a0614;
+  --muted: #3a3054;
+  --border: color-mix(in oklab, #7c3aed 42%, transparent);
   --accent: #7c3aed;
-  --accent-2: #c2410c;
-  --surface: color-mix(in oklab, #ffffff 75%, #ede5ff);
-  --neon-violet: #7c3aed;
-  --neon-orange: #ea580c;
-  --glow-violet: color-mix(in oklab, #7c3aed 22%, transparent);
-  --glow-orange: color-mix(in oklab, #ea580c 32%, transparent);
+  --accent-2: #ea580c;
+  --surface: #ffffff;
+  --neon-violet: #8b5cf6;
+  --neon-orange: #f97316;
+  --glow-violet: color-mix(in oklab, #7c3aed 38%, transparent);
+  --glow-orange: color-mix(in oklab, #ea580c 34%, transparent);
   --email-bg: #ffedd5;
   --email-border: #ea580c;
   --email-fg: #9a3412;
-  --email-btn-bg: #fed7aa;
+  --email-btn-bg: #fdba74;
+  /* Saturated section colors so tiles/rows pop on light bg */
+  --section-about: #7c3aed;
+  --section-projects: #0284c7;
+  --section-blog: #ca8a04;
+  --section-tastes: #e11d48;
+  --section-contact: #ea580c;
 }
 
 .dark {
@@ -55,6 +66,11 @@
   --email-border: color-mix(in oklab, #fb923c 55%, transparent);
   --email-fg: #fdba74;
   --email-btn-bg: color-mix(in oklab, #f97316 28%, transparent);
+  --section-about: #a78bfa;
+  --section-projects: #38bdf8;
+  --section-blog: #fbbf24;
+  --section-tastes: #fb7185;
+  --section-contact: #fb923c;
 }
 
 @theme inline {
@@ -174,6 +190,37 @@
       0 0 48px color-mix(in oklab, var(--neon-orange) 10%, transparent);
   }
 
+  /* Light: solid panels, stronger color so they don't wash out */
+  :root:not(.dark) .neon-panel {
+    border-color: color-mix(in oklab, var(--accent) 48%, transparent);
+    background:
+      linear-gradient(
+        135deg,
+        #ffffff 0%,
+        color-mix(in oklab, var(--neon-violet) 16%, #ffffff) 100%
+      );
+    box-shadow:
+      0 1px 0 color-mix(in oklab, var(--accent) 18%, transparent) inset,
+      0 2px 14px color-mix(in oklab, var(--neon-violet) 14%, transparent);
+  }
+
+  :root:not(.dark) .neon-panel:hover {
+    border-color: color-mix(in oklab, var(--accent) 72%, transparent);
+    box-shadow:
+      0 1px 0 color-mix(in oklab, var(--accent) 24%, transparent) inset,
+      0 6px 22px color-mix(in oklab, var(--neon-violet) 24%, transparent);
+  }
+
+  :root:not(.dark) .neon-text {
+    text-shadow: none;
+    color: var(--foreground);
+  }
+
+  :root:not(.dark) .glass-bar {
+    border-color: color-mix(in oklab, var(--accent) 35%, transparent);
+    background: color-mix(in oklab, #ffffff 88%, transparent);
+  }
+
   .neon-icon {
     border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
     background: color-mix(in oklab, var(--background) 70%, transparent);
@@ -200,93 +247,758 @@
     color: var(--email-fg);
   }
 
-  /* Home section mosaic - compact glass tiles */
-  .future-nav-tile {
-    --fn-accent: var(--accent);
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    border-radius: 1.15rem;
-    background:
-      radial-gradient(
-        120% 90% at 0% 0%,
-        color-mix(in oklab, var(--fn-accent) 22%, transparent),
-        transparent 55%
-      ),
-      linear-gradient(
-        160deg,
-        color-mix(in oklab, var(--surface) 88%, transparent),
-        color-mix(in oklab, var(--background) 55%, transparent)
-      );
-    box-shadow:
-      inset 0 1px 0 color-mix(in oklab, white 8%, transparent),
-      0 0 0 1px color-mix(in oklab, var(--fn-accent) 22%, transparent);
-    backdrop-filter: blur(14px);
-    transition:
-      transform 0.22s ease,
-      box-shadow 0.22s ease,
-      background 0.22s ease;
+}
+
+/* ── Cyberpunk loading-menu section nav ─────────────────── */
+
+.cp-nav {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.cp-nav-item {
+  --cp-accent: var(--accent);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 3.35rem;
+  min-width: 0;
+  padding: 0.55rem 1.4rem 0.55rem 0.7rem;
+  text-decoration: none;
+  color: inherit;
+  /* Angular cut corners — not a pill/button */
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
+  background: color-mix(in oklab, var(--cp-accent) 6%, transparent);
+  transition:
+    background 0.2s ease,
+    transform 0.18s ease;
+}
+
+.cp-nav-item:hover {
+  background: color-mix(in oklab, var(--cp-accent) 14%, transparent);
+  transform: translateX(2px);
+}
+
+.cp-nav-item:active {
+  transform: translateX(1px);
+}
+
+.cp-nav-frame {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+.cp-nav-frame::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--cp-accent);
+  opacity: 0.55;
+  box-shadow: 0 0 10px color-mix(in oklab, var(--cp-accent) 50%, transparent);
+  transition: opacity 0.2s ease, width 0.2s ease;
+}
+
+.cp-nav-item:hover .cp-nav-frame::before {
+  opacity: 1;
+  width: 3px;
+}
+
+.cp-nav-corner {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-color: var(--cp-accent);
+  opacity: 0.7;
+}
+
+.cp-nav-corner-tl {
+  top: 0;
+  left: 0;
+  border-top: 1.5px solid;
+  border-left: 1.5px solid;
+}
+
+.cp-nav-corner-br {
+  right: 0;
+  bottom: 0;
+  border-right: 1.5px solid;
+  border-bottom: 1.5px solid;
+}
+
+.cp-nav-scan {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 35%,
+    color-mix(in oklab, var(--cp-accent) 18%, transparent) 48%,
+    transparent 62%
+  );
+  opacity: 0;
+  transform: translateX(-40%);
+  transition:
+    opacity 0.35s ease,
+    transform 0.45s ease;
+}
+
+.cp-nav-item:hover .cp-nav-scan {
+  opacity: 1;
+  transform: translateX(40%);
+}
+
+.cp-nav-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  z-index: 1;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  color: color-mix(in oklab, var(--cp-accent) 85%, var(--muted));
+  opacity: 0.9;
+}
+
+.cp-nav-code {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.cp-nav-slash {
+  opacity: 0.45;
+}
+
+.cp-nav-label {
+  z-index: 1;
+  max-width: 100%;
+  font-family: var(--font-orbitron), var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.15;
+  color: var(--foreground);
+  text-shadow: 0 0 18px color-mix(in oklab, var(--cp-accent) 35%, transparent);
+  transition: color 0.2s ease, text-shadow 0.2s ease, letter-spacing 0.2s ease;
+  overflow-wrap: anywhere;
+}
+
+.cp-nav-item:hover .cp-nav-label {
+  color: var(--cp-accent);
+  letter-spacing: 0.1em;
+  text-shadow:
+    0 0 12px color-mix(in oklab, var(--cp-accent) 55%, transparent),
+    0 0 28px color-mix(in oklab, var(--cp-accent) 30%, transparent);
+}
+
+.cp-nav-bar {
+  position: absolute;
+  left: 0.7rem;
+  right: 1.35rem;
+  bottom: 0.3rem;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--cp-accent),
+    color-mix(in oklab, var(--cp-accent) 15%, transparent) 70%,
+    transparent
+  );
+  opacity: 0.35;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform-origin: left center;
+}
+
+.cp-nav-item:hover .cp-nav-bar {
+  opacity: 0.85;
+  transform: scaleX(1.02);
+}
+
+.cp-nav-chevron {
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  z-index: 1;
+  font-size: 0.75rem;
+  color: var(--cp-accent);
+  opacity: 0.35;
+  transform: translateY(-50%);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.cp-nav-item:hover .cp-nav-chevron {
+  opacity: 1;
+  transform: translateY(-50%) translateX(2px);
+}
+
+@media (min-width: 640px) {
+  .cp-nav {
+    gap: 0.5rem;
   }
 
-  .future-nav-tile::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      105deg,
-      transparent 40%,
-      color-mix(in oklab, white 7%, transparent) 48%,
-      transparent 56%
-    );
-    opacity: 0;
-    transition: opacity 0.35s ease, transform 0.45s ease;
-    transform: translateX(-30%);
-    pointer-events: none;
+  .cp-nav-item {
+    min-height: 3.75rem;
+    padding: 0.65rem 1.55rem 0.65rem 0.85rem;
   }
 
-  .future-nav-tile::after {
-    content: "";
-    position: absolute;
-    left: 12px;
-    right: 12px;
-    top: 0;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      var(--fn-accent),
-      transparent
-    );
-    opacity: 0.55;
-    pointer-events: none;
+  .cp-nav-label {
+    font-size: 1.05rem;
+    letter-spacing: 0.1em;
   }
 
-  .future-nav-tile:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      inset 0 1px 0 color-mix(in oklab, white 10%, transparent),
-      0 0 0 1px color-mix(in oklab, var(--fn-accent) 42%, transparent),
-      0 10px 28px color-mix(in oklab, var(--fn-accent) 14%, transparent);
-  }
-
-  .future-nav-tile:hover::before {
-    opacity: 1;
-    transform: translateX(30%);
-  }
-
-  .future-nav-tile:active {
-    transform: translateY(0) scale(0.98);
-  }
-
-  .future-nav-tile-wide {
-    border-radius: 999px;
-  }
-
-  .future-nav-tile-wide::after {
-    left: 20%;
-    right: 20%;
+  .cp-nav-meta {
+    font-size: 0.65rem;
   }
 }
+
+:root:not(.dark) .cp-nav-item {
+  background: color-mix(in oklab, var(--cp-accent) 16%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 32%, transparent);
+}
+
+:root:not(.dark) .cp-nav-item:hover {
+  background: color-mix(in oklab, var(--cp-accent) 26%, #ffffff);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 48%, transparent),
+    0 4px 16px color-mix(in oklab, var(--cp-accent) 18%, transparent);
+}
+
+:root:not(.dark) .cp-nav-label {
+  text-shadow: none;
+  color: color-mix(in oklab, var(--cp-accent) 75%, var(--foreground));
+}
+
+:root:not(.dark) .cp-nav-item:hover .cp-nav-label {
+  text-shadow: none;
+  color: var(--cp-accent);
+}
+
+:root:not(.dark) .cp-nav-item .cp-nav-frame::before {
+  opacity: 0.95;
+  width: 3px;
+}
+
+:root:not(.dark) .cp-nav-meta {
+  color: var(--cp-accent);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-nav-item,
+  .cp-nav-item:hover,
+  .cp-nav-scan,
+  .cp-nav-chevron,
+  .cp-nav-label,
+  .cp-row,
+  .cp-row:hover {
+    transition: none;
+  }
+
+  .cp-nav-item:hover,
+  .cp-row:hover {
+    transform: none;
+  }
+
+  .cp-nav-item:hover .cp-nav-scan,
+  .cp-row:hover .cp-nav-scan {
+    opacity: 0;
+    transform: none;
+  }
+
+  .cp-nav-item:hover .cp-nav-chevron {
+    transform: translateY(-50%);
+  }
+
+  .cp-row:hover .cp-nav-chevron {
+    transform: none;
+  }
+}
+
+/* Full-width cyber rows (contact, tastes, etc.) */
+.cp-list {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cp-row {
+  --cp-accent: var(--accent);
+  position: relative;
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: start;
+  gap: 0.55rem 0.7rem;
+  min-height: 3.25rem;
+  padding: 0.65rem 0.9rem 0.85rem 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+  background: color-mix(in oklab, var(--cp-accent) 6%, transparent);
+  transition:
+    background 0.2s ease,
+    transform 0.18s ease;
+}
+
+.cp-row:hover {
+  background: color-mix(in oklab, var(--cp-accent) 14%, transparent);
+  transform: translateX(3px);
+}
+
+.cp-row:active {
+  transform: translateX(1px);
+}
+
+.cp-row .cp-nav-frame::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--cp-accent);
+  opacity: 0.55;
+  box-shadow: 0 0 10px color-mix(in oklab, var(--cp-accent) 50%, transparent);
+  transition: opacity 0.2s ease, width 0.2s ease;
+}
+
+.cp-row:hover .cp-nav-frame::before {
+  opacity: 1;
+  width: 3px;
+}
+
+.cp-row-icon {
+  z-index: 1;
+}
+
+.cp-row-body {
+  z-index: 1;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.cp-row-label {
+  font-family: var(--font-orbitron), var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.15;
+  color: var(--foreground);
+  text-shadow: 0 0 16px color-mix(in oklab, var(--cp-accent) 30%, transparent);
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.cp-row:hover .cp-row-label {
+  color: var(--cp-accent);
+  text-shadow:
+    0 0 12px color-mix(in oklab, var(--cp-accent) 50%, transparent),
+    0 0 24px color-mix(in oklab, var(--cp-accent) 25%, transparent);
+}
+
+.cp-row-detail {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--muted);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.cp-row-bar {
+  left: 0.75rem;
+  right: 2rem;
+  bottom: 0.3rem;
+}
+
+.cp-row-chevron {
+  position: static;
+  transform: none;
+  font-size: 0.85rem;
+}
+
+.cp-row:hover .cp-row-chevron {
+  transform: translateX(3px);
+}
+
+/* Email row reuses cyber frame language */
+.cp-email {
+  --cp-accent: var(--neon-orange);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 3.25rem;
+  padding: 0.65rem 0.75rem 0.7rem;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+  background: color-mix(in oklab, var(--cp-accent) 10%, transparent);
+  border: none;
+  color: var(--email-fg);
+}
+
+.cp-email .cp-nav-frame::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--cp-accent);
+  opacity: 0.75;
+  box-shadow: 0 0 10px color-mix(in oklab, var(--cp-accent) 50%, transparent);
+}
+
+.cp-email-main {
+  z-index: 1;
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.cp-email-copy {
+  z-index: 1;
+  display: inline-flex;
+  height: 1.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0 0.55rem;
+  border: 1px solid color-mix(in oklab, var(--cp-accent) 55%, transparent);
+  background: color-mix(in oklab, var(--cp-accent) 18%, transparent);
+  color: inherit;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 6px) 0,
+    100% 6px,
+    100% 100%,
+    6px 100%,
+    0 calc(100% - 6px)
+  );
+  transition: background 0.15s ease, filter 0.15s ease;
+}
+
+.cp-email-copy:hover {
+  filter: brightness(1.12);
+  background: color-mix(in oklab, var(--cp-accent) 28%, transparent);
+}
+
+@media (min-width: 640px) {
+  .cp-row {
+    min-height: 3.5rem;
+    gap: 0.65rem 0.85rem;
+    padding: 0.7rem 1rem 0.75rem 0.9rem;
+  }
+
+  .cp-row-label {
+    font-size: 1.05rem;
+    letter-spacing: 0.12em;
+  }
+
+  .cp-row-detail {
+    font-size: 0.85rem;
+  }
+}
+
+:root:not(.dark) .cp-row {
+  background: color-mix(in oklab, var(--cp-accent) 16%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 34%, transparent);
+}
+
+:root:not(.dark) .cp-row:hover {
+  background: color-mix(in oklab, var(--cp-accent) 26%, #ffffff);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 50%, transparent),
+    0 4px 16px color-mix(in oklab, var(--cp-accent) 16%, transparent);
+}
+
+:root:not(.dark) .cp-row-label {
+  text-shadow: none;
+  color: color-mix(in oklab, var(--cp-accent) 72%, var(--foreground));
+}
+
+:root:not(.dark) .cp-row:hover .cp-row-label {
+  text-shadow: none;
+  color: var(--cp-accent);
+}
+
+:root:not(.dark) .cp-row .cp-nav-frame::before {
+  opacity: 0.95;
+  width: 3px;
+}
+
+:root:not(.dark) .cp-row .cp-nav-meta {
+  color: var(--cp-accent);
+  opacity: 1;
+}
+
+:root:not(.dark) .cp-tag {
+  color: var(--cp-accent);
+  background: color-mix(in oklab, var(--cp-accent) 18%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 40%, transparent);
+}
+
+:root:not(.dark) .cp-email {
+  background: color-mix(in oklab, var(--cp-accent) 18%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 40%, transparent);
+}
+
+/* Shared cyber UI for inner pages */
+.cp-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-bottom: 0.85rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.cp-heading-code {
+  opacity: 0.7;
+}
+
+.cp-heading-slash {
+  opacity: 0.4;
+}
+
+.cp-panel {
+  --cp-accent: var(--accent);
+  position: relative;
+  padding: 1rem 1rem 1.05rem;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+  background: color-mix(in oklab, var(--cp-accent) 7%, transparent);
+}
+
+.cp-panel .cp-nav-frame::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--cp-accent);
+  opacity: 0.6;
+  box-shadow: 0 0 10px color-mix(in oklab, var(--cp-accent) 45%, transparent);
+}
+
+.cp-panel-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.cp-accordion {
+  --cp-accent: var(--accent);
+  position: relative;
+  width: 100%;
+  padding: 0.85rem 0.9rem 0.9rem 0.75rem;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+  background: color-mix(in oklab, var(--cp-accent) 6%, transparent);
+  border: none;
+  transition: background 0.2s ease;
+}
+
+.cp-accordion:hover,
+.cp-accordion[aria-expanded="true"] {
+  background: color-mix(in oklab, var(--cp-accent) 13%, transparent);
+}
+
+.cp-accordion .cp-nav-frame::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--cp-accent);
+  opacity: 0.55;
+  box-shadow: 0 0 10px color-mix(in oklab, var(--cp-accent) 45%, transparent);
+  transition: opacity 0.2s ease, width 0.2s ease;
+}
+
+.cp-accordion:hover .cp-nav-frame::before,
+.cp-accordion[aria-expanded="true"] .cp-nav-frame::before {
+  opacity: 1;
+  width: 3px;
+}
+
+.cp-accordion-head {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 0.55rem 0.7rem;
+}
+
+.cp-accordion-body {
+  position: relative;
+  z-index: 1;
+}
+
+.cp-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+
+.cp-tag {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--cp-accent) 85%, var(--muted));
+  padding: 0.2rem 0.45rem;
+  background: color-mix(in oklab, var(--cp-accent) 12%, transparent);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 5px) 0,
+    100% 5px,
+    100% 100%,
+    5px 100%,
+    0 calc(100% - 5px)
+  );
+}
+
+.cp-prose {
+  font-size: 0.94rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.cp-prose + .cp-prose {
+  margin-top: 0.85rem;
+}
+
+.cp-headline {
+  font-family: var(--font-orbitron), var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--foreground);
+  text-shadow: 0 0 18px color-mix(in oklab, var(--accent) 30%, transparent);
+}
+
+@media (min-width: 640px) {
+  .cp-headline {
+    font-size: 1.35rem;
+    letter-spacing: 0.1em;
+  }
+}
+
+:root:not(.dark) .cp-panel,
+:root:not(.dark) .cp-accordion {
+  background: color-mix(in oklab, var(--cp-accent) 15%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 32%, transparent);
+}
+
+:root:not(.dark) .cp-accordion:hover,
+:root:not(.dark) .cp-accordion[aria-expanded="true"] {
+  background: color-mix(in oklab, var(--cp-accent) 24%, #ffffff);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 48%, transparent),
+    0 4px 16px color-mix(in oklab, var(--cp-accent) 14%, transparent);
+}
+
+:root:not(.dark) .cp-panel .cp-nav-frame::before,
+:root:not(.dark) .cp-accordion .cp-nav-frame::before {
+  opacity: 0.95;
+  width: 3px;
+}
+
+:root:not(.dark) .cp-headline {
+  text-shadow: none;
+  color: color-mix(in oklab, var(--cp-accent, var(--accent)) 55%, var(--foreground));
+}
+
+:root:not(.dark) .cp-heading {
+  color: var(--accent);
+  opacity: 1;
+}
+
+:root:not(.dark) .cp-ctrl,
+:root:not(.dark) .cp-ctrl-btn {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--accent) 42%, transparent),
+    0 0 14px color-mix(in oklab, var(--accent) 12%, transparent);
+}
+
+:root:not(.dark) .cp-ctrl-seg-active {
+  background: color-mix(in oklab, var(--accent) 24%, transparent);
+}
+
+:root:not(.dark) .avatar-hud {
+  --hud: #7c3aed;
+}
+
+:root:not(.dark) .avatar-hud-photo {
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--hud) 55%, transparent),
+    0 0 24px color-mix(in oklab, var(--hud) 22%, transparent);
+}
+
 
 /* ── Cosmic background ───────────────────────────────────── */
 
@@ -402,3 +1114,229 @@
     opacity: 0.25;
   }
 }
+
+
+/* ── Fixed chrome controls (theme / locale) ─────────────── */
+
+.cp-ctrl {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 6px) 0,
+    100% 6px,
+    100% 100%,
+    6px 100%,
+    0 calc(100% - 6px)
+  );
+  background: color-mix(in oklab, var(--surface) 80%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent),
+    0 0 16px color-mix(in oklab, var(--accent) 8%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.cp-ctrl-seg {
+  min-width: 1.85rem;
+  padding: 0.3rem 0.45rem;
+  color: var(--muted);
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.cp-ctrl-seg:hover {
+  color: var(--foreground);
+}
+
+.cp-ctrl-seg-active {
+  color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 18%, transparent);
+  box-shadow: 0 0 12px color-mix(in oklab, var(--accent) 25%, transparent);
+}
+
+.cp-ctrl-btn {
+  display: inline-flex;
+  height: 1.85rem;
+  width: 1.85rem;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 6px) 0,
+    100% 6px,
+    100% 100%,
+    6px 100%,
+    0 calc(100% - 6px)
+  );
+  background: color-mix(in oklab, var(--surface) 80%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent),
+    0 0 16px color-mix(in oklab, var(--accent) 8%, transparent);
+  backdrop-filter: blur(10px);
+  transition:
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.cp-ctrl-btn:hover {
+  color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--accent) 50%, transparent),
+    0 0 14px color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+:root:not(.dark) .cp-ctrl,
+:root:not(.dark) .cp-ctrl-btn {
+  background: color-mix(in oklab, #ffffff 88%, transparent);
+}
+
+/* ── Avatar HUD (home) ──────────────────────────────────── */
+
+.avatar-hud {
+  --hud: var(--accent);
+  position: relative;
+  width: 6.75rem;
+  height: 6.75rem;
+}
+
+@media (min-width: 640px) {
+  .avatar-hud {
+    width: 7.75rem;
+    height: 7.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .avatar-hud {
+    width: 8.5rem;
+    height: 8.5rem;
+  }
+}
+
+.avatar-hud-frame {
+  pointer-events: none;
+  position: absolute;
+  inset: -0.45rem;
+  z-index: 2;
+}
+
+.avatar-hud-corner {
+  position: absolute;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-color: var(--hud);
+  opacity: 0.95;
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--hud) 55%, transparent));
+}
+
+.avatar-hud-corner-tl {
+  top: 0;
+  left: 0;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+
+.avatar-hud-corner-tr {
+  top: 0;
+  right: 0;
+  border-top: 2px solid;
+  border-right: 2px solid;
+}
+
+.avatar-hud-corner-bl {
+  bottom: 0;
+  left: 0;
+  border-bottom: 2px solid;
+  border-left: 2px solid;
+}
+
+.avatar-hud-corner-br {
+  right: 0;
+  bottom: 0;
+  border-right: 2px solid;
+  border-bottom: 2px solid;
+}
+
+.avatar-hud-tick {
+  position: absolute;
+  background: var(--hud);
+  opacity: 0.55;
+  box-shadow: 0 0 6px color-mix(in oklab, var(--hud) 40%, transparent);
+}
+
+.avatar-hud-tick-t,
+.avatar-hud-tick-b {
+  left: 50%;
+  width: 0.55rem;
+  height: 2px;
+  transform: translateX(-50%);
+}
+
+.avatar-hud-tick-t {
+  top: 0;
+}
+
+.avatar-hud-tick-b {
+  bottom: 0;
+}
+
+.avatar-hud-tick-l,
+.avatar-hud-tick-r {
+  top: 50%;
+  width: 2px;
+  height: 0.55rem;
+  transform: translateY(-50%);
+}
+
+.avatar-hud-tick-l {
+  left: 0;
+}
+
+.avatar-hud-tick-r {
+  right: 0;
+}
+
+.avatar-hud-photo {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  clip-path: polygon(
+    10% 0,
+    90% 0,
+    100% 10%,
+    100% 90%,
+    90% 100%,
+    10% 100%,
+    0 90%,
+    0 10%
+  );
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--hud) 45%, transparent),
+    0 0 28px color-mix(in oklab, var(--hud) 28%, transparent);
+}
+
+.avatar-hud-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--hud) 12%, transparent),
+    transparent 40%,
+    color-mix(in oklab, var(--neon-orange) 10%, transparent)
+  );
+  pointer-events: none;
+}
+

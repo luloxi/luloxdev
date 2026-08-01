@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Orbitron, Space_Grotesk } from "next/font/google";
 import { CosmicBg } from "@/components/cosmic-bg";
+import { SiteControls } from "@/components/site-controls";
 import { LocaleProvider } from "@/i18n/locale-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { site } from "@/content/site";
@@ -53,6 +54,7 @@ export default function RootLayout({
         <ThemeProvider>
           <LocaleProvider>
             <CosmicBg />
+            <SiteControls />
             <div className="relative z-10">{children}</div>
           </LocaleProvider>
         </ThemeProvider>

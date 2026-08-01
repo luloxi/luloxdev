@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ExternalLink } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import {
   focusTopics,
   pastProjects,
@@ -9,6 +9,18 @@ import {
 } from "@/content/projects";
 import { useLocale } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
+
+const focusAccents: Record<FocusTopicId, string> = {
+  tokenization: "var(--section-projects)",
+  midnight: "var(--section-about)",
+  "ai-agents": "var(--section-tastes)",
+};
+
+const pastAccents = [
+  "var(--section-contact)",
+  "var(--section-blog)",
+  "var(--section-projects)",
+];
 
 export function ProjectsAccordion() {
   const { t } = useLocale();
@@ -21,36 +33,47 @@ export function ProjectsAccordion() {
   return (
     <div className="space-y-10">
       <section>
-        <h2 className="mb-3 text-[11px] font-medium uppercase tracking-[0.18em] text-accent">
-          {t.projects.focusHeading}
+        <h2 className="cp-heading">
+          <span className="cp-heading-code">01</span>
+          <span className="cp-heading-slash">//</span>
+          <span>{t.projects.focusHeading}</span>
         </h2>
-        <ul className="space-y-2.5">
-          {focusTopics.map((topic) => {
+        <ul className="cp-list">
+          {focusTopics.map((topic, i) => {
             const copy = t.projects.focus[topic.id];
             const isOpen = open === topic.id;
+            const accent = focusAccents[topic.id];
             return (
               <li key={topic.id}>
                 <button
                   type="button"
                   onClick={() => toggle(topic.id)}
                   aria-expanded={isOpen}
-                  className={cn(
-                    "neon-panel w-full rounded-2xl px-4 py-4 text-left transition-all",
-                    isOpen && "border-accent/45",
-                  )}
+                  className="cp-accordion group"
+                  style={{ ["--cp-accent" as string]: accent }}
                 >
-                  <div className="flex items-start gap-3">
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[15px] font-medium tracking-tight">
-                        {copy.title}
+                  <span className="cp-nav-frame" aria-hidden>
+                    <span className="cp-nav-corner cp-nav-corner-tl" />
+                    <span className="cp-nav-corner cp-nav-corner-br" />
+                    <span className="cp-nav-scan" />
+                  </span>
+
+                  <div className="cp-accordion-head">
+                    <span className="cp-nav-meta">
+                      <span className="cp-nav-code">
+                        {String(i + 1).padStart(2, "0")}
                       </span>
-                      <span className="mt-0.5 block text-sm text-muted">
-                        {copy.summary}
-                      </span>
+                      <span className="cp-nav-slash">//</span>
                     </span>
+
+                    <span className="cp-row-body min-w-0">
+                      <span className="cp-row-label">{copy.title}</span>
+                      <span className="cp-row-detail">{copy.summary}</span>
+                    </span>
+
                     <ChevronDown
                       className={cn(
-                        "mt-0.5 h-4 w-4 shrink-0 text-accent transition-transform duration-300",
+                        "mt-0.5 h-4 w-4 shrink-0 text-[color:var(--cp-accent)] transition-transform duration-300",
                         isOpen && "rotate-180",
                       )}
                       strokeWidth={1.75}
@@ -64,12 +87,16 @@ export function ProjectsAccordion() {
                     )}
                   >
                     <div className="overflow-hidden">
-                      <p className="mt-3 border-t border-border pt-3 text-sm leading-relaxed text-muted">
-                        {copy.body}
-                      </p>
-                      <p className="mt-3 text-xs text-muted/80">
-                        {topic.tags.join(" · ")}
-                      </p>
+                      <div className="cp-accordion-body mt-3 border-t border-[color:color-mix(in_oklab,var(--cp-accent)_28%,transparent)] pt-3">
+                        <p className="cp-prose text-[0.9rem]">{copy.body}</p>
+                        <div className="cp-tags">
+                          {topic.tags.map((tag) => (
+                            <span key={tag} className="cp-tag">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </button>
@@ -80,43 +107,62 @@ export function ProjectsAccordion() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-[11px] font-medium uppercase tracking-[0.18em] text-accent">
-          {t.projects.pastHeading}
+        <h2 className="cp-heading">
+          <span className="cp-heading-code">02</span>
+          <span className="cp-heading-slash">//</span>
+          <span>{t.projects.pastHeading}</span>
         </h2>
-        <ul className="space-y-2.5">
-          {pastProjects.map((project) => {
+        <ul className="cp-list">
+          {pastProjects.map((project, i) => {
             const copy = t.projects.past[project.id];
+            const accent = pastAccents[i % pastAccents.length];
             return (
               <li key={project.id}>
                 <a
                   href={project.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="neon-panel group block rounded-2xl px-4 py-4"
+                  className="cp-row group"
+                  style={{ ["--cp-accent" as string]: accent }}
                 >
-                  <div className="flex items-start gap-3">
-                    <img
-                      src={project.icon}
-                      alt=""
-                      width={22}
-                      height={22}
-                      className="mt-0.5 h-[22px] w-[22px] shrink-0 rounded-md object-cover ring-1 ring-border/60"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-3">
-                        <h3 className="text-[15px] font-medium tracking-tight group-hover:text-accent">
-                          {copy.title}
-                        </h3>
-                        <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-2 opacity-70 transition-opacity group-hover:opacity-100" />
-                      </div>
-                      <p className="mt-1.5 text-sm leading-relaxed text-muted">
-                        {copy.body}
-                      </p>
-                      <p className="mt-2 text-xs text-muted/80">
-                        {project.tags.join(" · ")}
-                      </p>
-                    </div>
-                  </div>
+                  <span className="cp-nav-frame" aria-hidden>
+                    <span className="cp-nav-corner cp-nav-corner-tl" />
+                    <span className="cp-nav-corner cp-nav-corner-br" />
+                    <span className="cp-nav-scan" />
+                  </span>
+
+                  <span className="cp-nav-meta">
+                    <span className="cp-nav-code">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="cp-nav-slash">//</span>
+                  </span>
+
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={project.icon}
+                    alt=""
+                    width={20}
+                    height={20}
+                    className="cp-row-icon h-5 w-5 shrink-0 rounded-sm object-cover"
+                  />
+
+                  <span className="cp-row-body min-w-0">
+                    <span className="cp-row-label">{copy.title}</span>
+                    <span className="cp-row-detail">{copy.body}</span>
+                    <span className="cp-tags">
+                      {project.tags.map((tag) => (
+                        <span key={tag} className="cp-tag">
+                          {tag}
+                        </span>
+                      ))}
+                    </span>
+                  </span>
+
+                  <span className="cp-nav-chevron cp-row-chevron" aria-hidden>
+                    ▸
+                  </span>
+                  <span className="cp-nav-bar cp-row-bar" aria-hidden />
                 </a>
               </li>
             );
