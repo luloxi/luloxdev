@@ -58,6 +58,15 @@ export function ProjectsAccordion() {
                   </span>
 
                   <div className="cp-accordion-head">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={topic.icon}
+                      alt=""
+                      width={40}
+                      height={40}
+                      className="focus-topic-icon shrink-0"
+                    />
+
                     <span className="cp-row-body min-w-0">
                       <span className="cp-row-label">{copy.title}</span>
                       <span className="cp-row-detail">{copy.summary}</span>
@@ -160,13 +169,6 @@ export function ProjectsAccordion() {
                   <span className="cp-row-body min-w-0">
                     <span className="cp-row-label">{copy.title}</span>
                     <span className="cp-row-detail">{copy.body}</span>
-                    <span className="cp-tags">
-                      {project.tags.map((tag) => (
-                        <span key={tag} className="cp-tag">
-                          {tag}
-                        </span>
-                      ))}
-                    </span>
                   </span>
 
                   <span className="cp-nav-chevron cp-row-chevron" aria-hidden>

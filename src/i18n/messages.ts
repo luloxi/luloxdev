@@ -52,8 +52,7 @@ export const messages = {
       pastHeading: "Proyectos anteriores",
       githubHeading: "Código",
       githubTitle: "GitHub",
-      githubBlurb:
-        "Repos, experimentos y builds open source. El taller donde vive el resto.",
+      githubBlurb: "Repos, experimentos y builds open source.",
 
       focus: {
         tokenization: {
@@ -80,15 +79,15 @@ export const messages = {
       past: {
         punksociety: {
           title: "PunkSociety",
-          body: "Social dApp on-chain: cada post es un NFT y los likes envían USDC al creador. Scaffold-ETH 2 + Foundry; experimentando con incentives reales en redes sociales.",
+          body: "Red social on-chain: cada post es un NFT y los likes envían valor al creador.",
         },
         sami: {
           title: "SAMI",
-          body: "Chatroom-game donde humanos cazan al infiltrado de IA (y la IA se disfraza de humano). Construido con Eliza, Next.js y un stack full on/off-chain.",
+          body: "Juego de chat donde humanos cazan al infiltrado de IA (y la IA se hace pasar por humano).",
         },
         mochi: {
           title: "Mochi",
-          body: "Agentes de IA “embodied”: mascotas de escritorio con chat, bodies custom, souls on-chain y marketplace en Avalanche (web, Electron y extensiones). Off-chain AI, ownership on-chain.",
+          body: "Mascotas de IA de escritorio con chat, cuerpos custom y un marketplace propio.",
         },
       },
     },
@@ -163,8 +162,7 @@ export const messages = {
       pastHeading: "Previous projects",
       githubHeading: "Code",
       githubTitle: "GitHub",
-      githubBlurb:
-        "Repos, experiments, and open-source builds. The workshop for everything else.",
+      githubBlurb: "Repos, experiments, and open-source builds.",
 
       focus: {
         tokenization: {
@@ -191,15 +189,15 @@ export const messages = {
       past: {
         punksociety: {
           title: "PunkSociety",
-          body: "On-chain social dApp: every post is an NFT and likes send USDC to the creator. Scaffold-ETH 2 + Foundry; experimenting with real incentives in social networks.",
+          body: "On-chain social network: every post is an NFT and likes send value to the creator.",
         },
         sami: {
           title: "SAMI",
-          body: "Chatroom game where humans hunt the AI infiltrator (and the AI pretends to be human). Built with Eliza, Next.js, and a full on/off-chain stack.",
+          body: "Chatroom game where humans hunt the AI infiltrator (and the AI pretends to be human).",
         },
         mochi: {
           title: "Mochi",
-          body: "Embodied AI agents: desktop pets with chat, custom bodies, on-chain souls, and an Avalanche marketplace (web, Electron, extensions). Off-chain AI, on-chain ownership.",
+          body: "Desktop AI pets with chat, custom bodies, and their own marketplace.",
         },
       },
     },

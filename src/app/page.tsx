@@ -13,16 +13,6 @@ import { site } from "@/content/site";
 export default function HomePage() {
   return (
     <div className="fixed inset-0 z-10 flex flex-col overflow-hidden">
-      {/* Purely decorative floating bits */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <span className="deco-float absolute left-[12%] top-[18%] h-1.5 w-1.5" />
-        <span className="deco-float deco-float-b absolute right-[14%] top-[28%] h-1 w-1" />
-        <span className="deco-float absolute bottom-[22%] left-[18%] h-1 w-1 opacity-40" />
-        <span className="deco-float deco-float-b absolute bottom-[30%] right-[20%] h-2 w-2" />
-        <span className="deco-ring absolute left-[8%] top-[42%] h-16 w-16 opacity-30" />
-        <span className="deco-ring absolute bottom-[12%] right-[6%] h-24 w-24 opacity-20" />
-      </div>
-
       <main className="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col items-center justify-center px-5 py-3 pt-12 sm:max-w-lg sm:px-8 sm:py-4 sm:pt-14">
         <div className="flex w-full min-h-0 max-h-full flex-col items-center">
           <header className="flex shrink-0 flex-col items-center text-center">
