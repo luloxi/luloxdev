@@ -55,6 +55,7 @@ export default function ContactPage() {
               accent={accent}
               Icon={Icon}
               iconClass={iconClass}
+              iconSize="lg"
             />
           );
         })}

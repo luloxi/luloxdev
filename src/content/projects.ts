@@ -12,28 +12,23 @@ export type PastProjectId = "punksociety" | "sami" | "mochi";
 
 export const focusTopics: {
   id: FocusTopicId;
-  tags: string[];
   icon: string;
 }[] = [
   {
-    id: "tokenization",
-    tags: ["CIP-0113", "ERC-3643", "T-REX", "RWA"],
-    icon: "/projects/focus/tokenization.svg",
-  },
-  {
-    id: "midnight",
-    tags: ["Midnight", "Privacy", "Ambassador"],
-    icon: "/projects/focus/midnight.svg",
-  },
-  {
     id: "hermes",
-    tags: ["Hermes", "Agent", "MCP"],
     icon: "/projects/focus/nous.png",
   },
   {
     id: "lcp",
-    tags: ["LCP", "Compliance", "Agentic commerce"],
     icon: "/projects/focus/lcp.svg",
+  },
+  {
+    id: "midnight",
+    icon: "/projects/focus/midnight.svg",
+  },
+  {
+    id: "tokenization",
+    icon: "/projects/focus/tokenization.svg",
   },
 ];
 

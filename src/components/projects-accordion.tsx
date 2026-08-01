@@ -90,13 +90,6 @@ export function ProjectsAccordion() {
                     <div className="overflow-hidden">
                       <div className="cp-accordion-body mt-3 border-t border-[color:color-mix(in_oklab,var(--cp-accent)_28%,transparent)] pt-3">
                         <p className="cp-prose text-[0.9rem]">{copy.body}</p>
-                        <div className="cp-tags">
-                          {topic.tags.map((tag) => (
-                            <span key={tag} className="cp-tag">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -123,8 +116,10 @@ export function ProjectsAccordion() {
           </span>
 
           <span className="github-card-body">
-            <span className="github-card-kicker">{github.handle}</span>
-            <span className="github-card-title">{t.projects.githubTitle}</span>
+            <span className="github-card-title-row">
+              <span className="github-card-title">{t.projects.githubTitle}</span>
+              <span className="github-card-kicker">{github.handle}</span>
+            </span>
             <span className="github-card-blurb">{t.projects.githubBlurb}</span>
           </span>
 

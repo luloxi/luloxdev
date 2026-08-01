@@ -9,6 +9,8 @@ type CpRowProps = {
   accent?: string;
   Icon?: ComponentType<{ className?: string }>;
   iconClass?: string;
+  /** Default sm (1.25rem); lg ~1.6× (2rem) for tastes */
+  iconSize?: "sm" | "lg";
   external?: boolean;
   className?: string;
   trailing?: ReactNode;
@@ -24,10 +26,14 @@ export function CpRow({
   accent = "var(--accent)",
   Icon,
   iconClass,
+  iconSize = "sm",
   external = true,
   className,
   trailing,
 }: CpRowProps) {
+  const iconBox = iconSize === "lg" ? "h-8 w-8 sm:h-9 sm:w-9" : "h-5 w-5";
+  const iconGlyph = iconSize === "lg" ? "h-8 w-8 sm:h-9 sm:w-9" : "h-5 w-5";
+
   return (
     <a
       href={href}
@@ -45,11 +51,12 @@ export function CpRow({
       {Icon ? (
         <span
           className={cn(
-            "cp-row-icon inline-flex h-5 w-5 shrink-0 items-center justify-center",
+            "cp-row-icon inline-flex shrink-0 items-center justify-center",
+            iconBox,
             iconClass,
           )}
         >
-          <Icon className="h-5 w-5" />
+          <Icon className={iconGlyph} />
         </span>
       ) : null}
 

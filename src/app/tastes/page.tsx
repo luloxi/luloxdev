@@ -54,6 +54,7 @@ export default function TastesPage() {
             accent={p.accent}
             Icon={p.Icon as ComponentType<{ className?: string }>}
             iconClass={p.iconClass}
+            iconSize="lg"
           />
         ))}
       </section>

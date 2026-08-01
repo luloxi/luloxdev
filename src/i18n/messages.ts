@@ -57,18 +57,18 @@ export const messages = {
       focus: {
         tokenization: {
           title: "Tokenización",
-          summary: "Estándares de tokens con compliance on-chain.",
-          body: "Trabajo en tokenización regulada y programmable tokens: CIP-0113 en Cardano (reglas de transferencia, custody compartido y compliance nativo) y ERC-3643 / T-REX en EVM (tokens permissioned para RWA, identidad on-chain y transferencias elegibles). El hilo conductor: assets que se comportan bien en el mundo real, no solo en un whitepaper.",
+          summary: "Estándares de tokens y marco legal.",
+          body: "Investigo CIP-0113 en Cardano y ERC-3643 / T-REX en EVM: programmable tokens con reglas de transferencia, custody e identidad on-chain. También el status legal de la tokenización en distintos países.",
         },
         midnight: {
           title: "Midnight Network",
           summary: "Privacy chain · Midnight Ambassador.",
-          body: "Soy Midnight Ambassador. Midnight es una blockchain enfocada en privacidad selectiva: smart contracts que pueden probar hechos sin revelar datos de más. Mi trabajo pasa por community, contenido y bridges entre builders y el stack de privacy. Menos hype, más craft usable.",
+          body: "Soy Midnight Ambassador. Midnight es una blockchain enfocada en privacidad selectiva: smart contracts que pueden probar hechos sin revelar datos de más.",
         },
         hermes: {
           title: "Hermes Agent",
-          summary: "Agente autónomo · herramientas, memoria y workflows.",
-          body: "Estoy investigando Hermes Agent: cómo armar agentes que usen tools, mantengan contexto y se integren con protocolos como MCP. Me interesa el craft práctico, no el hype: setup usable, límites claros y agentes que hagan trabajo real.",
+          summary: "Agente autónomo · tools, memoria y workflows.",
+          body: "Ya usé Hermes Agent durante algunos meses y ahora lo estoy estudiando más a fondo para sacarle jugo. Quiero automatizar procesos más complejos y manejar un equipo de agentes: tools, memoria, límites claros y workflows que hagan trabajo real.",
         },
         lcp: {
           title: "LCP",
@@ -167,18 +167,18 @@ export const messages = {
       focus: {
         tokenization: {
           title: "Tokenization",
-          summary: "Token standards with on-chain compliance.",
-          body: "I work on regulated tokenization and programmable tokens: CIP-0113 on Cardano (transfer rules, shared custody, native compliance) and ERC-3643 / T-REX on EVM (permissioned tokens for RWAs, on-chain identity, eligible transfers). The through-line: assets that behave in the real world, not only in a whitepaper.",
+          summary: "Token standards and legal framework.",
+          body: "I research both CIP-0113 on Cardano and ERC-3643 / T-REX on EVM: programmable tokens with transfer rules, custody, and on-chain identity. Also the legal status of tokenization across different countries.",
         },
         midnight: {
           title: "Midnight Network",
           summary: "Privacy chain · Midnight Ambassador.",
-          body: "I'm a Midnight Ambassador. Midnight is a blockchain focused on selective privacy: smart contracts that can prove facts without leaking more data than needed. My work spans community, content, and bridges between builders and the privacy stack. Less hype, more usable craft.",
+          body: "I'm a Midnight Ambassador. Midnight is a blockchain focused on selective privacy: smart contracts that can prove facts without leaking more data than needed.",
         },
         hermes: {
           title: "Hermes Agent",
           summary: "Autonomous agent · tools, memory, and workflows.",
-          body: "I'm researching Hermes Agent: how to build agents that use tools, keep context, and plug into protocols like MCP. Practical craft over hype: usable setup, clear limits, and agents that do real work.",
+          body: "I've already used Hermes Agent for a few months and I'm now studying it more deeply to get more out of it. I want to automate more complex processes and run a team of agents: tools, memory, clear limits, and workflows that do real work.",
         },
         lcp: {
           title: "LCP",

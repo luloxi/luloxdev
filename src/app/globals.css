@@ -551,19 +551,19 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 0.9rem 1rem;
+  gap: 0.65rem 0.85rem;
   overflow: hidden;
-  min-height: 5.5rem;
-  padding: 1.1rem 1.05rem 1.15rem 1rem;
+  min-height: 0;
+  padding: 0.7rem 0.85rem 0.75rem 0.8rem;
   text-decoration: none;
   color: inherit;
   clip-path: polygon(
     0 0,
-    calc(100% - 16px) 0,
-    100% 16px,
+    calc(100% - 12px) 0,
+    100% 12px,
     100% 100%,
-    16px 100%,
-    0 calc(100% - 16px)
+    12px 100%,
+    0 calc(100% - 12px)
   );
   background:
     radial-gradient(
@@ -635,21 +635,9 @@
   position: relative;
   z-index: 1;
   display: inline-flex;
-  height: 3rem;
-  width: 3rem;
   align-items: center;
   justify-content: center;
   color: var(--foreground);
-  clip-path: polygon(
-    0 0,
-    calc(100% - 8px) 0,
-    100% 8px,
-    100% 100%,
-    8px 100%,
-    0 calc(100% - 8px)
-  );
-  background: color-mix(in oklab, var(--foreground) 8%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--section-projects) 40%, transparent);
 }
 
 .github-card-body {
@@ -658,29 +646,40 @@
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.15rem;
+}
+
+.github-card-title-row {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.65rem;
 }
 
 .github-card-kicker {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
   color: var(--section-projects);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .github-card-title {
   font-family: var(--font-orbitron), var(--font-display);
-  font-size: 1.15rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--foreground);
+  flex-shrink: 0;
 }
 
 .github-card-blurb {
-  margin-top: 0.15rem;
-  font-size: 0.84rem;
-  line-height: 1.45;
+  font-size: 0.8rem;
+  line-height: 1.4;
   color: var(--muted);
 }
 
@@ -713,9 +712,7 @@
     0 6px 20px color-mix(in oklab, var(--section-projects) 12%, transparent);
 }
 
-:root:not(.dark) .github-card-icon {
-  background: color-mix(in oklab, var(--section-projects) 10%, #ffffff);
-}
+
 
 .cp-row {
   --cp-accent: var(--accent);
