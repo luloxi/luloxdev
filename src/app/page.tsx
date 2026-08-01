@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { SectionNav } from "@/components/section-nav";
-import { SocialNav } from "@/components/social-nav";
 import { site } from "@/content/site";
 
 /**
@@ -47,10 +46,6 @@ export default function HomePage() {
               {site.name}
             </h1>
             <div className="home-title-rule" aria-hidden />
-
-            <div className="home-socials">
-              <SocialNav />
-            </div>
 
             <div className="home-sections">
               <SectionNav />
