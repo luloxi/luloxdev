@@ -21,12 +21,12 @@ export const messages = {
     },
     about: {
       title: "Sobre mí",
-      headline: "Builder, connector y pensador de largo plazo.",
+      headline: "Builder e investigador",
       paragraphs: [
-        "Me dedico a construir con AI y blockchain, no por el hype, sino porque son herramientas reales para coordinar personas y valor de formas nuevas.",
-        "He estado en el ecosistema de Cardano y Midnight como ambassador y builder, y sigo cerca de comunidades que priorizan craft, open source y producto útil.",
-        "Hoy combino producto, community y advisory: menos ruido, más signal. Me interesa RealFi, privacy tech, y agentes que hagan trabajo de verdad.",
-        "Fuera de la pantalla: asados, meetups, cine y conversaciones largas. Creo que la mejor tech se construye con gente y con paciencia.",
+        "Soy Luciano Oliva Bianco (Lulox). Vivo en Buenos Aires, Argentina.",
+        "Uso la IA para hacer mi vida y la de los demás más eficiente. Con Grok vibecodeo y armo automatizaciones sencillas, como correo y calendario. Para automatizaciones más específicas uso n8n.",
+        "Me interesa la adopción cripto a nivel mundial desde que conocí Bitcoin en 2010. Creo que lo que más uso traerá a blockchain es la tokenización, las stablecoins y el comercio agéntico.",
+        "Soy embajador de Midnight, la blockchain de privacidad de IOG: privacidad selectiva, identidad y smart contracts que pueden probar hechos sin revelar datos de más. La privacidad es lo que permitirá que la tecnología blockchain sea adoptada por personas e instituciones que hoy prefieren no usarla por su transparencia.",
       ],
       timeline: [
         {
@@ -34,7 +34,7 @@ export const messages = {
           title: "Research & Development",
           org: "Input Output Global",
           description:
-            "Investigación económica y técnica en blockchain, finanzas y AI. Desarrollo de automatizaciones, agentes de AI y webapps.",
+            "Oficinas de IOG en Buenos Aires. Investigación económica y técnica en blockchain, finanzas y AI. Automatizaciones, agentes y webapps.",
         },
         {
           period: "Abr 2023 - May 2024",
@@ -131,12 +131,12 @@ export const messages = {
     },
     about: {
       title: "About",
-      headline: "Builder, connector, and long-term thinker.",
+      headline: "Builder and researcher",
       paragraphs: [
-        "I build with AI and blockchain, not for the hype, but because they're real tools for coordinating people and value in new ways.",
-        "I've been in the Cardano and Midnight ecosystems as ambassador and builder, and stay close to communities that prioritize craft, open source, and useful product.",
-        "Today I mix product, community, and advisory: less noise, more signal. I'm into RealFi, privacy tech, and agents that do real work.",
-        "Off-screen: asados, meetups, film, and long conversations. I believe the best tech is built with people and patience.",
+        "I'm Luciano Oliva Bianco (Lulox). I live in Buenos Aires, Argentina.",
+        "I use AI to make my life and others' more efficient. With Grok I vibecode and set up simple automations, like email and calendar. For more specific automations I use n8n.",
+        "I've cared about global crypto adoption since I first learned about Bitcoin in 2010. I think what will drive the most real usage for blockchain is tokenization, stablecoins, and agentic commerce.",
+        "I'm a Midnight Ambassador for IOG's privacy blockchain: selective privacy, identity, and smart contracts that can prove facts without oversharing data. Privacy is what will let blockchain be adopted by people and institutions that today prefer not to use it because of how transparent it is.",
       ],
       timeline: [
         {
@@ -144,7 +144,7 @@ export const messages = {
           title: "Research & Development",
           org: "Input Output Global",
           description:
-            "Economic and technical research on blockchain, finance and AI. Development of automations, AI agents and webapps.",
+            "IOG Buenos Aires office. Economic and technical research on blockchain, finance, and AI. Automations, agents, and webapps.",
         },
         {
           period: "Apr 2023 - May 2024",

@@ -73,19 +73,19 @@ export default function AboutPage() {
                     <span className="cp-nav-corner cp-nav-corner-tl" />
                     <span className="cp-nav-corner cp-nav-corner-br" />
                   </span>
-                  <div className="cp-panel-inner flex gap-4">
+                  <div className="cp-panel-inner flex items-center gap-4 sm:gap-5">
                     {logo ? (
-                      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center self-start overflow-hidden sm:h-12 sm:w-12">
+                      <span className="inline-flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden sm:h-20 sm:w-20">
                         {logo.type === "image" ? (
                           <Image
                             src={logo.src}
                             alt={logo.alt}
-                            width={48}
-                            height={48}
+                            width={80}
+                            height={80}
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <logo.Icon className="h-8 w-8 text-foreground sm:h-9 sm:w-9" />
+                          <logo.Icon className="h-14 w-14 text-foreground sm:h-16 sm:w-16" />
                         )}
                       </span>
                     ) : null}

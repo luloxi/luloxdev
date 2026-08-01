@@ -921,6 +921,7 @@
   border: 1px solid color-mix(in oklab, var(--cp-accent) 55%, transparent);
   background: color-mix(in oklab, var(--cp-accent) 18%, transparent);
   color: inherit;
+  cursor: pointer;
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -1642,6 +1643,7 @@
   min-width: 1.85rem;
   padding: 0.3rem 0.45rem;
   color: var(--muted);
+  cursor: pointer;
   transition:
     color 0.15s ease,
     background 0.15s ease;
@@ -1657,13 +1659,92 @@
   box-shadow: 0 0 12px color-mix(in oklab, var(--accent) 25%, transparent);
 }
 
+/* Language: flag + code stack (clear “this switches language”) */
+.cp-lang {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+
+.cp-lang-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.12rem;
+  min-width: 1.85rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.55;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease,
+    color 0.15s ease;
+}
+
+.cp-lang-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.cp-lang-btn-active {
+  opacity: 1;
+}
+
+.cp-lang-flag-wrap {
+  display: block;
+  width: 1.65rem;
+  height: 1.65rem;
+  /* Square mark with the same angular cut as other HUD squares */
+  clip-path: polygon(
+    0 0,
+    calc(100% - 4px) 0,
+    100% 4px,
+    100% 100%,
+    4px 100%,
+    0 calc(100% - 4px)
+  );
+  transition: box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.cp-lang-btn-active .cp-lang-flag-wrap {
+  filter: drop-shadow(0 0 7px color-mix(in oklab, var(--accent) 40%, transparent));
+}
+
+.cp-lang-flag {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cp-lang-code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  color: var(--muted);
+  transition: color 0.15s ease;
+}
+
+.cp-lang-btn:hover .cp-lang-code {
+  color: var(--foreground);
+}
+
+.cp-lang-btn-active .cp-lang-code {
+  color: var(--accent);
+}
+
 .cp-ctrl-btn {
   display: inline-flex;
-  height: 1.85rem;
-  width: 1.85rem;
+  height: 2.25rem;
+  width: 2.25rem;
   align-items: center;
   justify-content: center;
   color: var(--muted);
+  cursor: pointer;
   clip-path: polygon(
     0 0,
     calc(100% - 6px) 0,

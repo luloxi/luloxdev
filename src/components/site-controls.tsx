@@ -9,7 +9,7 @@ export function SiteControls({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "fixed right-3 top-3 z-50 flex items-center gap-1.5 sm:right-5 sm:top-4",
+        "fixed right-3 top-3 z-50 flex items-center gap-2 sm:right-5 sm:top-4",
         className,
       )}
     >

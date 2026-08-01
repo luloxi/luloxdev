@@ -26,9 +26,9 @@ export function ThemeToggle() {
       className="cp-ctrl-btn"
     >
       {isDark ? (
-        <Sun className="h-3.5 w-3.5" strokeWidth={1.75} />
+        <Sun className="h-5 w-5" strokeWidth={1.75} />
       ) : (
-        <Moon className="h-3.5 w-3.5" strokeWidth={1.75} />
+        <Moon className="h-5 w-5" strokeWidth={1.75} />
       )}
     </button>
   );
