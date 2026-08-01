@@ -261,7 +261,7 @@
   align-items: flex-start;
   justify-content: center;
   gap: 0.2rem;
-  min-height: 3.35rem;
+  min-height: 3.75rem;
   min-width: 0;
   padding: 0.55rem 1.4rem 0.55rem 0.7rem;
   text-decoration: none;
@@ -382,7 +382,7 @@
   z-index: 1;
   max-width: 100%;
   font-family: var(--font-orbitron), var(--font-display);
-  font-size: 0.92rem;
+  font-size: 1.2rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -448,17 +448,24 @@
   }
 
   .cp-nav-item {
-    min-height: 3.75rem;
-    padding: 0.65rem 1.55rem 0.65rem 0.85rem;
+    min-height: 4.25rem;
+    padding: 0.75rem 1.55rem 0.75rem 0.95rem;
   }
 
   .cp-nav-label {
-    font-size: 1.05rem;
+    font-size: 1.35rem;
     letter-spacing: 0.1em;
   }
+}
 
-  .cp-nav-meta {
-    font-size: 0.65rem;
+/* Desktop landing split: room for larger section titles */
+@media (min-width: 900px) {
+  .home-sections .cp-nav-item {
+    min-height: 4.5rem;
+  }
+
+  .home-sections .cp-nav-label {
+    font-size: 1.45rem;
   }
 }
 
@@ -1259,7 +1266,7 @@
   padding: 0.85rem 0.9rem 0.9rem 0.75rem;
   text-align: left;
   color: inherit;
-  cursor: pointer;
+  list-style: none;
   clip-path: polygon(
     0 0,
     calc(100% - 12px) 0,
@@ -1274,7 +1281,7 @@
 }
 
 .cp-accordion:hover,
-.cp-accordion[aria-expanded="true"] {
+.cp-accordion[data-open="true"] {
   background: color-mix(in oklab, var(--cp-accent) 13%, transparent);
 }
 
@@ -1292,9 +1299,22 @@
 }
 
 .cp-accordion:hover .cp-nav-frame::before,
-.cp-accordion[aria-expanded="true"] .cp-nav-frame::before {
+.cp-accordion[data-open="true"] .cp-nav-frame::before {
   opacity: 1;
   width: 3px;
+}
+
+.cp-accordion-trigger {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .cp-accordion-head {
@@ -1321,6 +1341,48 @@
 .cp-accordion-body {
   position: relative;
   z-index: 1;
+}
+
+.focus-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+  padding: 0;
+  list-style: none;
+}
+
+.focus-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.55rem 0.28rem 0.5rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: color-mix(in oklab, var(--cp-accent) 88%, var(--foreground));
+  background: color-mix(in oklab, var(--cp-accent) 12%, transparent);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 6px) 0,
+    100% 6px,
+    100% 100%,
+    6px 100%,
+    0 calc(100% - 6px)
+  );
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.focus-link:hover {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--cp-accent) 22%, transparent);
+  box-shadow: 0 0 14px color-mix(in oklab, var(--cp-accent) 18%, transparent);
 }
 
 .cp-tags {
@@ -1358,6 +1420,21 @@
   margin-top: 0.85rem;
 }
 
+.cp-prose-link {
+  color: color-mix(in oklab, var(--accent) 72%, var(--foreground));
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--accent) 40%, transparent);
+  text-underline-offset: 0.18em;
+  transition:
+    color 0.15s ease,
+    text-decoration-color 0.15s ease;
+}
+
+.cp-prose-link:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
 .cp-headline {
   font-family: var(--font-orbitron), var(--font-display);
   font-size: 1.15rem;
@@ -1391,7 +1468,7 @@
 }
 
 :root:not(.dark) .cp-accordion:hover,
-:root:not(.dark) .cp-accordion[aria-expanded="true"] {
+:root:not(.dark) .cp-accordion[data-open="true"] {
   background:
     linear-gradient(
       145deg,
@@ -1402,6 +1479,132 @@
     inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 40%, transparent),
     0 2px 4px var(--light-ink),
     0 14px 32px color-mix(in oklab, var(--cp-accent) 14%, transparent);
+}
+
+:root:not(.dark) .focus-link {
+  background: color-mix(in oklab, var(--cp-accent) 10%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 28%, transparent);
+}
+
+:root:not(.dark) .focus-link:hover {
+  background: color-mix(in oklab, var(--cp-accent) 16%, #ffffff);
+}
+
+/* Past project detail */
+.project-detail-icon {
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: contain;
+}
+
+.project-detail-icon[src$=".png"] {
+  border-radius: 0.55rem;
+}
+
+.project-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.5rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 5px) 0,
+    100% 5px,
+    100% 100%,
+    5px 100%,
+    0 calc(100% - 5px)
+  );
+}
+
+.project-status-live {
+  color: #86efac;
+  background: color-mix(in oklab, #22c55e 22%, transparent);
+}
+
+.project-status-disabled {
+  color: #fdba74;
+  background: color-mix(in oklab, #f97316 20%, transparent);
+}
+
+.project-status-archive {
+  color: var(--muted);
+  background: color-mix(in oklab, var(--muted) 16%, transparent);
+}
+
+:root:not(.dark) .project-status-live {
+  color: #166534;
+  background: color-mix(in oklab, #22c55e 16%, #ffffff);
+}
+
+:root:not(.dark) .project-status-disabled {
+  color: #9a3412;
+  background: color-mix(in oklab, #fb923c 16%, #ffffff);
+}
+
+.project-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.project-meta-row {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 0.65rem 0.85rem;
+  align-items: start;
+  padding: 0.65rem 0.75rem;
+  background: color-mix(in oklab, var(--accent) 6%, transparent);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
+}
+
+.project-meta-row dt {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding-top: 0.15rem;
+}
+
+.project-meta-row dd {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.project-team {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.15rem;
+}
+
+.project-team-sep {
+  margin: 0 0.35rem;
+  opacity: 0.45;
+}
+
+:root:not(.dark) .project-meta-row {
+  background: color-mix(in oklab, var(--accent) 8%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+.project-detail-links {
+  margin-top: 0.25rem;
 }
 
 :root:not(.dark) .cp-panel .cp-nav-frame::before,

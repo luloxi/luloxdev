@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import Image from "next/image";
 import { CpRow } from "@/components/cp-row";
 import { BuidlGuidlIcon } from "@/components/icons/brands";
@@ -12,6 +12,36 @@ import { useLocale } from "@/i18n/locale-provider";
 const linkedInHref =
   socials.find((s) => s.id === "linkedin")?.href ??
   "https://linkedin.com/in/lulox";
+
+/** Named terms in bio → official pages */
+const aboutLinks: Record<string, string> = {
+  n8n: "https://n8n.io",
+  Midnight: "https://midnight.network",
+  IOG: "https://www.iog.io",
+  Bitcoin: "https://bitcoin.org",
+  Grok: "https://grok.com",
+};
+
+const aboutLinkPattern = /(n8n|Midnight|IOG|Bitcoin|Grok)/g;
+
+function linkifyAbout(text: string): ReactNode[] {
+  const parts = text.split(aboutLinkPattern);
+  return parts.map((part, i) => {
+    const href = aboutLinks[part];
+    if (!href) return part;
+    return (
+      <a
+        key={`${part}-${i}`}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="cp-prose-link"
+      >
+        {part}
+      </a>
+    );
+  });
+}
 
 type OrgLogo =
   | { type: "icon"; Icon: ComponentType<{ className?: string }> }
@@ -50,7 +80,7 @@ export default function AboutPage() {
             <p className="cp-headline">{about.headline}</p>
             {about.paragraphs.map((p) => (
               <p key={p.slice(0, 40)} className="cp-prose">
-                {p}
+                {linkifyAbout(p)}
               </p>
             ))}
           </div>

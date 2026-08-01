@@ -22,10 +22,9 @@ export function SectionNav() {
 
   return (
     <nav aria-label="Sections" className="cp-nav">
-      {sections.map((s, i) => {
+      {sections.map((s) => {
         const accent = accents[s.id];
         const label = t.sections[s.id];
-        const code = String(i + 1).padStart(2, "0");
         return (
           <Link
             key={s.href}
@@ -37,13 +36,6 @@ export function SectionNav() {
               <span className="cp-nav-corner cp-nav-corner-tl" />
               <span className="cp-nav-corner cp-nav-corner-br" />
               <span className="cp-nav-scan" />
-            </span>
-
-            <span className="cp-nav-meta">
-              <span className="cp-nav-code">{code}</span>
-              <span className="cp-nav-slash" aria-hidden>
-                //
-              </span>
             </span>
 
             <span className="cp-nav-label">{label}</span>

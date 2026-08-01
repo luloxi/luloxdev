@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ChevronDown, ExternalLink } from "lucide-react";
 import { GitHubIcon } from "@/components/icons/social";
 import {
@@ -43,20 +44,24 @@ export function ProjectsAccordion() {
             const isOpen = open === topic.id;
             const accent = focusAccents[topic.id];
             return (
-              <li key={topic.id}>
+              <li
+                key={topic.id}
+                className="cp-accordion group"
+                style={{ ["--cp-accent" as string]: accent }}
+                data-open={isOpen ? "true" : undefined}
+              >
+                <span className="cp-nav-frame" aria-hidden>
+                  <span className="cp-nav-corner cp-nav-corner-tl" />
+                  <span className="cp-nav-corner cp-nav-corner-br" />
+                  <span className="cp-nav-scan" />
+                </span>
+
                 <button
                   type="button"
                   onClick={() => toggle(topic.id)}
                   aria-expanded={isOpen}
-                  className="cp-accordion group"
-                  style={{ ["--cp-accent" as string]: accent }}
+                  className="cp-accordion-trigger"
                 >
-                  <span className="cp-nav-frame" aria-hidden>
-                    <span className="cp-nav-corner cp-nav-corner-tl" />
-                    <span className="cp-nav-corner cp-nav-corner-br" />
-                    <span className="cp-nav-scan" />
-                  </span>
-
                   <div className="cp-accordion-head">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -80,20 +85,41 @@ export function ProjectsAccordion() {
                       strokeWidth={1.75}
                     />
                   </div>
+                </button>
 
-                  <div
-                    className={cn(
-                      "grid transition-[grid-template-rows] duration-300 ease-out",
-                      isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
-                    )}
-                  >
-                    <div className="overflow-hidden">
-                      <div className="cp-accordion-body mt-3 border-t border-[color:color-mix(in_oklab,var(--cp-accent)_28%,transparent)] pt-3">
-                        <p className="cp-prose text-[0.9rem]">{copy.body}</p>
-                      </div>
+                <div
+                  className={cn(
+                    "grid transition-[grid-template-rows] duration-300 ease-out",
+                    isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+                  )}
+                >
+                  <div className="overflow-hidden">
+                    <div className="cp-accordion-body mt-3 border-t border-[color:color-mix(in_oklab,var(--cp-accent)_28%,transparent)] pt-3">
+                      <p className="cp-prose text-[0.9rem]">{copy.body}</p>
+                      {topic.links.length > 0 ? (
+                        <ul className="focus-links">
+                          {topic.links.map((link) => (
+                            <li key={link.href}>
+                              <a
+                                href={link.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="focus-link"
+                              >
+                                <span>{link.label}</span>
+                                <ExternalLink
+                                  className="h-3 w-3 shrink-0 opacity-70"
+                                  strokeWidth={1.75}
+                                  aria-hidden
+                                />
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
                     </div>
                   </div>
-                </button>
+                </div>
               </li>
             );
           })}
@@ -137,10 +163,8 @@ export function ProjectsAccordion() {
             const accent = pastAccents[i % pastAccents.length];
             return (
               <li key={project.id}>
-                <a
-                  href={project.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href={`/projects/${project.id}`}
                   className="cp-row group"
                   style={{ ["--cp-accent" as string]: accent }}
                 >
@@ -170,7 +194,7 @@ export function ProjectsAccordion() {
                     ▸
                   </span>
                   <span className="cp-nav-bar cp-row-bar" aria-hidden />
-                </a>
+                </Link>
               </li>
             );
           })}
