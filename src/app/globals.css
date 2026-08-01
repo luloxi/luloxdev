@@ -25,29 +25,32 @@
   --section-contact: #fb923c;
 }
 
-/* Light mode: vivid accents (readable but as punchy as dark neon) */
+/* Light mode: Day HUD — cool pearl paper, glass panels, soft ink (not chalky white) */
 :root:not(.dark) {
-  --background: #ebe4f8;
-  --foreground: #0a0614;
-  --muted: #3a3054;
-  --border: color-mix(in oklab, #7c3aed 42%, transparent);
-  --accent: #7c3aed;
-  --accent-2: #ea580c;
-  --surface: #ffffff;
-  --neon-violet: #8b5cf6;
-  --neon-orange: #f97316;
-  --glow-violet: color-mix(in oklab, #7c3aed 38%, transparent);
-  --glow-orange: color-mix(in oklab, #ea580c 34%, transparent);
-  --email-bg: #ffedd5;
-  --email-border: #ea580c;
+  --background: #efeaf7;
+  --foreground: #151122;
+  --muted: #5a5272;
+  --border: color-mix(in oklab, #6d28d9 26%, transparent);
+  --accent: #6d28d9;
+  --accent-2: #c2410c;
+  --surface: color-mix(in oklab, #ffffff 86%, #e4ddf5);
+  --neon-violet: #7c3aed;
+  --neon-orange: #ea580c;
+  --glow-violet: color-mix(in oklab, #7c3aed 20%, transparent);
+  --glow-orange: color-mix(in oklab, #ea580c 16%, transparent);
+  --email-bg: color-mix(in oklab, #ffedd5 55%, #ffffff);
+  --email-border: color-mix(in oklab, #ea580c 75%, #c2410c);
   --email-fg: #9a3412;
-  --email-btn-bg: #fdba74;
-  /* Saturated section colors so tiles/rows pop on light bg */
-  --section-about: #7c3aed;
-  --section-projects: #0284c7;
-  --section-blog: #ca8a04;
-  --section-tastes: #e11d48;
-  --section-contact: #ea580c;
+  --email-btn-bg: color-mix(in oklab, #fdba74 45%, #ffffff);
+  /* Deep jewel tones that read clean on pearl, not neon-on-white */
+  --section-about: #6d28d9;
+  --section-projects: #0369a1;
+  --section-blog: #a16207;
+  --section-tastes: #be123c;
+  --section-contact: #c2410c;
+  /* Shared light elevation */
+  --light-ink: color-mix(in oklab, #151122 8%, transparent);
+  --light-glass: color-mix(in oklab, #ffffff 78%, transparent);
 }
 
 .dark {
@@ -168,35 +171,44 @@
       0 0 48px color-mix(in oklab, var(--neon-orange) 10%, transparent);
   }
 
-  /* Light: solid panels, stronger color so they don't wash out */
+  /* Light: frosted glass panels with soft violet elevation */
   :root:not(.dark) .neon-panel {
-    border-color: color-mix(in oklab, var(--accent) 48%, transparent);
+    border-color: color-mix(in oklab, var(--accent) 32%, transparent);
     background:
       linear-gradient(
-        135deg,
-        #ffffff 0%,
-        color-mix(in oklab, var(--neon-violet) 16%, #ffffff) 100%
+        145deg,
+        color-mix(in oklab, #ffffff 94%, transparent) 0%,
+        color-mix(in oklab, var(--neon-violet) 8%, #ffffff) 100%
       );
     box-shadow:
-      0 1px 0 color-mix(in oklab, var(--accent) 18%, transparent) inset,
-      0 2px 14px color-mix(in oklab, var(--neon-violet) 14%, transparent);
+      0 1px 0 color-mix(in oklab, #ffffff 70%, transparent) inset,
+      0 1px 2px var(--light-ink),
+      0 10px 28px color-mix(in oklab, var(--neon-violet) 12%, transparent);
+    backdrop-filter: blur(10px);
   }
 
   :root:not(.dark) .neon-panel:hover {
-    border-color: color-mix(in oklab, var(--accent) 72%, transparent);
+    border-color: color-mix(in oklab, var(--accent) 52%, transparent);
     box-shadow:
-      0 1px 0 color-mix(in oklab, var(--accent) 24%, transparent) inset,
-      0 6px 22px color-mix(in oklab, var(--neon-violet) 24%, transparent);
+      0 1px 0 color-mix(in oklab, #ffffff 80%, transparent) inset,
+      0 2px 4px var(--light-ink),
+      0 14px 36px color-mix(in oklab, var(--neon-violet) 18%, transparent);
   }
 
   :root:not(.dark) .neon-text {
-    text-shadow: none;
     color: var(--foreground);
+    text-shadow:
+      0 1px 0 color-mix(in oklab, #ffffff 90%, transparent),
+      0 0 28px color-mix(in oklab, var(--accent) 16%, transparent);
   }
 
   :root:not(.dark) .glass-bar {
-    border-color: color-mix(in oklab, var(--accent) 35%, transparent);
-    background: color-mix(in oklab, #ffffff 88%, transparent);
+    border-color: color-mix(in oklab, var(--accent) 28%, transparent);
+    background: color-mix(in oklab, #ffffff 72%, transparent);
+    box-shadow:
+      0 1px 2px var(--light-ink),
+      0 8px 24px color-mix(in oklab, var(--neon-violet) 10%, transparent);
+    backdrop-filter: blur(12px);
   }
 
   .neon-icon {
@@ -451,20 +463,34 @@
 }
 
 :root:not(.dark) .cp-nav-item {
-  background: color-mix(in oklab, var(--cp-accent) 16%, #ffffff);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 32%, transparent);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, #ffffff 88%, transparent),
+      color-mix(in oklab, var(--cp-accent) 10%, #ffffff)
+    );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 28%, transparent),
+    0 1px 2px var(--light-ink),
+    0 8px 20px color-mix(in oklab, var(--cp-accent) 8%, transparent);
 }
 
 :root:not(.dark) .cp-nav-item:hover {
-  background: color-mix(in oklab, var(--cp-accent) 26%, #ffffff);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, #ffffff 92%, transparent),
+      color-mix(in oklab, var(--cp-accent) 16%, #ffffff)
+    );
   box-shadow:
-    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 48%, transparent),
-    0 4px 16px color-mix(in oklab, var(--cp-accent) 18%, transparent);
+    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 42%, transparent),
+    0 2px 4px var(--light-ink),
+    0 12px 28px color-mix(in oklab, var(--cp-accent) 14%, transparent);
 }
 
 :root:not(.dark) .cp-nav-label {
   text-shadow: none;
-  color: color-mix(in oklab, var(--cp-accent) 75%, var(--foreground));
+  color: color-mix(in oklab, var(--cp-accent) 55%, var(--foreground));
 }
 
 :root:not(.dark) .cp-nav-item:hover .cp-nav-label {
@@ -473,13 +499,18 @@
 }
 
 :root:not(.dark) .cp-nav-item .cp-nav-frame::before {
-  opacity: 0.95;
+  opacity: 0.9;
   width: 3px;
+  box-shadow: 0 0 12px color-mix(in oklab, var(--cp-accent) 35%, transparent);
 }
 
 :root:not(.dark) .cp-nav-meta {
   color: var(--cp-accent);
-  opacity: 1;
+  opacity: 0.85;
+}
+
+:root:not(.dark) .cp-nav-corner {
+  opacity: 0.85;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -703,13 +734,18 @@
   background:
     radial-gradient(
       90% 120% at 0% 50%,
-      color-mix(in oklab, var(--section-projects) 16%, transparent),
+      color-mix(in oklab, var(--section-projects) 12%, transparent),
       transparent 55%
     ),
-    linear-gradient(135deg, #ffffff, color-mix(in oklab, var(--section-projects) 8%, #ffffff));
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, #ffffff 94%, transparent),
+      color-mix(in oklab, var(--section-projects) 8%, #ffffff)
+    );
   box-shadow:
-    inset 0 0 0 1px color-mix(in oklab, var(--section-projects) 40%, transparent),
-    0 6px 20px color-mix(in oklab, var(--section-projects) 12%, transparent);
+    inset 0 0 0 1px color-mix(in oklab, var(--section-projects) 30%, transparent),
+    0 1px 2px var(--light-ink),
+    0 10px 28px color-mix(in oklab, var(--section-projects) 12%, transparent);
 }
 
 
@@ -923,20 +959,34 @@
 }
 
 :root:not(.dark) .cp-row {
-  background: color-mix(in oklab, var(--cp-accent) 16%, #ffffff);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 34%, transparent);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, #ffffff 90%, transparent),
+      color-mix(in oklab, var(--cp-accent) 9%, #ffffff)
+    );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 26%, transparent),
+    0 1px 2px var(--light-ink),
+    0 8px 20px color-mix(in oklab, var(--cp-accent) 8%, transparent);
 }
 
 :root:not(.dark) .cp-row:hover {
-  background: color-mix(in oklab, var(--cp-accent) 26%, #ffffff);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, #ffffff 94%, transparent),
+      color-mix(in oklab, var(--cp-accent) 15%, #ffffff)
+    );
   box-shadow:
-    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 50%, transparent),
-    0 4px 16px color-mix(in oklab, var(--cp-accent) 16%, transparent);
+    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 40%, transparent),
+    0 2px 4px var(--light-ink),
+    0 12px 28px color-mix(in oklab, var(--cp-accent) 14%, transparent);
 }
 
 :root:not(.dark) .cp-row-label {
   text-shadow: none;
-  color: color-mix(in oklab, var(--cp-accent) 72%, var(--foreground));
+  color: color-mix(in oklab, var(--cp-accent) 48%, var(--foreground));
 }
 
 :root:not(.dark) .cp-row:hover .cp-row-label {
@@ -945,24 +995,32 @@
 }
 
 :root:not(.dark) .cp-row .cp-nav-frame::before {
-  opacity: 0.95;
+  opacity: 0.9;
   width: 3px;
+  box-shadow: 0 0 12px color-mix(in oklab, var(--cp-accent) 30%, transparent);
 }
 
 :root:not(.dark) .cp-row .cp-nav-meta {
   color: var(--cp-accent);
-  opacity: 1;
+  opacity: 0.85;
 }
 
 :root:not(.dark) .cp-tag {
   color: var(--cp-accent);
-  background: color-mix(in oklab, var(--cp-accent) 18%, #ffffff);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 40%, transparent);
+  background: color-mix(in oklab, var(--cp-accent) 12%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 28%, transparent);
 }
 
 :root:not(.dark) .cp-email {
-  background: color-mix(in oklab, var(--cp-accent) 18%, #ffffff);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 40%, transparent);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, #ffffff 90%, transparent),
+      color-mix(in oklab, var(--cp-accent) 12%, #ffffff)
+    );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 30%, transparent),
+    0 8px 22px color-mix(in oklab, var(--cp-accent) 10%, transparent);
 }
 
 /* Shared cyber UI for inner pages */
@@ -1019,12 +1077,12 @@
 }
 
 :root:not(.dark) .cp-page-title-text {
-  text-shadow: none;
   color: var(--accent);
+  text-shadow: 0 0 20px color-mix(in oklab, var(--accent) 14%, transparent);
 }
 
 :root:not(.dark) .cp-page-title-mark {
-  box-shadow: none;
+  box-shadow: 0 0 8px color-mix(in oklab, var(--accent) 22%, transparent);
 }
 
 /* Back navigation */
@@ -1132,16 +1190,33 @@
 }
 
 :root:not(.dark) .cp-back-footer {
-  background: color-mix(in oklab, var(--accent) 14%, #ffffff);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, #ffffff 90%, transparent),
+      color-mix(in oklab, var(--accent) 10%, #ffffff)
+    );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--accent) 28%, transparent),
+    0 1px 2px var(--light-ink),
+    0 8px 20px color-mix(in oklab, var(--accent) 10%, transparent);
 }
 
 :root:not(.dark) .cp-back-footer:hover {
-  background: color-mix(in oklab, var(--accent) 22%, #ffffff);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, #ffffff 94%, transparent),
+      color-mix(in oklab, var(--accent) 16%, #ffffff)
+    );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--accent) 40%, transparent),
+    0 10px 26px color-mix(in oklab, var(--accent) 14%, transparent);
 }
 
 :root:not(.dark) .cp-back-chevron {
-  background: color-mix(in oklab, var(--accent) 18%, #ffffff);
+  background: color-mix(in oklab, var(--accent) 12%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 22%, transparent);
 }
 
 .cp-panel {
@@ -1302,53 +1377,78 @@
 
 :root:not(.dark) .cp-panel,
 :root:not(.dark) .cp-accordion {
-  background: color-mix(in oklab, var(--cp-accent) 15%, #ffffff);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 32%, transparent);
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in oklab, #ffffff 92%, transparent),
+      color-mix(in oklab, var(--cp-accent) 9%, #ffffff)
+    );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 26%, transparent),
+    0 1px 2px var(--light-ink),
+    0 10px 26px color-mix(in oklab, var(--cp-accent) 9%, transparent);
 }
 
 :root:not(.dark) .cp-accordion:hover,
 :root:not(.dark) .cp-accordion[aria-expanded="true"] {
-  background: color-mix(in oklab, var(--cp-accent) 24%, #ffffff);
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in oklab, #ffffff 94%, transparent),
+      color-mix(in oklab, var(--cp-accent) 15%, #ffffff)
+    );
   box-shadow:
-    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 48%, transparent),
-    0 4px 16px color-mix(in oklab, var(--cp-accent) 14%, transparent);
+    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 40%, transparent),
+    0 2px 4px var(--light-ink),
+    0 14px 32px color-mix(in oklab, var(--cp-accent) 14%, transparent);
 }
 
 :root:not(.dark) .cp-panel .cp-nav-frame::before,
 :root:not(.dark) .cp-accordion .cp-nav-frame::before {
-  opacity: 0.95;
+  opacity: 0.9;
   width: 3px;
+  box-shadow: 0 0 12px color-mix(in oklab, var(--cp-accent) 32%, transparent);
 }
 
 :root:not(.dark) .cp-headline {
-  text-shadow: none;
-  color: color-mix(in oklab, var(--cp-accent, var(--accent)) 55%, var(--foreground));
+  color: color-mix(in oklab, var(--cp-accent, var(--accent)) 42%, var(--foreground));
+  text-shadow: 0 0 18px color-mix(in oklab, var(--cp-accent, var(--accent)) 12%, transparent);
 }
 
 :root:not(.dark) .cp-heading {
   color: var(--accent);
-  opacity: 1;
+  opacity: 0.92;
 }
 
 :root:not(.dark) .cp-ctrl,
 :root:not(.dark) .cp-ctrl-btn {
   box-shadow:
-    inset 0 0 0 1px color-mix(in oklab, var(--accent) 42%, transparent),
-    0 0 14px color-mix(in oklab, var(--accent) 12%, transparent);
+    inset 0 0 0 1px color-mix(in oklab, var(--accent) 28%, transparent),
+    0 1px 2px var(--light-ink),
+    0 6px 16px color-mix(in oklab, var(--accent) 10%, transparent);
 }
 
 :root:not(.dark) .cp-ctrl-seg-active {
-  background: color-mix(in oklab, var(--accent) 24%, transparent);
+  background: color-mix(in oklab, var(--accent) 16%, #ffffff);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--accent) 22%, transparent),
+    0 0 10px color-mix(in oklab, var(--accent) 12%, transparent);
 }
 
 :root:not(.dark) .avatar-hud {
-  --hud: #7c3aed;
+  --hud: #6d28d9;
 }
 
 :root:not(.dark) .avatar-hud-photo {
   box-shadow:
-    0 0 0 1px color-mix(in oklab, var(--hud) 55%, transparent),
-    0 0 24px color-mix(in oklab, var(--hud) 22%, transparent);
+    0 0 0 1px color-mix(in oklab, var(--hud) 40%, transparent),
+    0 4px 12px var(--light-ink),
+    0 12px 32px color-mix(in oklab, var(--hud) 18%, transparent);
+}
+
+:root:not(.dark) .avatar-hud-corner {
+  filter: drop-shadow(0 0 4px color-mix(in oklab, var(--hud) 28%, transparent));
+  opacity: 0.9;
 }
 
 
@@ -1422,6 +1522,59 @@
   );
 }
 
+/* Light: soft dawn aurora + pearl vignette (not muddy black edges) */
+:root:not(.dark) .cosmic-base {
+  background:
+    radial-gradient(
+      ellipse 85% 55% at 50% -12%,
+      color-mix(in oklab, var(--neon-violet) 22%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 50% 42% at 100% 100%,
+      color-mix(in oklab, var(--neon-orange) 14%, transparent),
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 48% 38% at 0% 85%,
+      color-mix(in oklab, #a78bfa 16%, transparent),
+      transparent 48%
+    ),
+    radial-gradient(
+      circle at 72% 28%,
+      color-mix(in oklab, #c4b5fd 12%, transparent),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 28% 62%,
+      color-mix(in oklab, #fdba74 8%, transparent),
+      transparent 36%
+    ),
+    var(--background);
+}
+
+:root:not(.dark) .cosmic-grid {
+  opacity: 0.2;
+  background-image:
+    linear-gradient(
+      color-mix(in oklab, var(--neon-violet) 22%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--neon-violet) 22%, transparent) 1px,
+      transparent 1px
+    );
+}
+
+:root:not(.dark) .cosmic-vignette {
+  background: radial-gradient(
+    ellipse 78% 72% at 50% 42%,
+    transparent 38%,
+    color-mix(in oklab, var(--background) 55%, #d8d0ec) 100%
+  );
+}
+
 /* Mobile: fewer layers / coarser grid = cheaper paints */
 @media (max-width: 639px) {
   .cosmic-grid {
@@ -1433,6 +1586,21 @@
       radial-gradient(
         ellipse 90% 55% at 50% -8%,
         color-mix(in oklab, var(--neon-violet) 18%, transparent),
+        transparent 58%
+      ),
+      radial-gradient(
+        ellipse 70% 45% at 100% 100%,
+        color-mix(in oklab, var(--neon-orange) 12%, transparent),
+        transparent 52%
+      ),
+      var(--background);
+  }
+
+  :root:not(.dark) .cosmic-base {
+    background:
+      radial-gradient(
+        ellipse 90% 55% at 50% -8%,
+        color-mix(in oklab, var(--neon-violet) 20%, transparent),
         transparent 58%
       ),
       radial-gradient(
@@ -1524,7 +1692,236 @@
 
 :root:not(.dark) .cp-ctrl,
 :root:not(.dark) .cp-ctrl-btn {
-  background: color-mix(in oklab, #ffffff 88%, transparent);
+  background: color-mix(in oklab, #ffffff 82%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+:root:not(.dark) .cp-ctrl-btn:hover {
+  background: color-mix(in oklab, var(--accent) 10%, #ffffff);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--accent) 38%, transparent),
+    0 4px 14px color-mix(in oklab, var(--accent) 14%, transparent);
+}
+
+:root:not(.dark) .email-cta {
+  box-shadow:
+    0 1px 2px var(--light-ink),
+    0 10px 28px color-mix(in oklab, var(--neon-orange) 14%, transparent);
+}
+
+/* ── Home layout ────────────────────────────────────────── */
+
+.home-main {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 28rem;
+  margin-inline: auto;
+  padding: 2.75rem 1.15rem 0.85rem;
+  overflow: hidden;
+}
+
+.home-layout {
+  display: flex;
+  min-height: 0;
+  max-height: 100%;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+}
+
+.home-hero {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+}
+
+.home-copy {
+  display: flex;
+  min-width: 0;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Mobile: ~2.5× previous photo + name (6.75rem / text-xl) */
+.home-title {
+  margin-top: 0.85rem;
+  font-size: clamp(2.4rem, 11vw, 3.125rem);
+  letter-spacing: 0.08em;
+  line-height: 1.05;
+}
+
+.home-title-rule {
+  margin-top: 0.55rem;
+  height: 1px;
+  width: 3.5rem;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent),
+    transparent
+  );
+  opacity: 0.65;
+}
+
+.home-socials {
+  margin-top: 0.55rem;
+}
+
+.home-sections {
+  margin-top: 0.7rem;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.home-social-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.home-social-link {
+  display: inline-flex;
+  height: 3.1rem;
+  width: 3.1rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  color: var(--muted);
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.home-social-link:hover {
+  border-color: color-mix(in oklab, var(--accent) 40%, transparent);
+  color: var(--accent);
+  box-shadow: 0 0 18px var(--glow-violet);
+}
+
+.home-social-icon {
+  height: 1.45rem;
+  width: 1.45rem;
+}
+
+/* Short phones: keep the big identity without clipping the menu */
+@media (max-width: 899px) and (max-height: 740px) {
+  .home-title {
+    font-size: clamp(2rem, 9.5vw, 2.6rem);
+  }
+
+  .home-main {
+    padding-top: 2.4rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .home-socials {
+    margin-top: 0.35rem;
+  }
+
+  .home-sections {
+    margin-top: 0.5rem;
+  }
+
+  .home-sections .cp-nav-item {
+    min-height: 2.9rem;
+    padding-block: 0.4rem;
+  }
+}
+
+/* Desktop: hero photo left, title + links right */
+@media (min-width: 900px) {
+  .home-main {
+    max-width: 68rem;
+    padding: 2.5rem 2.5rem 1.75rem;
+  }
+
+  .home-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 2.5rem 3.25rem;
+    max-height: none;
+  }
+
+  .home-hero {
+    justify-content: flex-end;
+  }
+
+  .home-copy {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .home-title {
+    margin-top: 0;
+    font-size: clamp(2.75rem, 5.5vw, 4.25rem);
+    letter-spacing: 0.1em;
+    line-height: 0.98;
+  }
+
+  .home-title-rule {
+    margin-top: 0.75rem;
+    width: 5rem;
+    background: linear-gradient(
+      90deg,
+      var(--accent),
+      color-mix(in oklab, var(--accent) 20%, transparent)
+    );
+  }
+
+  .home-socials {
+    margin-top: 1.15rem;
+  }
+
+  .home-social-nav {
+    justify-content: flex-start;
+    gap: 0.45rem;
+  }
+
+  .home-social-link {
+    height: 3.15rem;
+    width: 3.15rem;
+  }
+
+  .home-social-icon {
+    height: 1.5rem;
+    width: 1.5rem;
+  }
+
+  .home-sections {
+    margin-top: 1.35rem;
+    max-width: 22rem;
+  }
+
+  /* Single-column menu beside hero */
+  .home-sections .cp-nav {
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+  }
+
+  .home-sections .cp-nav-item {
+    min-height: 3.55rem;
+  }
+}
+
+@media (min-width: 1100px) {
+  .home-layout {
+    gap: 3rem 4rem;
+  }
+
+  .home-sections {
+    max-width: 24rem;
+  }
 }
 
 /* ── Avatar HUD (home) ──────────────────────────────────── */
@@ -1532,38 +1929,41 @@
 .avatar-hud {
   --hud: var(--accent);
   position: relative;
-  width: 6.75rem;
-  height: 6.75rem;
-}
-
-@media (min-width: 640px) {
-  .avatar-hud {
-    width: 7.75rem;
-    height: 7.75rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .avatar-hud {
-    width: 8.5rem;
-    height: 8.5rem;
-  }
+  /* Mobile: ~2.5× previous 6.75rem (capped by width + short viewports) */
+  width: min(16.875rem, 72vw, 36dvh);
+  height: min(16.875rem, 72vw, 36dvh);
 }
 
 .avatar-hud-frame {
   pointer-events: none;
   position: absolute;
-  inset: -0.45rem;
+  inset: -0.65rem;
   z-index: 2;
 }
 
 .avatar-hud-corner {
   position: absolute;
-  width: 0.85rem;
-  height: 0.85rem;
+  width: 1.15rem;
+  height: 1.15rem;
   border-color: var(--hud);
   opacity: 0.95;
   filter: drop-shadow(0 0 6px color-mix(in oklab, var(--hud) 55%, transparent));
+}
+
+@media (min-width: 900px) {
+  .avatar-hud {
+    width: min(22rem, 38vw, 52vh);
+    height: min(22rem, 38vw, 52vh);
+  }
+
+  .avatar-hud-frame {
+    inset: -0.85rem;
+  }
+
+  .avatar-hud-corner {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
 }
 
 .avatar-hud-corner-tl {

@@ -17,10 +17,7 @@ const iconMap = {
 
 export function SocialNav() {
   return (
-    <nav
-      aria-label="Social"
-      className="flex items-center justify-center gap-2 sm:gap-3"
-    >
+    <nav aria-label="Social" className="home-social-nav">
       {socials.map((s) => {
         const Icon = iconMap[s.id as keyof typeof iconMap];
         return (
@@ -31,9 +28,9 @@ export function SocialNav() {
             aria-label={s.label}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-[4.125rem] w-[4.125rem] items-center justify-center rounded-full border border-transparent text-muted transition-all duration-300 hover:border-accent/40 hover:text-accent hover:shadow-[0_0_18px_var(--glow-violet)] sm:h-[4.5rem] sm:w-[4.5rem]"
+            className="home-social-link"
           >
-            <Icon className="h-[1.875rem] w-[1.875rem] sm:h-9 sm:w-9" />
+            <Icon className="home-social-icon" />
           </a>
         );
       })}
