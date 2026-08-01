@@ -538,12 +538,208 @@
   gap: 0.4rem;
 }
 
+/* Contact: 2 per row on desktop */
+@media (min-width: 640px) {
+  .cp-list-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+  }
+
+  .cp-list-2col .cp-row {
+    min-height: 3.5rem;
+    padding: 0.7rem 0.75rem 0.8rem 0.7rem;
+  }
+
+  .cp-list-2col .cp-row-label {
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+  }
+
+  .cp-list-2col .cp-row-detail {
+    font-size: 0.72rem;
+  }
+}
+
+/* GitHub feature card on Projects */
+.github-card {
+  --cp-accent: var(--foreground);
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.9rem 1rem;
+  overflow: hidden;
+  min-height: 5.5rem;
+  padding: 1.1rem 1.05rem 1.15rem 1rem;
+  text-decoration: none;
+  color: inherit;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 16px) 0,
+    100% 16px,
+    100% 100%,
+    16px 100%,
+    0 calc(100% - 16px)
+  );
+  background:
+    radial-gradient(
+      90% 120% at 0% 50%,
+      color-mix(in oklab, var(--section-projects) 22%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--foreground) 8%, transparent),
+      color-mix(in oklab, var(--section-projects) 6%, transparent)
+    );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--section-projects) 35%, transparent),
+    0 8px 28px color-mix(in oklab, var(--section-projects) 12%, transparent);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease;
+}
+
+.github-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--section-projects) 55%, transparent),
+    0 12px 36px color-mix(in oklab, var(--section-projects) 20%, transparent);
+}
+
+.github-card-grid {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+  background-image:
+    linear-gradient(
+      color-mix(in oklab, var(--section-projects) 35%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--section-projects) 35%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 18px 18px;
+  mask-image: radial-gradient(ellipse 70% 80% at 20% 50%, black, transparent 75%);
+}
+
+.github-card-glow {
+  pointer-events: none;
+  position: absolute;
+  right: -10%;
+  top: -30%;
+  width: 50%;
+  height: 140%;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--section-projects) 28%, transparent),
+    transparent 65%
+  );
+  opacity: 0.7;
+  transition: opacity 0.25s ease;
+}
+
+.github-card:hover .github-card-glow {
+  opacity: 1;
+}
+
+.github-card-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  height: 3rem;
+  width: 3rem;
+  align-items: center;
+  justify-content: center;
+  color: var(--foreground);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 8px) 0,
+    100% 8px,
+    100% 100%,
+    8px 100%,
+    0 calc(100% - 8px)
+  );
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--section-projects) 40%, transparent);
+}
+
+.github-card-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.github-card-kicker {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--section-projects);
+}
+
+.github-card-title {
+  font-family: var(--font-orbitron), var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+
+.github-card-blurb {
+  margin-top: 0.15rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.github-card-go {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  color: var(--section-projects);
+  opacity: 0.7;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.github-card:hover .github-card-go {
+  opacity: 1;
+  transform: translate(2px, -2px);
+}
+
+:root:not(.dark) .github-card {
+  background:
+    radial-gradient(
+      90% 120% at 0% 50%,
+      color-mix(in oklab, var(--section-projects) 16%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(135deg, #ffffff, color-mix(in oklab, var(--section-projects) 8%, #ffffff));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--section-projects) 40%, transparent),
+    0 6px 20px color-mix(in oklab, var(--section-projects) 12%, transparent);
+}
+
+:root:not(.dark) .github-card-icon {
+  background: color-mix(in oklab, var(--section-projects) 10%, #ffffff);
+}
+
 .cp-row {
   --cp-accent: var(--accent);
   position: relative;
   display: grid;
-  grid-template-columns: auto auto 1fr auto;
-  align-items: start;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
   gap: 0.55rem 0.7rem;
   min-height: 3.25rem;
   padding: 0.65rem 0.9rem 0.85rem 0.75rem;
@@ -633,6 +829,13 @@
   left: 0.75rem;
   right: 2rem;
   bottom: 0.3rem;
+}
+
+/* Past project icons (~3.6× original; +20% from previous) */
+.project-icon {
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: contain;
 }
 
 .cp-row-chevron {
@@ -784,9 +987,6 @@
 
 /* Shared cyber UI for inner pages */
 .cp-heading {
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
   margin-bottom: 0.85rem;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 0.68rem;
@@ -796,12 +996,172 @@
   color: var(--accent);
 }
 
-.cp-heading-code {
-  opacity: 0.7;
+/* Page section title (about / projects / etc.) */
+.cp-page-title {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  margin-left: auto;
+  text-align: right;
 }
 
-.cp-heading-slash {
-  opacity: 0.4;
+.cp-page-title-text {
+  font-family: var(--font-orbitron), var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  line-height: 1.15;
+  color: var(--accent);
+  text-shadow: 0 0 18px color-mix(in oklab, var(--accent) 40%, transparent);
+}
+
+/* Full word width; fades out toward the left (0% opacity) */
+.cp-page-title-mark {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--accent) 35%, transparent) 45%,
+    var(--accent) 100%
+  );
+  box-shadow: 0 0 10px color-mix(in oklab, var(--accent) 40%, transparent);
+}
+
+@media (min-width: 640px) {
+  .cp-page-title-text {
+    font-size: 1.05rem;
+    letter-spacing: 0.2em;
+  }
+}
+
+:root:not(.dark) .cp-page-title-text {
+  text-shadow: none;
+  color: var(--accent);
+}
+
+:root:not(.dark) .cp-page-title-mark {
+  box-shadow: none;
+}
+
+/* Back navigation */
+.cp-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  transition: color 0.15s ease, gap 0.15s ease;
+}
+
+.cp-back-link:hover {
+  color: var(--accent-2);
+  gap: 0.55rem;
+}
+
+.cp-back-chevron {
+  display: inline-flex;
+  height: 1.35rem;
+  min-width: 1.35rem;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--accent);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 5px) 0,
+    100% 5px,
+    100% 100%,
+    5px 100%,
+    0 calc(100% - 5px)
+  );
+  background: color-mix(in oklab, var(--accent) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 45%, transparent);
+}
+
+.cp-back-footer {
+  --cp-accent: var(--accent);
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  min-height: 3.1rem;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: var(--accent);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+  background: color-mix(in oklab, var(--accent) 10%, transparent);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.18s ease;
+}
+
+.cp-back-footer:hover {
+  background: color-mix(in oklab, var(--accent) 18%, transparent);
+  color: var(--accent-2);
+  transform: translateX(-2px);
+}
+
+.cp-back-footer .cp-nav-frame::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  opacity: 0.75;
+  box-shadow: 0 0 10px color-mix(in oklab, var(--accent) 45%, transparent);
+}
+
+.cp-back-footer-chevron {
+  position: relative;
+  z-index: 1;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cp-back-footer-label {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-orbitron), var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+:root:not(.dark) .cp-back-footer {
+  background: color-mix(in oklab, var(--accent) 14%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 35%, transparent);
+}
+
+:root:not(.dark) .cp-back-footer:hover {
+  background: color-mix(in oklab, var(--accent) 22%, #ffffff);
+}
+
+:root:not(.dark) .cp-back-chevron {
+  background: color-mix(in oklab, var(--accent) 18%, #ffffff);
 }
 
 .cp-panel {
@@ -885,7 +1245,7 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: start;
   gap: 0.55rem 0.7rem;
 }

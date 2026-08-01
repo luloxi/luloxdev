@@ -1,19 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ExternalLink } from "lucide-react";
+import { GitHubIcon } from "@/components/icons/social";
 import {
   focusTopics,
   pastProjects,
   type FocusTopicId,
 } from "@/content/projects";
+import { github } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
 const focusAccents: Record<FocusTopicId, string> = {
   tokenization: "var(--section-projects)",
   midnight: "var(--section-about)",
-  "ai-agents": "var(--section-tastes)",
+  hermes: "var(--section-tastes)",
+  lcp: "var(--section-blog)",
 };
 
 const pastAccents = [
@@ -33,13 +36,9 @@ export function ProjectsAccordion() {
   return (
     <div className="space-y-10">
       <section>
-        <h2 className="cp-heading">
-          <span className="cp-heading-code">01</span>
-          <span className="cp-heading-slash">//</span>
-          <span>{t.projects.focusHeading}</span>
-        </h2>
+        <h2 className="cp-heading">{t.projects.focusHeading}</h2>
         <ul className="cp-list">
-          {focusTopics.map((topic, i) => {
+          {focusTopics.map((topic) => {
             const copy = t.projects.focus[topic.id];
             const isOpen = open === topic.id;
             const accent = focusAccents[topic.id];
@@ -59,13 +58,6 @@ export function ProjectsAccordion() {
                   </span>
 
                   <div className="cp-accordion-head">
-                    <span className="cp-nav-meta">
-                      <span className="cp-nav-code">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span className="cp-nav-slash">//</span>
-                    </span>
-
                     <span className="cp-row-body min-w-0">
                       <span className="cp-row-label">{copy.title}</span>
                       <span className="cp-row-detail">{copy.summary}</span>
@@ -107,11 +99,34 @@ export function ProjectsAccordion() {
       </section>
 
       <section>
-        <h2 className="cp-heading">
-          <span className="cp-heading-code">02</span>
-          <span className="cp-heading-slash">//</span>
-          <span>{t.projects.pastHeading}</span>
-        </h2>
+        <h2 className="cp-heading">{t.projects.githubHeading}</h2>
+        <a
+          href={github.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="github-card group"
+        >
+          <span className="github-card-grid" aria-hidden />
+          <span className="github-card-glow" aria-hidden />
+
+          <span className="github-card-icon" aria-hidden>
+            <GitHubIcon className="h-9 w-9 sm:h-10 sm:w-10" />
+          </span>
+
+          <span className="github-card-body">
+            <span className="github-card-kicker">{github.handle}</span>
+            <span className="github-card-title">{t.projects.githubTitle}</span>
+            <span className="github-card-blurb">{t.projects.githubBlurb}</span>
+          </span>
+
+          <span className="github-card-go" aria-hidden>
+            <ExternalLink className="h-4 w-4" strokeWidth={1.75} />
+          </span>
+        </a>
+      </section>
+
+      <section>
+        <h2 className="cp-heading">{t.projects.pastHeading}</h2>
         <ul className="cp-list">
           {pastProjects.map((project, i) => {
             const copy = t.projects.past[project.id];
@@ -131,21 +146,16 @@ export function ProjectsAccordion() {
                     <span className="cp-nav-scan" />
                   </span>
 
-                  <span className="cp-nav-meta">
-                    <span className="cp-nav-code">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span className="cp-nav-slash">//</span>
-                  </span>
-
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={project.icon}
-                    alt=""
-                    width={20}
-                    height={20}
-                    className="cp-row-icon h-5 w-5 shrink-0 rounded-sm object-cover"
-                  />
+                  {project.icon ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={project.icon}
+                      alt=""
+                      width={72}
+                      height={72}
+                      className="cp-row-icon project-icon shrink-0"
+                    />
+                  ) : null}
 
                   <span className="cp-row-body min-w-0">
                     <span className="cp-row-label">{copy.title}</span>

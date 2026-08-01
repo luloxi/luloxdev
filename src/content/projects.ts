@@ -2,7 +2,11 @@
  * Projects structure - copy lives in i18n/messages.ts
  */
 
-export type FocusTopicId = "tokenization" | "midnight" | "ai-agents";
+export type FocusTopicId =
+  | "tokenization"
+  | "midnight"
+  | "hermes"
+  | "lcp";
 
 export type PastProjectId = "punksociety" | "sami" | "mochi";
 
@@ -19,28 +23,34 @@ export const focusTopics: {
     tags: ["Midnight", "Privacy", "Ambassador"],
   },
   {
-    id: "ai-agents",
-    tags: ["LCP", "AI Agents", "Compliance"],
+    id: "hermes",
+    tags: ["Hermes", "Agent", "MCP"],
+  },
+  {
+    id: "lcp",
+    tags: ["LCP", "Compliance", "Agentic commerce"],
   },
 ];
 
-export const pastProjects: {
+export type PastProject = {
   id: PastProjectId;
   href: string;
   tags: string[];
   icon: string;
-}[] = [
+};
+
+export const pastProjects: PastProject[] = [
   {
     id: "mochi",
     href: "https://github.com/luloxi/Mochi",
     tags: ["AI Agents", "Avalanche", "Marketplace"],
-    icon: "/projects/mochi.svg",
+    icon: "/projects/mochi.png",
   },
   {
     id: "sami",
     href: "https://github.com/luloxi/sami",
     tags: ["AI", "Eliza", "Game"],
-    icon: "/projects/sami.svg",
+    icon: "/projects/sami.png",
   },
   {
     id: "punksociety",

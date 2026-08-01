@@ -15,16 +15,11 @@ export default function BlogPage() {
         <span className="cp-nav-frame" aria-hidden>
           <span className="cp-nav-corner cp-nav-corner-tl" />
           <span className="cp-nav-corner cp-nav-corner-br" />
-          <span className="cp-nav-scan" style={{ opacity: 0.4 }} />
         </span>
 
         <div className="cp-panel-inner py-6 text-center sm:py-8">
-          <p className="cp-nav-meta justify-center">
-            <span className="cp-nav-code">00</span>
-            <span className="cp-nav-slash">//</span>
-            <span className="uppercase tracking-[0.18em]">
-              {t.blog.comingSoon}
-            </span>
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-[color:var(--cp-accent)]">
+            {t.blog.comingSoon}
           </p>
           <p className="cp-headline mt-4 text-[1rem] sm:text-[1.1rem]">
             {t.blog.title}

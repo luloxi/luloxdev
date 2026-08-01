@@ -38,7 +38,10 @@ export default function AboutPage() {
   return (
     <PageShell title={about.title}>
       <div className="space-y-8">
-        <div className="cp-panel" style={{ ["--cp-accent" as string]: "var(--section-about)" }}>
+        <div
+          className="cp-panel"
+          style={{ ["--cp-accent" as string]: "var(--section-about)" }}
+        >
           <span className="cp-nav-frame" aria-hidden>
             <span className="cp-nav-corner cp-nav-corner-tl" />
             <span className="cp-nav-corner cp-nav-corner-br" />
@@ -54,11 +57,7 @@ export default function AboutPage() {
         </div>
 
         <section>
-          <h2 className="cp-heading">
-            <span className="cp-heading-code">01</span>
-            <span className="cp-heading-slash">//</span>
-            <span>{t.ui.experience}</span>
-          </h2>
+          <h2 className="cp-heading">{t.ui.experience}</h2>
 
           <ul className="cp-list">
             {about.timeline.map((item, i) => {
@@ -91,12 +90,8 @@ export default function AboutPage() {
                       </span>
                     ) : null}
                     <div className="min-w-0 flex-1">
-                      <p className="cp-nav-meta">
-                        <span className="cp-nav-code">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        <span className="cp-nav-slash">//</span>
-                        <span>{item.period}</span>
+                      <p className="font-mono text-[11px] text-[color:var(--cp-accent)]">
+                        {item.period}
                       </p>
                       <p className="cp-row-label mt-1.5 text-[0.9rem]">
                         {item.title}
@@ -115,7 +110,6 @@ export default function AboutPage() {
           <div className="mt-4">
             <CpRow
               href={linkedInHref}
-              code={String(about.timeline.length + 1).padStart(2, "0")}
               label={about.linkedInCta}
               accent="#0A66C2"
               Icon={LinkedInIcon}

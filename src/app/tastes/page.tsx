@@ -45,11 +45,10 @@ export default function TastesPage() {
   return (
     <PageShell title={tastes.title}>
       <section className="cp-list">
-        {platforms.map((p, i) => (
+        {platforms.map((p) => (
           <CpRow
             key={p.id}
             href={p.href}
-            code={String(i + 1).padStart(2, "0")}
             label={p.label}
             detail={tastes.platforms[p.id]}
             accent={p.accent}

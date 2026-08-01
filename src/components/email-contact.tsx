@@ -6,12 +6,8 @@ import { site } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
-type EmailContactProps = {
-  code?: string;
-};
-
 /** Cyberpunk-styled email row with copy action */
-export function EmailContact({ code = "06" }: EmailContactProps) {
+export function EmailContact() {
   const { t } = useLocale();
   const [copied, setCopied] = useState(false);
 
@@ -43,13 +39,6 @@ export function EmailContact({ code = "06" }: EmailContactProps) {
       <span className="cp-nav-frame" aria-hidden>
         <span className="cp-nav-corner cp-nav-corner-tl" />
         <span className="cp-nav-corner cp-nav-corner-br" />
-      </span>
-
-      <span className="cp-nav-meta z-[1]">
-        <span className="cp-nav-code">{code}</span>
-        <span className="cp-nav-slash" aria-hidden>
-          //
-        </span>
       </span>
 
       <a href={`mailto:${site.email}`} className="cp-email-main">

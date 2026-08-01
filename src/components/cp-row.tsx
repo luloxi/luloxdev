@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 
 type CpRowProps = {
   href: string;
-  code: string;
   label: string;
   /** Secondary line (handle, blurb, etc.) */
   detail?: string;
@@ -16,11 +15,10 @@ type CpRowProps = {
 };
 
 /**
- * Full-width cyberpunk menu row — same language as home section tiles.
+ * Full-width cyberpunk menu row (no index codes — those are landing-only).
  */
 export function CpRow({
   href,
-  code,
   label,
   detail,
   accent = "var(--accent)",
@@ -42,13 +40,6 @@ export function CpRow({
         <span className="cp-nav-corner cp-nav-corner-tl" />
         <span className="cp-nav-corner cp-nav-corner-br" />
         <span className="cp-nav-scan" />
-      </span>
-
-      <span className="cp-nav-meta">
-        <span className="cp-nav-code">{code}</span>
-        <span className="cp-nav-slash" aria-hidden>
-          //
-        </span>
       </span>
 
       {Icon ? (

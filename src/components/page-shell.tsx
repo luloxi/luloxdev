@@ -18,17 +18,34 @@ export function PageShell({ title, children }: PageShellProps) {
       <header className="mb-10 flex items-center justify-between gap-4 pr-20 sm:pr-24">
         <Link
           href="/"
-          className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-accent"
+          className="cp-back-link group shrink-0"
+          aria-label={`${t.ui.backHome} (${site.name})`}
         >
-          ← {t.ui.backHome}
-          <span className="sr-only"> ({site.name})</span>
+          <span className="cp-back-chevron" aria-hidden>
+            &lt;
+          </span>
+          <span>{t.ui.backHome}</span>
         </Link>
-        <h1 className="font-display text-sm font-medium tracking-[0.16em] text-accent uppercase">
-          <span className="mr-1.5 font-mono text-[10px] opacity-60">//</span>
-          {title}
+        <h1 className="cp-page-title shrink-0">
+          <span className="cp-page-title-text">{title}</span>
+          <span className="cp-page-title-mark" aria-hidden />
         </h1>
       </header>
+
       <div>{children}</div>
+
+      <div className="mt-12">
+        <Link href="/" className="cp-back-footer group">
+          <span className="cp-nav-frame" aria-hidden>
+            <span className="cp-nav-corner cp-nav-corner-tl" />
+            <span className="cp-nav-corner cp-nav-corner-br" />
+          </span>
+          <span className="cp-back-footer-chevron" aria-hidden>
+            &lt;
+          </span>
+          <span className="cp-back-footer-label">{t.ui.backHomeCta}</span>
+        </Link>
+      </div>
     </div>
   );
 }

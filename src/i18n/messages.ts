@@ -11,6 +11,7 @@ export const messages = {
     },
     ui: {
       backHome: "Inicio",
+      backHomeCta: "Volver al inicio",
       social: "Social",
       experience: "Experiencia",
       notFound: "Nada por acá.",
@@ -49,6 +50,11 @@ export const messages = {
       title: "Proyectos",
       focusHeading: "Investigando sobre",
       pastHeading: "Proyectos anteriores",
+      githubHeading: "Código",
+      githubTitle: "GitHub",
+      githubBlurb:
+        "Repos, experimentos y builds open source. El taller donde vive el resto.",
+
       focus: {
         tokenization: {
           title: "Tokenización",
@@ -60,10 +66,15 @@ export const messages = {
           summary: "Privacy chain · Midnight Ambassador.",
           body: "Soy Midnight Ambassador. Midnight es una blockchain enfocada en privacidad selectiva: smart contracts que pueden probar hechos sin revelar datos de más. Mi trabajo pasa por community, contenido y bridges entre builders y el stack de privacy. Menos hype, más craft usable.",
         },
-        "ai-agents": {
-          title: "AI Agents",
-          summary: "LCP · compliance para agentes que transaccionan.",
-          body: "Estoy trabajando en particular en el Legal Context Protocol (LCP): un estándar para que los agentes deban firmar / aceptar contexto legal y de compliance antes de ejecutar microtransacciones. Términos descubribles, verificables y con recourse, para que agentic commerce no sea un vacío legal.",
+        hermes: {
+          title: "Hermes Agent",
+          summary: "Agente autónomo · herramientas, memoria y workflows.",
+          body: "Estoy investigando Hermes Agent: cómo armar agentes que usen tools, mantengan contexto y se integren con protocolos como MCP. Me interesa el craft práctico, no el hype: setup usable, límites claros y agentes que hagan trabajo real.",
+        },
+        lcp: {
+          title: "LCP",
+          summary: "Legal Context Protocol · compliance para agentic commerce.",
+          body: "Estoy investigando el Legal Context Protocol (LCP): un estándar para que los agentes firmen / acepten contexto legal y de compliance antes de ejecutar microtransacciones. Términos descubribles, verificables y con recourse, para que el agentic commerce no sea un vacío legal.",
         },
       },
       past: {
@@ -111,6 +122,7 @@ export const messages = {
     },
     ui: {
       backHome: "Home",
+      backHomeCta: "Back to home",
       social: "Social",
       experience: "Experience",
       notFound: "Nothing here.",
@@ -149,6 +161,11 @@ export const messages = {
       title: "Projects",
       focusHeading: "Focus areas",
       pastHeading: "Previous projects",
+      githubHeading: "Code",
+      githubTitle: "GitHub",
+      githubBlurb:
+        "Repos, experiments, and open-source builds. The workshop for everything else.",
+
       focus: {
         tokenization: {
           title: "Tokenization",
@@ -160,10 +177,15 @@ export const messages = {
           summary: "Privacy chain · Midnight Ambassador.",
           body: "I'm a Midnight Ambassador. Midnight is a blockchain focused on selective privacy: smart contracts that can prove facts without leaking more data than needed. My work spans community, content, and bridges between builders and the privacy stack. Less hype, more usable craft.",
         },
-        "ai-agents": {
-          title: "AI Agents",
-          summary: "LCP · compliance for agents that transact.",
-          body: "I'm working specifically on the Legal Context Protocol (LCP): a standard so agents must sign / accept legal and compliance context before running microtransactions. Discoverable, verifiable terms with recourse, so agentic commerce isn't a legal void.",
+        hermes: {
+          title: "Hermes Agent",
+          summary: "Autonomous agent · tools, memory, and workflows.",
+          body: "I'm researching Hermes Agent: how to build agents that use tools, keep context, and plug into protocols like MCP. Practical craft over hype: usable setup, clear limits, and agents that do real work.",
+        },
+        lcp: {
+          title: "LCP",
+          summary: "Legal Context Protocol · compliance for agentic commerce.",
+          body: "I'm researching the Legal Context Protocol (LCP): a standard so agents must sign / accept legal and compliance context before running microtransactions. Discoverable, verifiable terms with recourse, so agentic commerce isn't a legal void.",
         },
       },
       past: {

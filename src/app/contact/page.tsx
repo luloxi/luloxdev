@@ -4,18 +4,17 @@ import type { ComponentType } from "react";
 import { CpRow } from "@/components/cp-row";
 import { EmailContact } from "@/components/email-contact";
 import {
-  GitHubIcon,
   InstagramBrandIcon,
   LinkedInIcon,
   TelegramIcon,
   XIcon,
 } from "@/components/icons/social";
 import { PageShell } from "@/components/page-shell";
-import { socials } from "@/content/site";
+import { contactSocials } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 
 const socialIcons: Record<
-  (typeof socials)[number]["id"],
+  (typeof contactSocials)[number]["id"],
   { Icon: ComponentType<{ className?: string }>; className?: string; accent: string }
 > = {
   x: {
@@ -37,11 +36,6 @@ const socialIcons: Record<
     className: "text-[#0A66C2]",
     accent: "#0A66C2",
   },
-  github: {
-    Icon: GitHubIcon,
-    className: "text-foreground",
-    accent: "var(--foreground)",
-  },
 };
 
 export default function ContactPage() {
@@ -49,14 +43,13 @@ export default function ContactPage() {
 
   return (
     <PageShell title={t.contact.title}>
-      <div className="cp-list">
-        {socials.map((s, i) => {
+      <div className="cp-list cp-list-2col">
+        {contactSocials.map((s) => {
           const { Icon, className: iconClass, accent } = socialIcons[s.id];
           return (
             <CpRow
               key={s.id}
               href={s.href}
-              code={String(i + 1).padStart(2, "0")}
               label={s.label}
               detail={displayHandle(s.href)}
               accent={accent}
@@ -68,7 +61,7 @@ export default function ContactPage() {
       </div>
 
       <div className="mt-6">
-        <EmailContact code={String(socials.length + 1).padStart(2, "0")} />
+        <EmailContact />
       </div>
     </PageShell>
   );

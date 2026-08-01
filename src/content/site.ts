@@ -37,6 +37,15 @@ export const socials = [
   { id: "github", label: "GitHub", href: "https://www.github.com/luloxi" },
 ] as const;
 
+/** Contact page (GitHub lives under Projects) */
+export const contactSocials = socials.filter((s) => s.id !== "github");
+
+export const github = {
+  label: "GitHub",
+  href: "https://www.github.com/luloxi",
+  handle: "github.com/luloxi",
+} as const;
+
 export const tasteLinks = {
   spotify: "https://open.spotify.com/user/11133679849/playlists",
   letterboxd: "https://letterboxd.com/lulox/",
