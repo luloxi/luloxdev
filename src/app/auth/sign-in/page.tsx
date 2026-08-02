@@ -6,6 +6,35 @@ import { PageShell } from "@/components/page-shell";
 import { authClient } from "@/lib/auth/client";
 import { useLocale } from "@/i18n/locale-provider";
 
+function GoogleMark({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      aria-hidden
+      width="18"
+      height="18"
+    >
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+      />
+    </svg>
+  );
+}
+
 function SignInInner() {
   const { t } = useLocale();
   const params = useSearchParams();
@@ -20,7 +49,6 @@ function SignInInner() {
         errorCallbackURL: `${origin}/auth/sign-in?error=oauth`,
       });
 
-      // Better Auth may return an error object instead of throwing
       const err =
         result && typeof result === "object" && "error" in result
           ? (result as { error?: { code?: string; message?: string } }).error
@@ -50,49 +78,32 @@ function SignInInner() {
 
   return (
     <PageShell title={t.blog.signInTitle}>
-      <div
-        className="cp-panel"
-        style={{ ["--cp-accent" as string]: "var(--section-blog)" }}
-      >
-        <span className="cp-nav-frame" aria-hidden>
-          <span className="cp-nav-corner cp-nav-corner-tl" />
-          <span className="cp-nav-corner cp-nav-corner-br" />
-        </span>
-        <div className="cp-panel-inner space-y-4 py-2">
-          <p className="cp-prose">{t.blog.signInNote}</p>
-          <p className="cp-prose text-[0.85rem] opacity-90">
-            {t.blog.signInProviders}
+      <div className="sign-in-plain">
+        {error === "auth_not_configured" ||
+        error === "oauth" ||
+        error === "domain" ||
+        error === "forbidden" ? (
+          <p className="sign-in-error">
+            {error === "auth_not_configured"
+              ? t.blog.authNotConfigured
+              : error === "domain"
+                ? t.blog.oauthDomainError
+                : error === "forbidden"
+                  ? t.blog.forbidden
+                  : t.blog.oauthError}
           </p>
+        ) : null}
 
-          {error === "auth_not_configured" ? (
-            <p className="font-mono text-xs text-[color:var(--section-tastes)]">
-              {t.blog.authNotConfigured}
-            </p>
-          ) : null}
-          {error === "oauth" ? (
-            <p className="font-mono text-xs text-[color:var(--section-tastes)]">
-              {t.blog.oauthError}
-            </p>
-          ) : null}
-          {error === "domain" ? (
-            <p className="font-mono text-xs text-[color:var(--section-tastes)]">
-              {t.blog.oauthDomainError}
-            </p>
-          ) : null}
-          {error === "forbidden" ? (
-            <p className="font-mono text-xs text-[color:var(--section-tastes)]">
-              {t.blog.forbidden}
-            </p>
-          ) : null}
-
-          <button
-            type="button"
-            onClick={() => void signInGoogle()}
-            className="blog-admin-btn"
-          >
-            {t.blog.signInGoogle}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => void signInGoogle()}
+          className="sign-in-google-btn"
+        >
+          <span className="sign-in-google-icon">
+            <GoogleMark />
+          </span>
+          <span className="sign-in-google-label">{t.blog.signInGoogle}</span>
+        </button>
       </div>
     </PageShell>
   );
