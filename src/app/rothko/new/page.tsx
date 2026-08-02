@@ -10,9 +10,9 @@ export default function NewBlogPostPage() {
   return (
     <PageShell
       title={t.blog.newPost}
-      backHref="/admin/blog"
+      backHref="/rothko"
       backLabel={t.blog.adminTitle}
-      footerHref="/admin/blog"
+      footerHref="/rothko"
       footerLabel={t.blog.adminTitle}
     >
       <div

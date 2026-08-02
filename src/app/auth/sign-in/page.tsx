@@ -14,13 +14,36 @@ function SignInInner() {
   async function signInGoogle() {
     const origin = window.location.origin;
     try {
-      await authClient.signIn.social({
+      const result = await authClient.signIn.social({
         provider: "google",
-        callbackURL: `${origin}/admin/blog`,
+        callbackURL: `${origin}/rothko`,
         errorCallbackURL: `${origin}/auth/sign-in?error=oauth`,
       });
+
+      // Better Auth may return an error object instead of throwing
+      const err =
+        result && typeof result === "object" && "error" in result
+          ? (result as { error?: { code?: string; message?: string } }).error
+          : null;
+      if (err) {
+        console.error("[auth] Google sign-in failed", err);
+        const code = err.code ?? "";
+        if (
+          code === "INVALID_CALLBACKURL" ||
+          /callbackurl|trusted|domain/i.test(err.message ?? "")
+        ) {
+          window.location.href = `/auth/sign-in?error=domain`;
+          return;
+        }
+        window.location.href = `/auth/sign-in?error=oauth`;
+      }
     } catch (err) {
       console.error("[auth] Google sign-in failed", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      if (/callbackurl|trusted|domain|INVALID_CALLBACKURL/i.test(msg)) {
+        window.location.href = `/auth/sign-in?error=domain`;
+        return;
+      }
       window.location.href = `/auth/sign-in?error=oauth`;
     }
   }
@@ -49,6 +72,11 @@ function SignInInner() {
           {error === "oauth" ? (
             <p className="font-mono text-xs text-[color:var(--section-tastes)]">
               {t.blog.oauthError}
+            </p>
+          ) : null}
+          {error === "domain" ? (
+            <p className="font-mono text-xs text-[color:var(--section-tastes)]">
+              {t.blog.oauthDomainError}
             </p>
           ) : null}
           {error === "forbidden" ? (

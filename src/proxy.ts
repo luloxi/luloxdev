@@ -8,11 +8,11 @@ const neonMiddleware =
     : null;
 
 /**
- * Protect /admin routes. Neon Auth middleware redirects unauthenticated users.
+ * Protect /rothko (blog CMS). Neon Auth middleware redirects unauthenticated users.
  * Admin email allowlist is enforced in page/API handlers via isAdminUser().
  */
 export default function proxy(request: NextRequest) {
-  if (!request.nextUrl.pathname.startsWith("/admin")) {
+  if (!request.nextUrl.pathname.startsWith("/rothko")) {
     return NextResponse.next();
   }
 
@@ -27,5 +27,5 @@ export default function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/rothko", "/rothko/:path*"],
 };

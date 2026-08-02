@@ -19,18 +19,30 @@ vercel env pull .env.local --yes
 
 - Identity and static sections: `src/content/*`
 - Blog seed posts: `src/content/blog/seed.ts` (loaded into Neon on first request)
-- Live blog edits: `/admin/blog` (Google sign-in, admin email only)
+- Live blog edits: `/rothko` (Google sign-in, admin email only)
 
 ## Blog admin
 
 - Public: `/blog` and `/blog/[slug]`
 - Sign-in: `/auth/sign-in` (Google via Neon Auth)
-- Editor: `/admin/blog` for `lucianoolivabianco@gmail.com` only
+- Editor: `/rothko` for `lucianoolivabianco@gmail.com` only
 - Neon Auth supports Google (and GitHub / Vercel), not X yet
+
+### Production Google login (Neon trusted domains)
+
+Localhost is allowed by default. Production OAuth needs trusted origins:
+
+1. Open [Neon Console](https://console.neon.tech) → project for this app → **Auth** → **Configuration** → **Domains**
+2. Add (with `https://`, no trailing slash):
+   - `https://www.lulox.dev`
+   - `https://lulox.dev`
+3. Retry Google sign-in on production
+
+If OAuth still fails after that, configure your own Google OAuth client in Neon Auth (production should not rely on shared dev Google credentials): redirect URI = `{NEON_AUTH_BASE_URL}/callback/google`.
 
 ## Structure
 
 - `/` - hero, section grid
 - `/about` `/projects` `/blog` `/tastes` `/contact` - full pages
-- `/admin/blog` - protected editor
+- `/rothko` - protected blog editor
 - Back link on every section → home

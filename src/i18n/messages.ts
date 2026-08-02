@@ -132,6 +132,8 @@ export const messages = {
       signInGoogle: "Continuar con Google",
       authNotConfigured: "Auth no está configurado en este entorno.",
       oauthError: "Falló el login. Probá de nuevo.",
+      oauthDomainError:
+        "Neon Auth no confía este dominio. En Neon Console → Auth → Configuration → Domains agregá https://www.lulox.dev y https://lulox.dev.",
       forbidden: "Tu cuenta no tiene permiso de admin.",
       adminTitle: "Editar blog",
       adminAs: "Sesión",
@@ -308,6 +310,8 @@ export const messages = {
       signInGoogle: "Continue with Google",
       authNotConfigured: "Auth is not configured in this environment.",
       oauthError: "Sign-in failed. Try again.",
+      oauthDomainError:
+        "Neon Auth does not trust this domain. In Neon Console → Auth → Configuration → Domains add https://www.lulox.dev and https://lulox.dev.",
       forbidden: "Your account is not an admin.",
       adminTitle: "Edit blog",
       adminAs: "Session",

@@ -104,7 +104,7 @@ export default function AdminBlogPage() {
               <p className="cp-prose mt-1 text-sm">{email ?? "…"}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link href="/admin/blog/new" className="blog-admin-btn">
+              <Link href="/rothko/new" className="blog-admin-btn">
                 {t.blog.newPost}
               </Link>
               <button type="button" onClick={() => void signOut()} className="blog-admin-btn-ghost">
@@ -165,7 +165,7 @@ export default function AdminBlogPage() {
                     {t.blog.view}
                   </Link>
                   <Link
-                    href={`/admin/blog/${post.slug}`}
+                    href={`/rothko/${post.slug}`}
                     className="blog-admin-btn"
                   >
                     {t.blog.edit}

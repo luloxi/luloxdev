@@ -54,7 +54,7 @@ export function BlogEditor({ initial, isNew }: Props) {
       return;
     }
     const data = (await res.json()) as { slug: string };
-    router.push(`/admin/blog/${data.slug}`);
+    router.push(`/rothko/${data.slug}`);
     router.refresh();
   }
 
@@ -213,7 +213,7 @@ export function BlogEditor({ initial, isNew }: Props) {
         <button
           type="button"
           className="blog-admin-btn-ghost"
-          onClick={() => router.push("/admin/blog")}
+          onClick={() => router.push("/rothko")}
         >
           {t.blog.cancel}
         </button>

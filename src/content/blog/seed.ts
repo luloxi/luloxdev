@@ -2,7 +2,7 @@ import type { BlogPost } from "./types";
 
 /**
  * Initial blog posts. Seeded into Neon on first request if the table is empty.
- * Edit from /admin when logged in as admin (Google: lucianoolivabianco@gmail.com).
+ * Edit from /rothko when logged in as admin (Google: lucianoolivabianco@gmail.com).
  */
 export const seedPosts: BlogPost[] = [
   {

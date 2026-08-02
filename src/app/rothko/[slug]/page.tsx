@@ -40,7 +40,7 @@ export default function EditBlogPostPage() {
 
   if (post === undefined) {
     return (
-      <PageShell title={t.blog.edit} backHref="/admin/blog" backLabel={t.blog.adminTitle}>
+      <PageShell title={t.blog.edit} backHref="/rothko" backLabel={t.blog.adminTitle}>
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-[color:var(--section-blog)]">
           {t.blog.loading}
         </p>
@@ -50,7 +50,7 @@ export default function EditBlogPostPage() {
 
   if (post === null) {
     return (
-      <PageShell title={t.blog.edit} backHref="/admin/blog" backLabel={t.blog.adminTitle}>
+      <PageShell title={t.blog.edit} backHref="/rothko" backLabel={t.blog.adminTitle}>
         <p className="cp-prose">{t.blog.notFound}</p>
       </PageShell>
     );
@@ -59,9 +59,9 @@ export default function EditBlogPostPage() {
   return (
     <PageShell
       title={t.blog.edit}
-      backHref="/admin/blog"
+      backHref="/rothko"
       backLabel={t.blog.adminTitle}
-      footerHref="/admin/blog"
+      footerHref="/rothko"
       footerLabel={t.blog.adminTitle}
     >
       <div

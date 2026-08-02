@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Editar blog",
+  title: "Rothko",
 };
 
-export default function AdminBlogLayout({
+export default function RothkoLayout({
   children,
 }: {
   children: React.ReactNode;
