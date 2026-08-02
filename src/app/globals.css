@@ -916,6 +916,22 @@
   color: inherit;
 }
 
+/* Full address always visible (wrap on narrow screens, never truncate) */
+.cp-email-address {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.01em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (min-width: 640px) {
+  .cp-email-address {
+    font-size: 0.8rem;
+  }
+}
+
 .cp-email-copy {
   z-index: 1;
   display: inline-flex;
@@ -1040,6 +1056,144 @@
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--accent);
+}
+
+/* Projects: blog CTA stands out; research topics stay compact */
+.projects-blog-cta {
+  min-height: 3.6rem;
+  padding-top: 0.95rem;
+  padding-bottom: 1rem;
+  background: color-mix(in oklab, var(--section-blog) 14%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--section-blog) 40%, transparent),
+    0 0 22px color-mix(in oklab, var(--section-blog) 14%, transparent);
+}
+
+.projects-blog-cta .cp-row-label {
+  font-size: 1.25rem;
+  letter-spacing: 0.14em;
+  color: color-mix(in oklab, var(--section-blog) 55%, var(--foreground));
+}
+
+@media (min-width: 640px) {
+  .projects-blog-cta .cp-row-label {
+    font-size: 1.4rem;
+    letter-spacing: 0.16em;
+  }
+}
+
+.projects-blog-cta:hover {
+  background: color-mix(in oklab, var(--section-blog) 20%, transparent);
+}
+
+.projects-blog-cta:hover .cp-row-label {
+  color: var(--section-blog);
+}
+
+:root:not(.dark) .projects-blog-cta {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, #ffffff 88%, transparent),
+      color-mix(in oklab, var(--section-blog) 16%, #ffffff)
+    );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--section-blog) 36%, transparent),
+    0 2px 4px var(--light-ink),
+    0 12px 28px color-mix(in oklab, var(--section-blog) 12%, transparent);
+}
+
+.focus-topic-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.focus-topic-chip {
+  --cp-accent: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.35rem;
+  padding: 0.4rem 0.55rem;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  background: color-mix(in oklab, var(--cp-accent) 5%, transparent);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 8px) 0,
+    100% 8px,
+    100% 100%,
+    8px 100%,
+    0 calc(100% - 8px)
+  );
+  opacity: 0.72;
+  transition:
+    opacity 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.focus-topic-chip:hover {
+  opacity: 0.92;
+  background: color-mix(in oklab, var(--cp-accent) 10%, transparent);
+}
+
+.focus-topic-chip-active {
+  opacity: 1;
+  background: color-mix(in oklab, var(--cp-accent) 14%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 38%, transparent),
+    0 0 14px color-mix(in oklab, var(--cp-accent) 12%, transparent);
+}
+
+.focus-topic-chip-icon {
+  width: 1.45rem;
+  height: 1.45rem;
+  object-fit: contain;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.focus-topic-chip-icon[src$=".png"] {
+  border-radius: 0.3rem;
+}
+
+.focus-topic-chip-title {
+  font-family: var(--font-orbitron), var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: color-mix(in oklab, var(--foreground) 82%, var(--muted));
+}
+
+.focus-topic-chip-active .focus-topic-chip-title {
+  color: var(--foreground);
+  text-shadow: 0 0 12px color-mix(in oklab, var(--cp-accent) 28%, transparent);
+}
+
+.focus-topic-panel {
+  min-height: 7.5rem;
+}
+
+:root:not(.dark) .focus-topic-chip {
+  background: color-mix(in oklab, var(--cp-accent) 6%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 16%, transparent);
+}
+
+:root:not(.dark) .focus-topic-chip:hover {
+  background: color-mix(in oklab, var(--cp-accent) 10%, #ffffff);
+}
+
+:root:not(.dark) .focus-topic-chip-active {
+  background: color-mix(in oklab, var(--cp-accent) 12%, #ffffff);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 32%, transparent),
+    0 4px 14px color-mix(in oklab, var(--cp-accent) 10%, transparent);
 }
 
 /* Page section title (about / projects / etc.) */
@@ -1624,8 +1778,7 @@
   opacity: 0.92;
 }
 
-:root:not(.dark) .cp-ctrl,
-:root:not(.dark) .cp-ctrl-btn {
+:root:not(.dark) .cp-ctrl {
   box-shadow:
     inset 0 0 0 1px color-mix(in oklab, var(--accent) 28%, transparent),
     0 1px 2px var(--light-ink),
@@ -1940,51 +2093,93 @@
   color: var(--accent);
 }
 
-.cp-ctrl-btn {
+/* Theme: tiny "tema"/"theme" label + two color chips (light / dark) */
+.cp-theme {
   display: inline-flex;
-  height: 2.25rem;
-  width: 2.25rem;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 0.2rem;
+  margin-left: 0.2rem;
+  padding-left: 0.4rem;
+  border-left: 1px solid color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+.cp-theme-label {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
   color: var(--muted);
-  cursor: pointer;
-  clip-path: polygon(
-    0 0,
-    calc(100% - 6px) 0,
-    100% 6px,
-    100% 100%,
-    6px 100%,
-    0 calc(100% - 6px)
-  );
-  background: color-mix(in oklab, var(--surface) 92%, transparent);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent),
-    0 0 16px color-mix(in oklab, var(--accent) 8%, transparent);
-  transition:
-    color 0.15s ease,
-    box-shadow 0.15s ease,
-    background 0.15s ease;
+  user-select: none;
 }
 
-.cp-ctrl-btn:hover {
-  color: var(--accent);
-  background: color-mix(in oklab, var(--accent) 14%, transparent);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in oklab, var(--accent) 50%, transparent),
-    0 0 14px color-mix(in oklab, var(--accent) 22%, transparent);
+.cp-theme-swatches {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-:root:not(.dark) .cp-ctrl,
-:root:not(.dark) .cp-ctrl-btn {
+.cp-theme .cp-lang-btn {
+  gap: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.cp-theme .cp-lang-flag-wrap,
+.cp-theme-swatch {
+  display: block;
+  width: 1.65rem;
+  height: 1.65rem;
+  box-sizing: border-box;
+}
+
+/* Light chip: pearl paper (same family as light site bg) */
+.cp-theme-swatch-light {
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff 0%,
+      #efeaf7 55%,
+      #e4ddf5 100%
+    );
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, #6d28d9 22%, transparent);
+}
+
+/* Dark chip: deep cosmic purple (same family as dark site bg) */
+.cp-theme-swatch-dark {
+  background:
+    linear-gradient(
+      145deg,
+      #1a1030 0%,
+      #08060e 55%,
+      #05040a 100%
+    );
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, #c4b5fd 28%, transparent);
+}
+
+.cp-theme .cp-lang-btn-active .cp-theme-swatch-light {
+  filter: drop-shadow(0 0 7px color-mix(in oklab, #a78bfa 45%, transparent));
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in oklab, #6d28d9 55%, transparent),
+    0 0 0 1px color-mix(in oklab, #fff 40%, transparent);
+}
+
+.cp-theme .cp-lang-btn-active .cp-theme-swatch-dark {
+  filter: drop-shadow(0 0 7px color-mix(in oklab, #a855f7 50%, transparent));
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in oklab, #c4b5fd 50%, transparent),
+    0 0 0 1px color-mix(in oklab, #a855f7 40%, transparent);
+}
+
+.cp-theme-placeholder {
+  opacity: 0.45;
+}
+
+:root:not(.dark) .cp-ctrl {
   background: color-mix(in oklab, #ffffff 82%, transparent);
   backdrop-filter: blur(10px);
-}
-
-:root:not(.dark) .cp-ctrl-btn:hover {
-  background: color-mix(in oklab, var(--accent) 10%, #ffffff);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in oklab, var(--accent) 38%, transparent),
-    0 4px 14px color-mix(in oklab, var(--accent) 14%, transparent);
 }
 
 :root:not(.dark) .email-cta {
@@ -2351,3 +2546,433 @@
   pointer-events: none;
 }
 
+
+/* —— Blog —— */
+.blog-card {
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s ease;
+}
+
+.blog-card:hover {
+  background: color-mix(in oklab, var(--cp-accent) 12%, transparent);
+}
+
+.blog-card-icon {
+  display: inline-flex;
+  width: 3.25rem;
+  height: 3.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  padding: 0.25rem;
+  color: var(--cp-accent);
+}
+
+.blog-post-title {
+  font-family: var(--font-orbitron), var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  color: var(--foreground);
+  text-transform: none;
+}
+
+@media (min-width: 640px) {
+  .blog-post-title {
+    font-size: 1.35rem;
+  }
+}
+
+/* Admin publish switch */
+.blog-publish-toggle {
+  --toggle-accent: var(--muted);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 1.85rem;
+  padding: 0.25rem 0.65rem 0.25rem 0.3rem;
+  border: none;
+  cursor: pointer;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: color-mix(in oklab, var(--muted) 12%, transparent);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 6px) 0,
+    100% 6px,
+    100% 100%,
+    6px 100%,
+    0 calc(100% - 6px)
+  );
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.blog-publish-toggle-on {
+  --toggle-accent: var(--section-blog);
+  color: color-mix(in oklab, var(--section-blog) 70%, var(--foreground));
+  background: color-mix(in oklab, var(--section-blog) 16%, transparent);
+}
+
+.blog-publish-toggle-knob {
+  width: 1.55rem;
+  height: 0.85rem;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--toggle-accent) 35%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--toggle-accent) 40%, transparent);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.blog-publish-toggle-knob::after {
+  content: "";
+  position: absolute;
+  top: 0.1rem;
+  left: 0.12rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 9999px;
+  background: var(--muted);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.blog-publish-toggle-on .blog-publish-toggle-knob::after {
+  transform: translateX(0.62rem);
+  background: var(--section-blog);
+}
+
+.blog-publish-toggle-text {
+  line-height: 1;
+}
+
+.blog-author-socials {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.blog-author-social-link {
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  color: var(--muted);
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.blog-author-social-link:hover {
+  color: var(--section-contact);
+  background: color-mix(in oklab, var(--section-contact) 14%, transparent);
+  box-shadow: 0 0 12px color-mix(in oklab, var(--section-contact) 22%, transparent);
+}
+
+.blog-author-social-icon {
+  height: 1rem;
+  width: 1rem;
+}
+
+.blog-cover {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.blog-cover-img {
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: contain;
+}
+
+.blog-md {
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.7;
+}
+
+.blog-h2 {
+  margin-top: 1.75rem;
+  margin-bottom: 0.65rem;
+  font-family: var(--font-orbitron), var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+
+.blog-h3 {
+  margin-top: 1.35rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.blog-p {
+  margin: 0.75rem 0;
+}
+
+.blog-ul,
+.blog-ol {
+  margin: 0.75rem 0;
+  padding-left: 1.25rem;
+}
+
+.blog-li {
+  margin: 0.35rem 0;
+}
+
+.blog-strong {
+  color: color-mix(in oklab, var(--foreground) 92%, var(--section-blog));
+  font-weight: 600;
+}
+
+.blog-quote {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border-left: 2px solid color-mix(in oklab, var(--section-blog) 70%, transparent);
+  background: color-mix(in oklab, var(--section-blog) 8%, transparent);
+  color: var(--muted);
+}
+
+.blog-code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.82em;
+  padding: 0.1em 0.35em;
+  background: color-mix(in oklab, var(--section-blog) 12%, transparent);
+  color: color-mix(in oklab, var(--foreground) 90%, var(--section-blog));
+}
+
+.blog-pre {
+  margin: 1rem 0;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  background: color-mix(in oklab, var(--section-blog) 10%, transparent);
+  color: var(--foreground);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
+}
+
+.blog-table-wrap {
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.blog-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.blog-th,
+.blog-td {
+  padding: 0.45rem 0.55rem;
+  text-align: left;
+  border-bottom: 1px solid color-mix(in oklab, var(--section-blog) 28%, transparent);
+  vertical-align: top;
+}
+
+.blog-th {
+  color: var(--foreground);
+  font-weight: 600;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.blog-hr {
+  margin: 1.5rem 0;
+  border: none;
+  border-top: 1px solid color-mix(in oklab, var(--section-blog) 30%, transparent);
+}
+
+.blog-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 1.25rem 0;
+}
+
+.blog-img {
+  max-width: 100%;
+  height: auto;
+  max-height: 12rem;
+  object-fit: contain;
+}
+
+.blog-figcaption {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--section-blog) 80%, var(--muted));
+}
+
+.blog-embed {
+  display: block;
+  position: relative;
+  width: 100%;
+  margin: 1.25rem 0;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--section-blog) 8%, transparent);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+}
+
+.blog-embed-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.blog-admin-btn,
+.blog-admin-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.85rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 7px) 0,
+    100% 7px,
+    100% 100%,
+    7px 100%,
+    0 calc(100% - 7px)
+  );
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.blog-admin-btn {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--section-blog) 28%, transparent);
+}
+
+.blog-admin-btn:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--section-blog) 42%, transparent);
+}
+
+.blog-admin-btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.blog-admin-btn-ghost {
+  color: var(--muted);
+  background: color-mix(in oklab, var(--section-blog) 10%, transparent);
+}
+
+.blog-admin-btn-ghost:hover {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--section-blog) 18%, transparent);
+}
+
+.blog-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+}
+
+.blog-label {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--section-blog) 85%, var(--muted));
+}
+
+.blog-input,
+.blog-textarea {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--section-blog) 8%, transparent);
+  border: 1px solid color-mix(in oklab, var(--section-blog) 30%, transparent);
+  outline: none;
+}
+
+.blog-input:focus,
+.blog-textarea:focus {
+  border-color: color-mix(in oklab, var(--section-blog) 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--section-blog) 25%, transparent);
+}
+
+.blog-textarea {
+  resize: vertical;
+  min-height: 4rem;
+  line-height: 1.5;
+}
+
+.blog-textarea-lg {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.8rem;
+  min-height: 16rem;
+}
+
+.blog-fieldset {
+  margin: 0 0 1rem;
+  padding: 0.85rem 0.9rem 0.35rem;
+  border: 1px solid color-mix(in oklab, var(--section-blog) 22%, transparent);
+}
+
+.blog-legend {
+  padding: 0 0.4rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--section-blog);
+}
+
+:root:not(.dark) .blog-card:hover {
+  background: color-mix(in oklab, var(--cp-accent) 10%, #ffffff);
+}
+
+:root:not(.dark) .blog-input,
+:root:not(.dark) .blog-textarea {
+  background: color-mix(in oklab, #ffffff 90%, var(--section-blog));
+}

@@ -6,7 +6,7 @@ import { site } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
-/** Cyberpunk-styled email row with copy action */
+/** Cyberpunk-styled email row with copy action (layout matches social CpRows) */
 export function EmailContact() {
   const { t } = useLocale();
   const [copied, setCopied] = useState(false);
@@ -42,14 +42,12 @@ export function EmailContact() {
       </span>
 
       <a href={`mailto:${site.email}`} className="cp-email-main">
-        <Mail className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden />
-        <span className="min-w-0 truncate">
-          <span className="cp-row-label mr-2 inline text-[0.85rem]">
-            {t.contact.emailLabel}
-          </span>
-          <span className="font-mono text-[12px] opacity-90 sm:text-[13px]">
-            {site.email}
-          </span>
+        <span className="cp-row-icon inline-flex h-8 w-8 shrink-0 items-center justify-center sm:h-9 sm:w-9">
+          <Mail className="h-8 w-8 sm:h-9 sm:w-9" strokeWidth={1.75} aria-hidden />
+        </span>
+        <span className="cp-row-body min-w-0 flex-1">
+          <span className="cp-row-label">{t.contact.emailLabel}</span>
+          <span className="cp-row-detail cp-email-address">{site.email}</span>
         </span>
       </a>
 

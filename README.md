@@ -9,12 +9,28 @@ pnpm install
 pnpm dev
 ```
 
+Copy env from Vercel when needed:
+
+```bash
+vercel env pull .env.local --yes
+```
+
 ## Content
 
-Edit `src/content/*` - identity, about, projects, blog, tastes, contact.
+- Identity and static sections: `src/content/*`
+- Blog seed posts: `src/content/blog/seed.ts` (loaded into Neon on first request)
+- Live blog edits: `/admin/blog` (Google sign-in, admin email only)
+
+## Blog admin
+
+- Public: `/blog` and `/blog/[slug]`
+- Sign-in: `/auth/sign-in` (Google via Neon Auth)
+- Editor: `/admin/blog` for `lucianoolivabianco@gmail.com` only
+- Neon Auth supports Google (and GitHub / Vercel), not X yet
 
 ## Structure
 
-- `/` - centered hero, section icons, social logos
+- `/` - hero, section grid
 - `/about` `/projects` `/blog` `/tastes` `/contact` - full pages
+- `/admin/blog` - protected editor
 - Back link on every section → home
