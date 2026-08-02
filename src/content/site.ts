@@ -7,9 +7,15 @@
 export const site = {
   name: "Lulox",
   tagline: "I make stuff with AI and blockchain",
+  /** Share / SEO description (same idea as blog author bio) */
+  description:
+    "Soy Luciano Oliva Bianco (Lulox). Hago research y builds en AI, blockchain, tokenización y comercio agéntico.",
   ens: "lulox.eth",
   avatar: "/avatar.jpg",
   email: "lucianoolivabianco@gmail.com",
+  /** Used for absolute OG/Twitter URLs when env is missing */
+  url: "https://www.lulox.dev",
+  xHandle: "@LuloxDev",
 } as const;
 
 export type SectionId =

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { CyberLoader } from "@/components/cyber-loader";
 import { PageShell } from "@/components/page-shell";
 import type { BlogPost } from "@/content/blog/types";
 import { localizePost } from "@/content/blog/types";
@@ -49,11 +50,7 @@ export default function BlogPage() {
           </p>
         ) : null}
 
-        {posts === null && !error ? (
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-[color:var(--section-blog)]">
-            {t.blog.loading}
-          </p>
-        ) : null}
+        {posts === null && !error ? <CyberLoader /> : null}
 
         <ul className="space-y-3">
           {(posts ?? []).map((post) => {

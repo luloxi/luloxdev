@@ -5,6 +5,7 @@ import { Mail } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BlogMarkdown } from "@/components/blog-markdown";
+import { CyberLoader } from "@/components/cyber-loader";
 import { PageShell } from "@/components/page-shell";
 import {
   GitHubIcon,
@@ -69,9 +70,7 @@ export default function BlogPostPage() {
         footerHref="/blog"
         footerLabel={t.blog.backToBlog}
       >
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-[color:var(--section-blog)]">
-          {t.blog.loading}
-        </p>
+        <CyberLoader />
       </PageShell>
     );
   }

@@ -19,12 +19,69 @@ const orbitron = Orbitron({
   display: "swap",
 });
 
+function siteUrl() {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL;
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return site.url;
+}
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()),
   title: {
-    default: `${site.name}`,
-    template: `%s · ${site.name}`,
+    default: site.name,
+    template: `%s | ${site.name}`,
   },
-  description: site.tagline,
+  description: site.description,
+  applicationName: site.name,
+  authors: [{ name: "Luciano Oliva Bianco", url: siteUrl() }],
+  creator: site.name,
+  keywords: [
+    "Lulox",
+    "Luciano Oliva Bianco",
+    "AI",
+    "blockchain",
+    "tokenización",
+    "comercio agéntico",
+    "Midnight",
+    "Cardano",
+  ],
+  openGraph: {
+    type: "website",
+    locale: "es_AR",
+    alternateLocale: ["en_US"],
+    siteName: site.name,
+    title: site.name,
+    description: site.description,
+    url: "/",
+    images: [
+      {
+        url: site.avatar,
+        width: 1551,
+        height: 1551,
+        alt: `${site.name} · Luciano Oliva Bianco`,
+        type: "image/jpeg",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: site.name,
+    description: site.description,
+    images: [site.avatar],
+    creator: site.xHandle,
+    site: site.xHandle,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export const viewport: Viewport = {

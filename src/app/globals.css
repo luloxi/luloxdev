@@ -2976,3 +2976,114 @@
 :root:not(.dark) .blog-textarea {
   background: color-mix(in oklab, #ffffff 90%, var(--section-blog));
 }
+
+/* ── Cyberpunk loader (minimal, centered) ───────────────── */
+
+.cp-loader {
+  --loader-accent: var(--section-blog);
+  display: flex;
+  min-height: min(42vh, 16rem);
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in oklab, var(--loader-accent) 88%, var(--foreground));
+}
+
+.cp-loader-core {
+  display: flex;
+  width: min(100%, 14rem);
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.55rem;
+}
+
+.cp-loader-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  margin: 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px color-mix(in oklab, var(--loader-accent) 35%, transparent);
+}
+
+.cp-loader-bracket {
+  color: color-mix(in oklab, var(--loader-accent) 70%, transparent);
+  opacity: 0.85;
+}
+
+.cp-loader-cursor {
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.9em;
+  margin-left: 0.12rem;
+  background: var(--loader-accent);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--loader-accent) 50%, transparent);
+  animation: cp-loader-blink 0.9s steps(1, end) infinite;
+}
+
+.cp-loader-bar {
+  position: relative;
+  height: 0.22rem;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--loader-accent) 12%, transparent);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 4px) 0,
+    100% 4px,
+    100% 100%,
+    4px 100%,
+    0 calc(100% - 4px)
+  );
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--loader-accent) 26%, transparent);
+}
+
+.cp-loader-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 38%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--loader-accent),
+    transparent
+  );
+  box-shadow: 0 0 10px color-mix(in oklab, var(--loader-accent) 45%, transparent);
+  animation: cp-loader-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes cp-loader-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cp-loader-sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(280%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-loader-cursor,
+  .cp-loader-bar-fill {
+    animation: none;
+  }
+
+  .cp-loader-bar-fill {
+    width: 50%;
+    transform: none;
+  }
+}

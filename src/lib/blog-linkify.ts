@@ -11,7 +11,7 @@ const BLOG_LINK_TERMS: [string, string][] = [
   ["Midnight Foundation", "https://midnight.foundation/"],
   ["Hermes Agent", "https://hermes-agent.nousresearch.com/"],
   ["Nous Research", "https://nousresearch.com/"],
-  ["Grok Build", "https://grok.com"],
+  ["Grok Build", "https://grok.com/build"],
   ["American Arbitration Association", "https://www.adr.org/"],
   ["Integra Ledger", "https://www.integraledger.com/"],
   ["ERC-3643", "https://www.erc3643.org/"],
