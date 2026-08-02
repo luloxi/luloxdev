@@ -18,7 +18,7 @@ export const messages = {
       themeLabel: "tema",
       themeLight: "Modo claro",
       themeDark: "Modo oscuro",
-      langLabel: "Idioma",
+      langLabel: "idioma",
     },
     about: {
       title: "Sobre mí",
@@ -195,7 +195,7 @@ export const messages = {
       themeLabel: "theme",
       themeLight: "Light mode",
       themeDark: "Dark mode",
-      langLabel: "Language",
+      langLabel: "language",
     },
     about: {
       title: "About",

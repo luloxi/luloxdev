@@ -2015,29 +2015,45 @@
   box-shadow: 0 0 12px color-mix(in oklab, var(--accent) 25%, transparent);
 }
 
-/* Language: flag + code stack (clear “this switches language”) */
+/* Language: label + flags only (same chrome as theme) */
 .cp-lang {
   display: inline-flex;
-  align-items: stretch;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.cp-lang-label {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--muted);
+  user-select: none;
+}
+
+.cp-lang-flags {
+  display: inline-flex;
+  align-items: center;
   gap: 0.35rem;
 }
 
 .cp-lang-btn {
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.12rem;
-  min-width: 1.85rem;
-  padding: 0;
+  gap: 0;
+  min-width: 0;
+  padding: 0.1rem 0;
   border: none;
   background: transparent;
   cursor: pointer;
   opacity: 0.55;
   transition:
     opacity 0.15s ease,
-    transform 0.15s ease,
-    color 0.15s ease;
+    transform 0.15s ease;
 }
 
 .cp-lang-btn:hover {
@@ -2053,7 +2069,6 @@
   display: block;
   width: 1.65rem;
   height: 1.65rem;
-  /* Square mark with the same angular cut as other HUD squares */
   clip-path: polygon(
     0 0,
     calc(100% - 4px) 0,
@@ -2073,24 +2088,6 @@
   display: block;
   width: 100%;
   height: 100%;
-}
-
-.cp-lang-code {
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  line-height: 1;
-  color: var(--muted);
-  transition: color 0.15s ease;
-}
-
-.cp-lang-btn:hover .cp-lang-code {
-  color: var(--foreground);
-}
-
-.cp-lang-btn-active .cp-lang-code {
-  color: var(--accent);
 }
 
 /* Theme: tiny "tema"/"theme" label + two color chips (light / dark) */

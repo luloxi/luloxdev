@@ -7,19 +7,16 @@ import { cn } from "@/lib/utils";
 
 const options: {
   code: Locale;
-  short: string;
   label: string;
   Flag: typeof FlagAR;
 }[] = [
   {
     code: "es",
-    short: "ES",
     label: "Español",
     Flag: FlagAR,
   },
   {
     code: "en",
-    short: "EN",
     label: "English",
     Flag: FlagUS,
   },
@@ -34,25 +31,27 @@ export function LocaleToggle({ className }: { className?: string }) {
       aria-label={t.ui.langLabel}
       className={cn("cp-lang", className)}
     >
-      {options.map(({ code, short, label, Flag }) => {
-        const active = locale === code;
-        return (
-          <button
-            key={code}
-            type="button"
-            onClick={() => setLocale(code)}
-            aria-pressed={active}
-            aria-label={`${t.ui.langLabel}: ${label}`}
-            title={`${label} (${short})`}
-            className={cn("cp-lang-btn", active && "cp-lang-btn-active")}
-          >
-            <span className="cp-lang-flag-wrap" aria-hidden>
-              <Flag className="cp-lang-flag" />
-            </span>
-            <span className="cp-lang-code">{short}</span>
-          </button>
-        );
-      })}
+      <span className="cp-lang-label">{t.ui.langLabel}</span>
+      <div className="cp-lang-flags">
+        {options.map(({ code, label, Flag }) => {
+          const active = locale === code;
+          return (
+            <button
+              key={code}
+              type="button"
+              onClick={() => setLocale(code)}
+              aria-pressed={active}
+              aria-label={label}
+              title={label}
+              className={cn("cp-lang-btn", active && "cp-lang-btn-active")}
+            >
+              <span className="cp-lang-flag-wrap" aria-hidden>
+                <Flag className="cp-lang-flag" />
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

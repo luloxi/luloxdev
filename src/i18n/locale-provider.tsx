@@ -25,6 +25,24 @@ type LocaleContextValue = {
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
+/** Spanish (any region) → es; everything else → en */
+export function detectBrowserLocale(): Locale {
+  if (typeof navigator === "undefined") return DEFAULT_LOCALE;
+
+  const candidates =
+    navigator.languages?.length > 0
+      ? navigator.languages
+      : [navigator.language];
+
+  for (const raw of candidates) {
+    if (!raw) continue;
+    const base = raw.toLowerCase().split("-")[0];
+    if (base === "es") return "es";
+  }
+
+  return "en";
+}
+
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
   const [ready, setReady] = useState(false);
@@ -34,9 +52,11 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale | null;
       if (stored === "es" || stored === "en") {
         setLocaleState(stored);
+      } else {
+        setLocaleState(detectBrowserLocale());
       }
     } catch {
-      /* ignore */
+      setLocaleState(detectBrowserLocale());
     }
     setReady(true);
   }, []);
