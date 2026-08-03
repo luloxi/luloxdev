@@ -19,6 +19,8 @@ const focusAccents: Record<FocusTopicId, string> = {
   midnight: "var(--section-about)",
   hermes: "var(--section-tastes)",
   lcp: "var(--section-blog)",
+  x402: "var(--section-contact)",
+  erc8004: "var(--section-projects)",
 };
 
 const pastAccents = [

@@ -51,7 +51,7 @@ export async function ensureBlogSchemaAndSeed() {
             ${post.summary.en},
             ${post.body.es},
             ${post.body.en},
-            true,
+            ${post.published !== false},
             NOW()
           )
           ON CONFLICT (slug) DO NOTHING
@@ -72,11 +72,25 @@ function sortByDateDesc(posts: BlogPost[]) {
   );
 }
 
+function seedPostsFiltered(includeDrafts?: boolean) {
+  const posts = includeDrafts
+    ? seedPosts
+    : seedPosts.filter((p) => p.published !== false);
+  return sortByDateDesc(posts);
+}
+
+function seedPostBySlug(slug: string, includeDrafts?: boolean) {
+  const post = seedPosts.find((p) => p.slug === slug) ?? null;
+  if (!post) return null;
+  if (!includeDrafts && post.published === false) return null;
+  return post;
+}
+
 export async function getAllPosts(opts?: {
   includeDrafts?: boolean;
 }): Promise<BlogPost[]> {
   if (!hasDatabase()) {
-    return sortByDateDesc(seedPosts);
+    return seedPostsFiltered(opts?.includeDrafts);
   }
 
   try {
@@ -92,7 +106,7 @@ export async function getAllPosts(opts?: {
     return (rows as BlogPostRow[]).map(rowToPost);
   } catch (err) {
     console.error("[blog] getAllPosts fallback to seed:", err);
-    return sortByDateDesc(seedPosts);
+    return seedPostsFiltered(opts?.includeDrafts);
   }
 }
 
@@ -101,7 +115,7 @@ export async function getPostBySlug(
   opts?: { includeDrafts?: boolean },
 ): Promise<BlogPost | null> {
   if (!hasDatabase()) {
-    return seedPosts.find((p) => p.slug === slug) ?? null;
+    return seedPostBySlug(slug, opts?.includeDrafts);
   }
 
   try {
@@ -118,7 +132,7 @@ export async function getPostBySlug(
     return row ? rowToPost(row) : null;
   } catch (err) {
     console.error("[blog] getPostBySlug fallback to seed:", err);
-    return seedPosts.find((p) => p.slug === slug) ?? null;
+    return seedPostBySlug(slug, opts?.includeDrafts);
   }
 }
 

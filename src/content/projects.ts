@@ -6,7 +6,9 @@ export type FocusTopicId =
   | "tokenization"
   | "midnight"
   | "hermes"
-  | "lcp";
+  | "lcp"
+  | "x402"
+  | "erc8004";
 
 export type PastProjectId = "punksociety" | "sami" | "mochi";
 
@@ -38,6 +40,33 @@ export const focusTopics: {
       {
         label: "Intro (AAA)",
         href: "https://www.adr.org/news-and-insights/introducing-the-legal-context-protocol/",
+      },
+    ],
+  },
+  {
+    id: "x402",
+    icon: "/projects/focus/x402.svg",
+    links: [
+      { label: "x402", href: "https://x402.org/" },
+      { label: "Docs", href: "https://docs.x402.org/" },
+      {
+        label: "GitHub",
+        href: "https://github.com/x402-foundation/x402",
+      },
+    ],
+  },
+  {
+    id: "erc8004",
+    icon: "/projects/focus/erc8004.svg",
+    links: [
+      {
+        label: "EIP-8004",
+        href: "https://eips.ethereum.org/EIPS/eip-8004",
+      },
+      { label: "8004.org", href: "https://www.8004.org/" },
+      {
+        label: "Magicians",
+        href: "https://ethereum-magicians.org/t/erc-8004-trustless-agents/25098",
       },
     ],
   },

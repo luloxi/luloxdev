@@ -86,6 +86,16 @@ export const messages = {
           summary: "Legal Context Protocol · compliance para agentic commerce.",
           body: "Estoy investigando el Legal Context Protocol (LCP): un estándar para que los agentes firmen / acepten contexto legal y de compliance antes de ejecutar microtransacciones. Términos descubribles, verificables y con recourse, para que el agentic commerce no sea un vacío legal.",
         },
+        x402: {
+          title: "x402",
+          summary: "Pagos HTTP-nativos · comercio agéntico.",
+          body: "Investigo x402: el estándar abierto de pagos nativos de internet (HTTP 402 Payment Required) para que agentes y servicios paguen APIs, datos y contenido con stablecoins, sin cuentas ni API keys. La capa de value transfer del comercio agéntico.",
+        },
+        erc8004: {
+          title: "ERC-8004",
+          summary: "Identidad, reputación y validación de agentes.",
+          body: "Investigo ERC-8004 (Trustless Agents): identidad on-chain portable para agentes (registro ERC-721), reputación y hooks de validación. Cómo descubrir y confiar en agentes entre organizaciones sin trust previo. Encaja con x402 y con el resto del stack de agentic commerce.",
+        },
       },
       past: {
         punksociety: {
@@ -262,6 +272,16 @@ export const messages = {
           title: "LCP",
           summary: "Legal Context Protocol · compliance for agentic commerce.",
           body: "I'm researching the Legal Context Protocol (LCP): a standard so agents must sign / accept legal and compliance context before running microtransactions. Discoverable, verifiable terms with recourse, so agentic commerce isn't a legal void.",
+        },
+        x402: {
+          title: "x402",
+          summary: "HTTP-native payments · agentic commerce.",
+          body: "I research x402: the open internet-native payment standard (HTTP 402 Payment Required) so agents and services can pay for APIs, data, and content with stablecoins, without accounts or API keys. The value-transfer layer of agentic commerce.",
+        },
+        erc8004: {
+          title: "ERC-8004",
+          summary: "Agent identity, reputation, and validation.",
+          body: "I research ERC-8004 (Trustless Agents): portable on-chain agent identity (ERC-721 registry), reputation, and validation hooks. How to discover and trust agents across organizations without pre-existing trust. It pairs with x402 and the rest of the agentic commerce stack.",
         },
       },
       past: {

@@ -2025,9 +2025,9 @@
 
 .cp-lang-label {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.52rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   line-height: 1;
   text-transform: uppercase;
   color: var(--muted);
@@ -2103,9 +2103,9 @@
 
 .cp-theme-label {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.52rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   line-height: 1;
   text-transform: uppercase;
   color: var(--muted);
@@ -2118,10 +2118,24 @@
   gap: 0.35rem;
 }
 
+/* Do not dim theme chips with btn opacity (0.55 turns white into muddy gray). */
 .cp-theme .cp-lang-btn {
   gap: 0;
   min-width: 0;
   padding: 0;
+  opacity: 1;
+}
+
+.cp-theme .cp-lang-btn:not(.cp-lang-btn-active) {
+  opacity: 1;
+}
+
+.cp-theme .cp-lang-btn:not(.cp-lang-btn-active) .cp-theme-swatch {
+  opacity: 0.88;
+}
+
+.cp-theme .cp-lang-btn:hover .cp-theme-swatch {
+  opacity: 1;
 }
 
 .cp-theme .cp-lang-flag-wrap,
@@ -2132,16 +2146,33 @@
   box-sizing: border-box;
 }
 
-/* Light chip: pearl paper (same family as light site bg) */
+/* Light chip: bright paper so it stays readable on dark UI */
 .cp-theme-swatch-light {
   background:
     linear-gradient(
       145deg,
       #ffffff 0%,
-      #efeaf7 55%,
-      #e4ddf5 100%
+      #f7f4fc 50%,
+      #efe8fa 100%
     );
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, #6d28d9 22%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, #6d28d9 18%, transparent),
+    0 0 0 1px color-mix(in oklab, #ffffff 55%, transparent);
+}
+
+/* Extra punch in dark mode: pure white read as "light theme" */
+.dark .cp-theme-swatch-light {
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff 0%,
+      #faf8ff 45%,
+      #f3eefc 100%
+    );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, #c4b5fd 35%, transparent),
+    0 0 0 1px color-mix(in oklab, #ffffff 70%, transparent),
+    0 0 10px color-mix(in oklab, #ffffff 18%, transparent);
 }
 
 /* Dark chip: deep cosmic purple (same family as dark site bg) */
@@ -2157,13 +2188,20 @@
 }
 
 .cp-theme .cp-lang-btn-active .cp-theme-swatch-light {
+  opacity: 1;
   filter: drop-shadow(0 0 7px color-mix(in oklab, #a78bfa 45%, transparent));
   box-shadow:
     inset 0 0 0 1.5px color-mix(in oklab, #6d28d9 55%, transparent),
-    0 0 0 1px color-mix(in oklab, #fff 40%, transparent);
+    0 0 0 1px color-mix(in oklab, #fff 55%, transparent);
+}
+
+.dark .cp-theme .cp-lang-btn-active .cp-theme-swatch-light,
+.dark .cp-theme .cp-lang-btn:not(.cp-lang-btn-active) .cp-theme-swatch-light {
+  opacity: 1;
 }
 
 .cp-theme .cp-lang-btn-active .cp-theme-swatch-dark {
+  opacity: 1;
   filter: drop-shadow(0 0 7px color-mix(in oklab, #a855f7 50%, transparent));
   box-shadow:
     inset 0 0 0 1.5px color-mix(in oklab, #c4b5fd 50%, transparent),

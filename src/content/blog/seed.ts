@@ -3,6 +3,7 @@ import type { BlogPost } from "./types";
 /**
  * Initial blog posts. Seeded into Neon on first request if the table is empty.
  * Edit from /rothko when logged in as admin (Google: lucianoolivabianco@gmail.com).
+ * Drafts and live edits live in Neon only (not in this seed).
  */
 export const seedPosts: BlogPost[] = [
   {
@@ -116,7 +117,7 @@ If you are choosing between a chat with tools and an autonomous agent, my simple
     slug: "comercio-agentico-y-lcp",
     publishedAt: "2026-08-01",
     coverImage: "/projects/focus/lcp.svg",
-    published: true,
+    published: false,
     tags: ["LCP", "agentic commerce", "AI"],
     title: {
       es: "Qué es el comercio agéntico y por qué es necesario el LCP",
@@ -229,7 +230,7 @@ If you are building agents that touch money, LCP is not a nice-to-have. It is th
     slug: "que-es-tokenizacion",
     publishedAt: "2026-07-28",
     coverImage: "/projects/focus/tokenization.svg",
-    published: true,
+    published: false,
     tags: ["tokenización", "RWA", "blockchain"],
     title: {
       es: "Qué es la tokenización y las diferentes formas de beneficiarte",
@@ -338,7 +339,7 @@ Countries that build a clear tokenization regime (Argentina's CNV is one moving 
     slug: "tokenizacion-legal-argentina",
     publishedAt: "2026-07-25",
     coverImage: "/projects/focus/tokenization.svg",
-    published: true,
+    published: false,
     tags: ["Argentina", "CNV", "regulación", "RWA"],
     title: {
       es: "Estado legal actual de la tokenización en Argentina y otras regiones",
@@ -453,7 +454,7 @@ The frame moves fast. When I update this post, I will leave the review date at t
     slug: "midnight-privacidad-blockchain",
     publishedAt: "2026-07-20",
     coverImage: "/projects/focus/midnight.svg",
-    published: true,
+    published: false,
     tags: ["Midnight", "privacidad", "IOG", "ZK"],
     title: {
       es: "Qué es Midnight y por qué es importante la privacidad en blockchain",
@@ -578,7 +579,7 @@ If you are designing an on-chain product, ask: *which data should NOT be public?
     slug: "cip-113-vs-erc-3643",
     publishedAt: "2026-07-15",
     coverImage: "/projects/focus/tokenization.svg",
-    published: true,
+    published: false,
     tags: ["CIP-113", "ERC-3643", "Cardano", "EVM", "RWA"],
     title: {
       es: "Comparando el estándar CIP-113 con el ERC-3643",

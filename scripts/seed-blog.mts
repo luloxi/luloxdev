@@ -52,7 +52,7 @@ for (const post of seedPosts) {
       ${post.summary.en},
       ${post.body.es},
       ${post.body.en},
-      true,
+      ${post.published !== false},
       NOW()
     )
     ON CONFLICT (slug) DO UPDATE SET
@@ -65,10 +65,10 @@ for (const post of seedPosts) {
       summary_en = EXCLUDED.summary_en,
       body_es = EXCLUDED.body_es,
       body_en = EXCLUDED.body_en,
-      published = true,
+      -- Keep admin publish state; only insert uses seed published flag
       updated_at = NOW()
   `;
-  console.log("upserted", post.slug);
+  console.log("upserted", post.slug, "(published not overwritten on conflict)");
 }
 
 console.log("done", seedPosts.length);
