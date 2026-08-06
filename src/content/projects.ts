@@ -110,6 +110,14 @@ export type PastProject = {
   /** Public product URL when still up */
   liveUrl?: string;
   status: ProjectStatus;
+  /**
+   * Optional explanation shown when status is "disabled".
+   * Bilingual so the project detail page can show why it is not running.
+   */
+  disabledReason?: {
+    es: string;
+    en: string;
+  };
   /** Team credits (names are language-agnostic) */
   team: TeamMember[];
 };
@@ -120,6 +128,10 @@ export const pastProjects: PastProject[] = [
     icon: "/projects/mochi.png",
     github: "https://github.com/luloxi/Mochi",
     status: "disabled",
+    disabledReason: {
+      es: "Proyecto en pausa. El runtime, los contratos y el marketplace existen, pero la app no está en producción activa por ahora.",
+      en: "Paused. Runtime, contracts and marketplace exist, but the app is not in active production right now.",
+    },
     team: [{ name: "Kathonejo", href: "https://linktr.ee/kathonejo" }],
   },
   {
@@ -127,6 +139,10 @@ export const pastProjects: PastProject[] = [
     icon: "/projects/sami.png",
     github: "https://github.com/fabian416/sami",
     status: "disabled",
+    disabledReason: {
+      es: "Demo / hackathon. El código está disponible, pero no hay instancia pública corriendo en este momento.",
+      en: "Demo / hackathon. Code is available, but there is no public instance running at the moment.",
+    },
     team: [
       { name: "Luciano Carreño", href: "https://x.com/lucho_leonel1" },
       { name: "Fabián Díaz", href: "https://x.com/Fabian_diaz222" },
@@ -138,6 +154,10 @@ export const pastProjects: PastProject[] = [
     icon: "/projects/punksociety.svg",
     github: "https://github.com/luloxi/PunkSociety",
     status: "disabled",
+    disabledReason: {
+      es: "Proyecto de hackathon (3er lugar Avalanche Summit 2024). No se mantiene una instancia en vivo.",
+      en: "Hackathon project (3rd place Avalanche Summit 2024). No live instance is maintained.",
+    },
     team: [{ name: "Solo" }],
   },
 ];
