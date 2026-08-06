@@ -21,7 +21,7 @@ const statusClass: Record<ProjectStatus, string> = {
 export default function PastProjectPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   if (!pastProjectIds.includes(id as PastProjectId)) {
     notFound();
@@ -128,6 +128,16 @@ export default function PastProjectPage() {
               </span>
             </dd>
           </div>
+          {project.status === "disabled" && project.disabledReason ? (
+            <div className="project-meta-row">
+              <dt>{t.projects.metaDisabledReason}</dt>
+              <dd className="cp-prose text-[0.9rem]">
+                {locale === "en"
+                  ? project.disabledReason.en
+                  : project.disabledReason.es}
+              </dd>
+            </div>
+          ) : null}
         </dl>
 
         <div className="!mt-4 sm:!mt-6">
