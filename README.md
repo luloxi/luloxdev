@@ -19,14 +19,18 @@ vercel env pull .env.local --yes
 
 - Identity and static sections: `src/content/*`
 - Blog seed posts: `src/content/blog/seed.ts` (loaded into Neon on first request)
-- Live blog edits: `/rothko` (Google sign-in, admin email only)
+- Project structure (ids, icons, team, github): `src/content/projects.ts`
+- Live edits: `/rothko` (Google sign-in, admin email only)
+  - Blog posts (full CRUD)
+  - Past projects: status, disabled reason (ES/EN), live URL
 
-## Blog admin
+## Rothko admin
 
-- Public: `/blog` and `/blog/[slug]`
+- Public: `/blog`, `/blog/[slug]`, `/projects`, `/projects/[id]`
 - Sign-in: `/auth/sign-in` (Google via Neon Auth)
 - Editor: `/rothko` for `lucianoolivabianco@gmail.com` only
 - Neon Auth supports Google (and GitHub / Vercel), not X yet
+- Project overrides live in Neon table `project_overrides` (status + bilingual reason). Static data is the base; DB wins when present.
 
 ### Production Google login (Neon trusted domains)
 
@@ -44,5 +48,5 @@ If OAuth still fails after that, configure your own Google OAuth client in Neon 
 
 - `/` - hero, section grid
 - `/about` `/projects` `/blog` `/tastes` `/contact` - full pages
-- `/rothko` - protected blog editor
+- `/rothko` - protected admin (blog + project status/reasons)
 - Back link on every section → home
