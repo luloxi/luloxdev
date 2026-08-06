@@ -1,12 +1,14 @@
 "use client";
 
 import { notFound, useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { CpRow } from "@/components/cp-row";
 import { GitHubIcon } from "@/components/icons/social";
 import { PageShell } from "@/components/page-shell";
 import {
   getPastProject,
   pastProjectIds,
+  type PastProject,
   type PastProjectId,
   type ProjectStatus,
 } from "@/content/projects";
@@ -23,11 +25,43 @@ export default function PastProjectPage() {
   const id = params.id;
   const { t, locale } = useLocale();
 
-  if (!pastProjectIds.includes(id as PastProjectId)) {
+  const staticProject = pastProjectIds.includes(id as PastProjectId)
+    ? getPastProject(id)
+    : undefined;
+
+  const [project, setProject] = useState<PastProject | null>(
+    staticProject ?? null,
+  );
+
+  useEffect(() => {
+    if (!staticProject) return;
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/projects/public");
+        if (!res.ok) return;
+        const data = (await res.json()) as { projects: PastProject[] };
+        const merged = data.projects.find((p) => p.id === id);
+        if (!cancelled && merged) setProject(merged);
+      } catch {
+        // keep static fallback
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, staticProject]);
+
+  if (!staticProject) {
     notFound();
   }
 
-  const project = getPastProject(id)!;
+  if (!project) {
+    notFound();
+  }
+
   const copy = t.projects.past[project.id];
   const statusLabel =
     project.status === "live"
