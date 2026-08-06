@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import type { PastProjectId, ProjectStatus } from "@/content/projects";
+import type {
+  PastProjectId,
+  ProjectStatus,
+  TeamMember,
+} from "@/content/projects";
 import {
   getMergedPastProjects,
   requireAdminSession,
@@ -10,6 +14,32 @@ export const dynamic = "force-dynamic";
 
 const VALID_IDS: PastProjectId[] = ["mochi", "sami", "punksociety"];
 const VALID_STATUSES: ProjectStatus[] = ["live", "disabled", "archive"];
+
+function parseTeam(raw: unknown): TeamMember[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const name = String((item as { name?: unknown }).name ?? "").trim();
+      if (!name) return null;
+      const href = String((item as { href?: unknown }).href ?? "").trim();
+      return href ? { name, href } : { name };
+    })
+    .filter(Boolean) as TeamMember[];
+}
+
+function parseParagraphs(raw: unknown): string[] {
+  if (Array.isArray(raw)) {
+    return raw.map((p) => String(p).trim()).filter(Boolean);
+  }
+  if (typeof raw === "string") {
+    return raw
+      .split(/\n\s*\n/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
 
 export async function GET() {
   const gate = await requireAdminSession();
@@ -38,6 +68,22 @@ export async function PUT(request: Request) {
     status?: string;
     disabledReason?: { es?: string; en?: string };
     liveUrl?: string;
+    github?: string;
+    team?: unknown;
+    copy?: {
+      es?: {
+        title?: string;
+        body?: string;
+        paragraphs?: unknown;
+        awards?: string;
+      };
+      en?: {
+        title?: string;
+        body?: string;
+        paragraphs?: unknown;
+        awards?: string;
+      };
+    };
   };
 
   if (!data?.id || !VALID_IDS.includes(data.id as PastProjectId)) {
@@ -56,6 +102,22 @@ export async function PUT(request: Request) {
       en: data.disabledReason?.en ?? "",
     },
     liveUrl: data.liveUrl ?? "",
+    github: data.github ?? "",
+    team: parseTeam(data.team),
+    copy: {
+      es: {
+        title: data.copy?.es?.title ?? "",
+        body: data.copy?.es?.body ?? "",
+        paragraphs: parseParagraphs(data.copy?.es?.paragraphs),
+        awards: data.copy?.es?.awards ?? "",
+      },
+      en: {
+        title: data.copy?.en?.title ?? "",
+        body: data.copy?.en?.body ?? "",
+        paragraphs: parseParagraphs(data.copy?.en?.paragraphs),
+        awards: data.copy?.en?.awards ?? "",
+      },
+    },
   });
 
   const projects = await getMergedPastProjects();
