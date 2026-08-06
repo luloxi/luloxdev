@@ -5,18 +5,83 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { PageShell } from "@/components/page-shell";
 import type { BlogPost } from "@/content/blog/types";
-import type { PastProject, ProjectStatus } from "@/content/projects";
+import type {
+  PastProject,
+  ProjectStatus,
+  TeamMember,
+} from "@/content/projects";
 import { authClient } from "@/lib/auth/client";
 import { useLocale } from "@/i18n/locale-provider";
 
 type EditableProject = PastProject & {
   draftStatus: ProjectStatus;
+  draftGithub: string;
+  draftLiveUrl: string;
+  draftTeam: string;
+  draftTitleEs: string;
+  draftTitleEn: string;
+  draftBodyEs: string;
+  draftBodyEn: string;
+  draftParagraphsEs: string;
+  draftParagraphsEn: string;
+  draftAwardsEs: string;
+  draftAwardsEn: string;
   draftReasonEs: string;
   draftReasonEn: string;
-  draftLiveUrl: string;
   saving?: boolean;
   saved?: boolean;
 };
+
+function teamToText(team: TeamMember[]): string {
+  return team
+    .map((m) => (m.href ? `${m.name} | ${m.href}` : m.name))
+    .join("\n");
+}
+
+function textToTeam(text: string): TeamMember[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [namePart, ...rest] = line.split("|");
+      const name = (namePart ?? "").trim();
+      const href = rest.join("|").trim();
+      return href ? { name, href } : { name };
+    })
+    .filter((m) => m.name);
+}
+
+function paragraphsToText(paragraphs: string[]): string {
+  return paragraphs.join("\n\n");
+}
+
+function textToParagraphs(text: string): string[] {
+  return text
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
+function toDraft(p: PastProject): EditableProject {
+  return {
+    ...p,
+    draftStatus: p.status,
+    draftGithub: p.github ?? "",
+    draftLiveUrl: p.liveUrl ?? "",
+    draftTeam: teamToText(p.team ?? []),
+    draftTitleEs: p.copy.es.title,
+    draftTitleEn: p.copy.en.title,
+    draftBodyEs: p.copy.es.body,
+    draftBodyEn: p.copy.en.body,
+    draftParagraphsEs: paragraphsToText(p.copy.es.paragraphs),
+    draftParagraphsEn: paragraphsToText(p.copy.en.paragraphs),
+    draftAwardsEs: p.copy.es.awards,
+    draftAwardsEn: p.copy.en.awards,
+    draftReasonEs: p.disabledReason?.es ?? "",
+    draftReasonEn: p.disabledReason?.en ?? "",
+  };
+}
 
 export default function AdminPage() {
   const { t } = useLocale();
@@ -61,15 +126,7 @@ export default function AdminPage() {
     };
 
     setPosts(blogData.posts);
-    setProjects(
-      projectsData.projects.map((p) => ({
-        ...p,
-        draftStatus: p.status,
-        draftReasonEs: p.disabledReason?.es ?? "",
-        draftReasonEn: p.disabledReason?.en ?? "",
-        draftLiveUrl: p.liveUrl ?? "",
-      })),
-    );
+    setProjects(projectsData.projects.map(toDraft));
   }, [router, t.blog.adminLoadError, t.projects.adminLoadError]);
 
   useEffect(() => {
@@ -118,7 +175,20 @@ export default function AdminPage() {
     patch: Partial<
       Pick<
         EditableProject,
-        "draftStatus" | "draftReasonEs" | "draftReasonEn" | "draftLiveUrl"
+        | "draftStatus"
+        | "draftGithub"
+        | "draftLiveUrl"
+        | "draftTeam"
+        | "draftTitleEs"
+        | "draftTitleEn"
+        | "draftBodyEs"
+        | "draftBodyEn"
+        | "draftParagraphsEs"
+        | "draftParagraphsEn"
+        | "draftAwardsEs"
+        | "draftAwardsEn"
+        | "draftReasonEs"
+        | "draftReasonEn"
       >
     >,
   ) {
@@ -145,11 +215,27 @@ export default function AdminPage() {
       body: JSON.stringify({
         id: project.id,
         status: project.draftStatus,
+        github: project.draftGithub,
+        liveUrl: project.draftLiveUrl,
+        team: textToTeam(project.draftTeam),
         disabledReason: {
           es: project.draftReasonEs,
           en: project.draftReasonEn,
         },
-        liveUrl: project.draftLiveUrl,
+        copy: {
+          es: {
+            title: project.draftTitleEs,
+            body: project.draftBodyEs,
+            paragraphs: textToParagraphs(project.draftParagraphsEs),
+            awards: project.draftAwardsEs,
+          },
+          en: {
+            title: project.draftTitleEn,
+            body: project.draftBodyEn,
+            paragraphs: textToParagraphs(project.draftParagraphsEn),
+            awards: project.draftAwardsEn,
+          },
+        },
       }),
     });
 
@@ -174,11 +260,7 @@ export default function AdminPage() {
             if (p.id !== project.id) return p;
             const next = merged ?? p;
             return {
-              ...next,
-              draftStatus: next.status,
-              draftReasonEs: next.disabledReason?.es ?? "",
-              draftReasonEn: next.disabledReason?.en ?? "",
-              draftLiveUrl: next.liveUrl ?? "",
+              ...toDraft(next),
               saving: false,
               saved: true,
             };
@@ -266,81 +348,250 @@ export default function AdminPage() {
                       </Link>
                     </div>
 
-                    <label className="block space-y-1.5">
-                      <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
-                        {t.projects.adminStatus}
-                      </span>
-                      <select
-                        value={project.draftStatus}
-                        onChange={(e) =>
-                          updateProjectDraft(project.id, {
-                            draftStatus: e.target.value as ProjectStatus,
-                          })
-                        }
-                        className="blog-field w-full max-w-xs"
-                      >
-                        <option value="live">{t.projects.statusLive}</option>
-                        <option value="disabled">
-                          {t.projects.statusDisabled}
-                        </option>
-                        <option value="archive">
-                          {t.projects.statusArchive}
-                        </option>
-                      </select>
-                    </label>
+                    {/* Status + URLs */}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <label className="block space-y-1.5">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                          {t.projects.adminStatus}
+                        </span>
+                        <select
+                          value={project.draftStatus}
+                          onChange={(e) =>
+                            updateProjectDraft(project.id, {
+                              draftStatus: e.target.value as ProjectStatus,
+                            })
+                          }
+                          className="blog-field w-full"
+                        >
+                          <option value="live">{t.projects.statusLive}</option>
+                          <option value="disabled">
+                            {t.projects.statusDisabled}
+                          </option>
+                          <option value="archive">
+                            {t.projects.statusArchive}
+                          </option>
+                        </select>
+                      </label>
+
+                      <label className="block space-y-1.5">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                          {t.projects.adminLiveUrl}
+                        </span>
+                        <input
+                          type="url"
+                          value={project.draftLiveUrl}
+                          onChange={(e) =>
+                            updateProjectDraft(project.id, {
+                              draftLiveUrl: e.target.value,
+                            })
+                          }
+                          className="blog-field w-full"
+                          placeholder="https://…"
+                        />
+                      </label>
+                    </div>
 
                     <label className="block space-y-1.5">
                       <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
-                        {t.projects.adminReasonEs}
-                      </span>
-                      <textarea
-                        value={project.draftReasonEs}
-                        onChange={(e) =>
-                          updateProjectDraft(project.id, {
-                            draftReasonEs: e.target.value,
-                          })
-                        }
-                        rows={3}
-                        className="blog-field w-full"
-                        placeholder="Por qué no está en funcionamiento…"
-                      />
-                    </label>
-
-                    <label className="block space-y-1.5">
-                      <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
-                        {t.projects.adminReasonEn}
-                      </span>
-                      <textarea
-                        value={project.draftReasonEn}
-                        onChange={(e) =>
-                          updateProjectDraft(project.id, {
-                            draftReasonEn: e.target.value,
-                          })
-                        }
-                        rows={3}
-                        className="blog-field w-full"
-                        placeholder="Why it is not running…"
-                      />
-                    </label>
-
-                    <label className="block space-y-1.5">
-                      <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
-                        {t.projects.adminLiveUrl}
+                        {t.projects.adminGithub}
                       </span>
                       <input
                         type="url"
-                        value={project.draftLiveUrl}
+                        value={project.draftGithub}
                         onChange={(e) =>
                           updateProjectDraft(project.id, {
-                            draftLiveUrl: e.target.value,
+                            draftGithub: e.target.value,
                           })
                         }
                         className="blog-field w-full"
-                        placeholder="https://…"
+                        placeholder="https://github.com/…"
                       />
                     </label>
 
-                    <div className="flex flex-wrap items-center gap-2">
+                    <label className="block space-y-1.5">
+                      <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                        {t.projects.adminTeam}
+                      </span>
+                      <textarea
+                        value={project.draftTeam}
+                        onChange={(e) =>
+                          updateProjectDraft(project.id, {
+                            draftTeam: e.target.value,
+                          })
+                        }
+                        rows={3}
+                        className="blog-field w-full"
+                        placeholder={"Nombre | https://…\nOtra persona"}
+                      />
+                    </label>
+
+                    {/* Copy ES */}
+                    <div className="space-y-3 border-t border-[color:var(--border)] pt-4">
+                      <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-[color:var(--section-projects)]">
+                        ES
+                      </p>
+                      <label className="block space-y-1.5">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                          {t.projects.adminTitleEs}
+                        </span>
+                        <input
+                          type="text"
+                          value={project.draftTitleEs}
+                          onChange={(e) =>
+                            updateProjectDraft(project.id, {
+                              draftTitleEs: e.target.value,
+                            })
+                          }
+                          className="blog-field w-full"
+                        />
+                      </label>
+                      <label className="block space-y-1.5">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                          {t.projects.adminBodyEs}
+                        </span>
+                        <textarea
+                          value={project.draftBodyEs}
+                          onChange={(e) =>
+                            updateProjectDraft(project.id, {
+                              draftBodyEs: e.target.value,
+                            })
+                          }
+                          rows={2}
+                          className="blog-field w-full"
+                        />
+                      </label>
+                      <label className="block space-y-1.5">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                          {t.projects.adminParagraphsEs}
+                        </span>
+                        <textarea
+                          value={project.draftParagraphsEs}
+                          onChange={(e) =>
+                            updateProjectDraft(project.id, {
+                              draftParagraphsEs: e.target.value,
+                            })
+                          }
+                          rows={5}
+                          className="blog-field w-full"
+                        />
+                      </label>
+                      <label className="block space-y-1.5">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                          {t.projects.adminAwardsEs}
+                        </span>
+                        <input
+                          type="text"
+                          value={project.draftAwardsEs}
+                          onChange={(e) =>
+                            updateProjectDraft(project.id, {
+                              draftAwardsEs: e.target.value,
+                            })
+                          }
+                          className="blog-field w-full"
+                        />
+                      </label>
+                      <label className="block space-y-1.5">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                          {t.projects.adminReasonEs}
+                        </span>
+                        <textarea
+                          value={project.draftReasonEs}
+                          onChange={(e) =>
+                            updateProjectDraft(project.id, {
+                              draftReasonEs: e.target.value,
+                            })
+                          }
+                          rows={2}
+                          className="blog-field w-full"
+                          placeholder="Por qué no está en funcionamiento…"
+                        />
+                      </label>
+                    </div>
+
+                    {/* Copy EN */}
+                    <div className="space-y-3 border-t border-[color:var(--border)] pt-4">
+                      <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-[color:var(--section-projects)]">
+                        EN
+                      </p>
+                      <label className="block space-y-1.5">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                          {t.projects.adminTitleEn}
+                        </span>
+                        <input
+                          type="text"
+                          value={project.draftTitleEn}
+                          onChange={(e) =>
+                            updateProjectDraft(project.id, {
+                              draftTitleEn: e.target.value,
+                            })
+                          }
+                          className="blog-field w-full"
+                        />
+                      </label>
+                      <label className="block space-y-1.5">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                          {t.projects.adminBodyEn}
+                        </span>
+                        <textarea
+                          value={project.draftBodyEn}
+                          onChange={(e) =>
+                            updateProjectDraft(project.id, {
+                              draftBodyEn: e.target.value,
+                            })
+                          }
+                          rows={2}
+                          className="blog-field w-full"
+                        />
+                      </label>
+                      <label className="block space-y-1.5">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                          {t.projects.adminParagraphsEn}
+                        </span>
+                        <textarea
+                          value={project.draftParagraphsEn}
+                          onChange={(e) =>
+                            updateProjectDraft(project.id, {
+                              draftParagraphsEn: e.target.value,
+                            })
+                          }
+                          rows={5}
+                          className="blog-field w-full"
+                        />
+                      </label>
+                      <label className="block space-y-1.5">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                          {t.projects.adminAwardsEn}
+                        </span>
+                        <input
+                          type="text"
+                          value={project.draftAwardsEn}
+                          onChange={(e) =>
+                            updateProjectDraft(project.id, {
+                              draftAwardsEn: e.target.value,
+                            })
+                          }
+                          className="blog-field w-full"
+                        />
+                      </label>
+                      <label className="block space-y-1.5">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
+                          {t.projects.adminReasonEn}
+                        </span>
+                        <textarea
+                          value={project.draftReasonEn}
+                          onChange={(e) =>
+                            updateProjectDraft(project.id, {
+                              draftReasonEn: e.target.value,
+                            })
+                          }
+                          rows={2}
+                          className="blog-field w-full"
+                          placeholder="Why it is not running…"
+                        />
+                      </label>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
                       <button
                         type="button"
                         disabled={project.saving}
