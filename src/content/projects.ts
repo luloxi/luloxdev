@@ -1,5 +1,6 @@
 /**
- * Projects structure - copy lives in i18n/messages.ts
+ * Projects structure and default copy.
+ * Live overrides (status, urls, team, texts) live in Neon via /rothko.
  */
 
 export type FocusTopicId =
@@ -20,7 +21,7 @@ export type FocusLink = {
 export const focusTopics: {
   id: FocusTopicId;
   icon: string;
-  /** 1–3 relevant external references shown under each topic */
+  /** 1-3 relevant external references shown under each topic */
   links: FocusLink[];
 }[] = [
   {
@@ -103,6 +104,18 @@ export type TeamMember = {
   href?: string;
 };
 
+export type ProjectCopyLocale = {
+  title: string;
+  body: string;
+  paragraphs: string[];
+  awards: string;
+};
+
+export type ProjectCopy = {
+  es: ProjectCopyLocale;
+  en: ProjectCopyLocale;
+};
+
 export type PastProject = {
   id: PastProjectId;
   icon: string;
@@ -120,6 +133,8 @@ export type PastProject = {
   };
   /** Team credits (names are language-agnostic) */
   team: TeamMember[];
+  /** Bilingual copy (defaults + Neon overrides) */
+  copy: ProjectCopy;
 };
 
 export const pastProjects: PastProject[] = [
@@ -133,6 +148,26 @@ export const pastProjects: PastProject[] = [
       en: "Paused. Runtime, contracts and marketplace exist, but the app is not in active production right now.",
     },
     team: [{ name: "Kathonejo", href: "https://linktr.ee/kathonejo" }],
+    copy: {
+      es: {
+        title: "Mochi",
+        body: "Mascotas de IA de escritorio con chat, cuerpos custom y un marketplace propio.",
+        paragraphs: [
+          "Mochi son mascotas de IA de escritorio (y browser) con chat, cuerpos custom y un marketplace propio en Avalanche: ownership on-chain, AI off-chain.",
+          "Incluye web app, app Electron y extensiones de Chrome/Firefox, con runtime compartido, contratos en Foundry y metadata en IPFS.",
+        ],
+        awards: "Sin premios formales.",
+      },
+      en: {
+        title: "Mochi",
+        body: "Desktop AI pets with chat, custom bodies, and their own marketplace.",
+        paragraphs: [
+          "Mochi is desktop (and browser) AI pets with chat, custom bodies, and an Avalanche marketplace: on-chain ownership, off-chain AI.",
+          "It includes a web app, Electron desktop, Chrome/Firefox extensions, a shared runtime, Foundry contracts, and IPFS metadata.",
+        ],
+        awards: "No formal awards.",
+      },
+    },
   },
   {
     id: "sami",
@@ -148,6 +183,26 @@ export const pastProjects: PastProject[] = [
       { name: "Fabián Díaz", href: "https://x.com/Fabian_diaz222" },
       { name: "Lendoor", href: "https://x.com/LendoorProtocol" },
     ],
+    copy: {
+      es: {
+        title: "SAMI",
+        body: "Juego de chat donde humanos cazan al infiltrado de IA (y la IA se hace pasar por humano).",
+        paragraphs: [
+          "SAMI es un juego de chat en el que humanos tienen que encontrar al infiltrado de IA. El agente se camufla entre jugadores y con el tiempo busca ser cada vez más difícil de detectar.",
+          "Está construido con TypeScript, Eliza, Next.js, Express, Supabase y un stack web3 (RainbowKit, Foundry, Wagmi, Viem).",
+        ],
+        awards: "Sin premios formales.",
+      },
+      en: {
+        title: "SAMI",
+        body: "Chatroom game where humans hunt the AI infiltrator (and the AI pretends to be human).",
+        paragraphs: [
+          "SAMI is a chat game where humans have to find the AI infiltrator. The agent blends into the room and aims to get harder to spot over time.",
+          "Built with TypeScript, Eliza, Next.js, Express, Supabase, and a web3 stack (RainbowKit, Foundry, Wagmi, Viem).",
+        ],
+        awards: "No formal awards.",
+      },
+    },
   },
   {
     id: "punksociety",
@@ -159,6 +214,26 @@ export const pastProjects: PastProject[] = [
       en: "Hackathon project (3rd place Avalanche Summit 2024). No live instance is maintained.",
     },
     team: [{ name: "Solo" }],
+    copy: {
+      es: {
+        title: "PunkSociety",
+        body: "Red social on-chain: cada post es un NFT y los likes envían valor al creador.",
+        paragraphs: [
+          "PunkSociety es una red social on-chain: cada post es un NFT y los likes envían valor (USDC) al creador. La idea es alinear atención con ownership y pagos directos.",
+          "Lo construí con Scaffold-ETH 2, Foundry y Next.js.",
+        ],
+        awards: "3er lugar · Avalanche Summit Hackathon 2024.",
+      },
+      en: {
+        title: "PunkSociety",
+        body: "On-chain social network: every post is an NFT and likes send value to the creator.",
+        paragraphs: [
+          "PunkSociety is an on-chain social network: every post is an NFT and likes send value (USDC) to the creator. The point is aligning attention with ownership and direct payments.",
+          "I built it with Scaffold-ETH 2, Foundry, and Next.js.",
+        ],
+        awards: "3rd place · Avalanche Summit Hackathon 2024.",
+      },
+    },
   },
 ];
 
