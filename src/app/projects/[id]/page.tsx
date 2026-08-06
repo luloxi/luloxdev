@@ -62,7 +62,7 @@ export default function PastProjectPage() {
     notFound();
   }
 
-  const copy = t.projects.past[project.id];
+  const copy = project.copy[locale] ?? project.copy.es;
   const statusLabel =
     project.status === "live"
       ? t.projects.statusLive
@@ -174,7 +174,14 @@ export default function PastProjectPage() {
           ) : null}
         </dl>
 
-        <div className="!mt-4 sm:!mt-6">
+        <div className="!mt-4 space-y-2 sm:!mt-6">
+          {project.liveUrl ? (
+            <CpRow
+              href={project.liveUrl}
+              label={t.projects.openLive}
+              accent="var(--section-projects)"
+            />
+          ) : null}
           <CpRow
             href={project.github}
             label={t.projects.openGithub}
