@@ -30,7 +30,7 @@ export default function HomePage() {
 
               <div className="avatar-hud-photo">
                 <Image
-                  src={site.avatar}
+                  src={site.heroPhoto}
                   alt={site.name}
                   width={400}
                   height={400}
