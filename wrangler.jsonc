@@ -14,6 +14,11 @@
       "service": "luloxdev"
     }
   ],
+  // Public Neon Auth endpoint (not a secret). Secrets DATABASE_URL and
+  // NEON_AUTH_COOKIE_SECRET live in Cloudflare as encrypted secrets.
+  "vars": {
+    "NEON_AUTH_BASE_URL": "https://ep-odd-glitter-awjav466.neonauth.c-12.us-east-1.aws.neon.tech/neondb/auth"
+  },
   "observability": {
     "enabled": true
   }
