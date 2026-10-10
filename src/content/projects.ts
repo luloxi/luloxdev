@@ -1,6 +1,6 @@
 /**
  * Projects structure and default copy.
- * Live overrides (status, urls, team, texts) live in Neon via /rothko.
+ * Live overrides (status, urls, team, texts) live in D1 via /rothko.
  */
 
 export type FocusTopicId =
@@ -133,7 +133,7 @@ export type PastProject = {
   };
   /** Team credits (names are language-agnostic) */
   team: TeamMember[];
-  /** Bilingual copy (defaults + Neon overrides) */
+  /** Bilingual copy (defaults + D1 overrides) */
   copy: ProjectCopy;
 };
 

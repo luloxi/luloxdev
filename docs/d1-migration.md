@@ -26,12 +26,32 @@ Note: Neon has 2 drafts not in `seed.ts` (x402, erc8004), so the DB, not the see
 3. `wrangler d1 migrations apply luloxdev --remote` then `wrangler d1 execute luloxdev --remote --file d1-import.sql`.
 4. Re-hash rows read back from D1 and compare (done locally: 8/8 rows, hashes equal; public API output byte-identical to www.lulox.dev).
 
+## Status (2026-10-10)
+
+- D1 `luloxdev` (id 61d3b739-db00-4fed-86d5-0387bf50b2cc, region WNAM) created; migrations 0001 + 0002 applied remotely.
+- Content imported: 8 posts (1 published, 7 drafts), 0 project overrides. Remote per-table sha256 equals the Neon export.
+- Not live yet: the deployed Worker still uses Neon until this branch is merged and deployed.
+
 ## Code
 
 - `src/lib/db.ts`: D1 binding `DB` via `getCloudflareContext()`; null outside a Worker (static seed fallback).
-- `src/lib/blog.ts`, `src/lib/projects.ts`: prepared statements on D1, same behavior. Schema creation moved to migrations.
-- `wrangler.jsonc`: `d1_databases` binding (placeholder id until the DB is created).
-- After cutover: drop `@neondatabase/serverless`, rewrite `scripts/seed-blog.mts` for D1, remove Vercel-only paths.
+- `src/lib/blog.ts`, `src/lib/projects.ts`: prepared statements on D1. Schema lives in `migrations/`.
+- Auth: Better Auth 1.7.7 on D1 (native binding) + Google. `src/lib/auth/options.ts` (config, allowed hosts,
+  admin-only account creation hook), `server.ts` (per-request instance), `client.ts`, `/api/auth/[...path]`,
+  `proxy.ts` (cookie check, real admin check in API handlers). Sign-in page unchanged.
+- `migrations/0002_better_auth.sql` generated with `pnpm db:auth-schema`.
+- `pnpm seed:blog [--remote]` inserts missing default posts into D1 without overwriting.
+- `pnpm test` (allowlist), `pnpm typecheck`, `pnpm cf:build`.
+- Removed `@neondatabase/auth`, `@neondatabase/serverless`, `NEON_AUTH_BASE_URL` var.
+
+## Cutover (needs Luciano)
+
+1. Google Cloud OAuth client (Web) with JS origins https://www.lulox.dev, https://lulox.dev,
+   https://luloxdev.lucianoolivabianco.workers.dev and redirect URIs
+   https://www.lulox.dev/api/auth/callback/google, https://luloxdev.lucianoolivabianco.workers.dev/api/auth/callback/google.
+2. `wrangler secret put` GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BETTER_AUTH_SECRET (random 32+ bytes).
+3. Re-export Neon and re-import if posts changed since 2026-10-10, merge, deploy, delete old secrets
+   DATABASE_URL and NEON_AUTH_COOKIE_SECRET from the Worker.
 
 ## Auth replacement (Neon Auth lives in the Neon DB, so it has to go too)
 

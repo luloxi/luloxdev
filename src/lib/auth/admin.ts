@@ -1,6 +1,6 @@
 /**
  * Only these identities can edit the blog.
- * Neon Auth currently supports Google (and GitHub / Vercel), not X.
+ * Sign-in is Google via Better Auth (D1); other emails can't create an account.
  * Google: lucianoolivabianco@gmail.com
  */
 export const ADMIN_EMAILS = ["lucianoolivabianco@gmail.com"] as const;

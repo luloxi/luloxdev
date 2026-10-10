@@ -1,29 +1,25 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth, isAuthConfigured } from "@/lib/auth/server";
-
-const neonMiddleware =
-  isAuthConfigured() && auth
-    ? auth.middleware({ loginUrl: "/auth/sign-in" })
-    : null;
+import { getSessionCookie } from "better-auth/cookies";
 
 /**
- * Protect /rothko (blog CMS). Neon Auth middleware redirects unauthenticated users.
- * Admin email allowlist is enforced in page/API handlers via isAdminUser().
+ * Protect /rothko (blog CMS). Cheap cookie check only: no session cookie means
+ * straight to sign-in. The real check (valid session + admin email allowlist)
+ * runs in the /api/blog and /api/projects handlers via requireAdminSession().
  */
 export default function proxy(request: NextRequest) {
   if (!request.nextUrl.pathname.startsWith("/rothko")) {
     return NextResponse.next();
   }
 
-  if (!neonMiddleware) {
+  if (!getSessionCookie(request)) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/sign-in";
-    url.searchParams.set("error", "auth_not_configured");
+    url.search = "";
     return NextResponse.redirect(url);
   }
 
-  return neonMiddleware(request);
+  return NextResponse.next();
 }
 
 export const config = {

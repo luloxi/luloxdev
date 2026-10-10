@@ -164,7 +164,7 @@ export const messages = {
       authNotConfigured: "Auth no está configurado en este entorno.",
       oauthError: "Falló el login. Probá de nuevo.",
       oauthDomainError:
-        "Neon Auth no confía este dominio. En Neon Console → Auth → Configuration → Domains agregá https://www.lulox.dev y https://lulox.dev.",
+        "Este dominio no está autorizado para iniciar sesión. Tiene que estar en TRUSTED_ORIGINS (src/lib/auth/options.ts) y en los orígenes del cliente OAuth de Google.",
       forbidden: "Acceso denegado. Esta cuenta no está autorizada.",
       adminTitle: "Editar blog",
       adminAs: "Sesión",
@@ -373,7 +373,7 @@ export const messages = {
       authNotConfigured: "Auth is not configured in this environment.",
       oauthError: "Sign-in failed. Try again.",
       oauthDomainError:
-        "Neon Auth does not trust this domain. In Neon Console → Auth → Configuration → Domains add https://www.lulox.dev and https://lulox.dev.",
+        "This domain is not allowed to sign in. It must be in TRUSTED_ORIGINS (src/lib/auth/options.ts) and in the Google OAuth client origins.",
       forbidden: "Access denied. This account is not authorized.",
       adminTitle: "Edit blog",
       adminAs: "Session",

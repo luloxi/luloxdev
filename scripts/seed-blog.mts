@@ -1,74 +1,44 @@
-import { readFileSync } from "node:fs";
-import { neon } from "@neondatabase/serverless";
+/**
+ * Seed the default blog posts into D1 (only inserts slugs that don't exist yet,
+ * never overwrites edits or drafts made in /rothko).
+ *
+ *   pnpm seed:blog            # local D1 (.wrangler/state)
+ *   pnpm seed:blog --remote   # Cloudflare D1 "luloxdev"
+ */
+import { execFileSync } from "node:child_process";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { seedPosts } from "../src/content/blog/seed.ts";
 
-try {
-  const env = readFileSync(".env.local", "utf8");
-  for (const line of env.split("\n")) {
-    const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
-    if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
-  }
-} catch {
-  /* ignore */
-}
+const remote = process.argv.includes("--remote");
+const q = (v: string) => `'${v.replace(/'/g, "''")}'`;
+const now = new Date().toISOString();
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL missing");
-}
+const statements = seedPosts.map((post) => {
+  const publishedAt = new Date(post.publishedAt).toISOString();
+  const values = [
+    q(post.slug),
+    q(publishedAt),
+    q(post.coverImage ?? ""),
+    q(JSON.stringify(post.tags ?? [])),
+    q(post.title.es),
+    q(post.title.en),
+    q(post.summary.es),
+    q(post.summary.en),
+    q(post.body.es),
+    q(post.body.en),
+    post.published !== false ? "1" : "0",
+    q(now),
+  ].join(", ");
+  return `INSERT INTO blog_posts (slug, published_at, cover_image, tags, title_es, title_en, summary_es, summary_en, body_es, body_en, published, updated_at) VALUES (${values}) ON CONFLICT (slug) DO NOTHING;`;
+});
 
-const sql = neon(process.env.DATABASE_URL);
+mkdirSync(".wrangler", { recursive: true });
+const file = ".wrangler/seed-blog.sql";
+writeFileSync(file, statements.join("\n") + "\n");
 
-await sql`
-  CREATE TABLE IF NOT EXISTS blog_posts (
-    slug TEXT PRIMARY KEY,
-    published_at TIMESTAMPTZ NOT NULL,
-    cover_image TEXT NOT NULL DEFAULT '',
-    tags TEXT[] NOT NULL DEFAULT '{}',
-    title_es TEXT NOT NULL,
-    title_en TEXT NOT NULL,
-    summary_es TEXT NOT NULL,
-    summary_en TEXT NOT NULL,
-    body_es TEXT NOT NULL,
-    body_en TEXT NOT NULL,
-    published BOOLEAN NOT NULL DEFAULT true,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-  )
-`;
-
-for (const post of seedPosts) {
-  await sql`
-    INSERT INTO blog_posts (
-      slug, published_at, cover_image, tags,
-      title_es, title_en, summary_es, summary_en,
-      body_es, body_en, published, updated_at
-    ) VALUES (
-      ${post.slug},
-      ${post.publishedAt},
-      ${post.coverImage},
-      ${post.tags as unknown as string},
-      ${post.title.es},
-      ${post.title.en},
-      ${post.summary.es},
-      ${post.summary.en},
-      ${post.body.es},
-      ${post.body.en},
-      ${post.published !== false},
-      NOW()
-    )
-    ON CONFLICT (slug) DO UPDATE SET
-      published_at = EXCLUDED.published_at,
-      cover_image = EXCLUDED.cover_image,
-      tags = EXCLUDED.tags,
-      title_es = EXCLUDED.title_es,
-      title_en = EXCLUDED.title_en,
-      summary_es = EXCLUDED.summary_es,
-      summary_en = EXCLUDED.summary_en,
-      body_es = EXCLUDED.body_es,
-      body_en = EXCLUDED.body_en,
-      -- Keep admin publish state; only insert uses seed published flag
-      updated_at = NOW()
-  `;
-  console.log("upserted", post.slug, "(published not overwritten on conflict)");
-}
-
-console.log("done", seedPosts.length);
+execFileSync(
+  "wrangler",
+  ["d1", "execute", "luloxdev", remote ? "--remote" : "--local", "--file", file, "-y"],
+  { stdio: "inherit" },
+);
+console.log(`Seeded ${statements.length} posts (existing slugs untouched) into ${remote ? "remote" : "local"} D1.`);

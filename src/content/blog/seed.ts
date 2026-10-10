@@ -1,9 +1,9 @@
 import type { BlogPost } from "./types";
 
 /**
- * Initial blog posts. Seeded into Neon on first request if the table is empty.
+ * Initial blog posts. Seeded into D1 on first request if the table is empty.
  * Edit from /rothko when logged in as admin (Google: lucianoolivabianco@gmail.com).
- * Drafts and live edits live in Neon only (not in this seed).
+ * Drafts and live edits live in D1 only (not in this seed).
  */
 export const seedPosts: BlogPost[] = [
   {

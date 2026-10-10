@@ -1,16 +1,14 @@
-import { auth, isAuthConfigured } from "@/lib/auth/server";
+import { getAuth } from "@/lib/auth/server";
 
-function notConfigured() {
-  return Response.json(
-    { error: "Auth is not configured" },
-    { status: 503 },
-  );
+export const dynamic = "force-dynamic";
+
+async function handle(request: Request) {
+  const auth = await getAuth();
+  if (!auth) {
+    return Response.json({ error: "Auth is not configured" }, { status: 503 });
+  }
+  return auth.handler(request);
 }
 
-export const GET = isAuthConfigured() && auth
-  ? auth.handler().GET
-  : async () => notConfigured();
-
-export const POST = isAuthConfigured() && auth
-  ? auth.handler().POST
-  : async () => notConfigured();
+export const GET = handle;
+export const POST = handle;

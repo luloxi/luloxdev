@@ -196,14 +196,16 @@ export async function deletePost(slug: string) {
 }
 
 export async function requireAdminSession() {
-  const { auth, isAuthConfigured } = await import("@/lib/auth/server");
+  const { getAuth } = await import("@/lib/auth/server");
   const { isAdminUser } = await import("@/lib/auth/admin");
+  const { headers } = await import("next/headers");
 
-  if (!isAuthConfigured() || !auth) {
+  const auth = await getAuth();
+  if (!auth) {
     return { ok: false as const, reason: "auth_not_configured" as const };
   }
 
-  const { data: session } = await auth.getSession();
+  const session = await auth.api.getSession({ headers: await headers() });
   const user = session?.user;
   if (!user || !isAdminUser(user)) {
     return { ok: false as const, reason: "unauthorized" as const, user };
