@@ -6,7 +6,7 @@ import {
   type ProjectStatus,
   type TeamMember,
 } from "@/content/projects";
-import { getSql, hasDatabase } from "@/lib/db";
+import { getDb, nowIso, requireDb } from "@/lib/db";
 
 export type ProjectOverrideRow = {
   id: string;
@@ -40,50 +40,9 @@ export type ProjectOverrideInput = {
   };
 };
 
-let ensurePromise: Promise<void> | null = null;
-
+/** Schema lives in migrations/0001_init.sql (wrangler d1 migrations apply). */
 export async function ensureProjectSchema() {
-  if (!hasDatabase()) return;
-  if (!ensurePromise) {
-    ensurePromise = (async () => {
-      const sql = getSql();
-      await sql`
-        CREATE TABLE IF NOT EXISTS project_overrides (
-          id TEXT PRIMARY KEY,
-          status TEXT NOT NULL DEFAULT 'disabled',
-          disabled_reason_es TEXT NOT NULL DEFAULT '',
-          disabled_reason_en TEXT NOT NULL DEFAULT '',
-          live_url TEXT NOT NULL DEFAULT '',
-          github TEXT NOT NULL DEFAULT '',
-          team_json TEXT NOT NULL DEFAULT '',
-          title_es TEXT NOT NULL DEFAULT '',
-          title_en TEXT NOT NULL DEFAULT '',
-          body_es TEXT NOT NULL DEFAULT '',
-          body_en TEXT NOT NULL DEFAULT '',
-          paragraphs_es TEXT NOT NULL DEFAULT '',
-          paragraphs_en TEXT NOT NULL DEFAULT '',
-          awards_es TEXT NOT NULL DEFAULT '',
-          awards_en TEXT NOT NULL DEFAULT '',
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        )
-      `;
-      // Migrate older tables that only had the first columns
-      await sql`ALTER TABLE project_overrides ADD COLUMN IF NOT EXISTS github TEXT NOT NULL DEFAULT ''`;
-      await sql`ALTER TABLE project_overrides ADD COLUMN IF NOT EXISTS team_json TEXT NOT NULL DEFAULT ''`;
-      await sql`ALTER TABLE project_overrides ADD COLUMN IF NOT EXISTS title_es TEXT NOT NULL DEFAULT ''`;
-      await sql`ALTER TABLE project_overrides ADD COLUMN IF NOT EXISTS title_en TEXT NOT NULL DEFAULT ''`;
-      await sql`ALTER TABLE project_overrides ADD COLUMN IF NOT EXISTS body_es TEXT NOT NULL DEFAULT ''`;
-      await sql`ALTER TABLE project_overrides ADD COLUMN IF NOT EXISTS body_en TEXT NOT NULL DEFAULT ''`;
-      await sql`ALTER TABLE project_overrides ADD COLUMN IF NOT EXISTS paragraphs_es TEXT NOT NULL DEFAULT ''`;
-      await sql`ALTER TABLE project_overrides ADD COLUMN IF NOT EXISTS paragraphs_en TEXT NOT NULL DEFAULT ''`;
-      await sql`ALTER TABLE project_overrides ADD COLUMN IF NOT EXISTS awards_es TEXT NOT NULL DEFAULT ''`;
-      await sql`ALTER TABLE project_overrides ADD COLUMN IF NOT EXISTS awards_en TEXT NOT NULL DEFAULT ''`;
-    })().catch((err) => {
-      ensurePromise = null;
-      throw err;
-    });
-  }
-  await ensurePromise;
+  // no-op on D1: kept so callers don't change
 }
 
 function isValidStatus(value: string): value is ProjectStatus {
@@ -184,15 +143,16 @@ function applyOverride(
 }
 
 export async function getMergedPastProjects(): Promise<PastProject[]> {
-  if (!hasDatabase()) {
+  const db = await getDb();
+  if (!db) {
     return pastProjects;
   }
 
   try {
-    await ensureProjectSchema();
-    const sql = getSql();
-    const rows = (await sql`SELECT * FROM project_overrides`) as ProjectOverrideRow[];
-    const byId = new Map(rows.map((r) => [r.id, r]));
+    const { results } = await db
+      .prepare("SELECT * FROM project_overrides")
+      .all<ProjectOverrideRow>();
+    const byId = new Map(results.map((r) => [r.id, r]));
     return pastProjects.map((p) => applyOverride(p, byId.get(p.id)));
   } catch (err) {
     console.error("[projects] getMergedPastProjects fallback to static:", err);
@@ -206,17 +166,17 @@ export async function getMergedPastProject(
   const base = pastProjects.find((p) => p.id === id);
   if (!base) return null;
 
-  if (!hasDatabase()) {
+  const db = await getDb();
+  if (!db) {
     return base;
   }
 
   try {
-    await ensureProjectSchema();
-    const sql = getSql();
-    const rows = (await sql`
-      SELECT * FROM project_overrides WHERE id = ${id} LIMIT 1
-    `) as ProjectOverrideRow[];
-    return applyOverride(base, rows[0]);
+    const row = await db
+      .prepare("SELECT * FROM project_overrides WHERE id = ? LIMIT 1")
+      .bind(id)
+      .first<ProjectOverrideRow>();
+    return applyOverride(base, row ?? undefined);
   } catch (err) {
     console.error("[projects] getMergedPastProject fallback to static:", err);
     return base;
@@ -224,8 +184,7 @@ export async function getMergedPastProject(
 }
 
 export async function upsertProjectOverride(input: ProjectOverrideInput) {
-  await ensureProjectSchema();
-  const sql = getSql();
+  const db = await requireDb();
 
   const status = input.status;
   const reasonEs = input.disabledReason?.es ?? "";
@@ -242,48 +201,52 @@ export async function upsertProjectOverride(input: ProjectOverrideInput) {
   const awardsEs = input.copy?.es.awards ?? "";
   const awardsEn = input.copy?.en.awards ?? "";
 
-  await sql`
-    INSERT INTO project_overrides (
-      id, status, disabled_reason_es, disabled_reason_en, live_url,
-      github, team_json,
-      title_es, title_en, body_es, body_en,
-      paragraphs_es, paragraphs_en, awards_es, awards_en,
-      updated_at
-    ) VALUES (
-      ${input.id},
-      ${status},
-      ${reasonEs},
-      ${reasonEn},
-      ${liveUrl},
-      ${github},
-      ${teamJson},
-      ${titleEs},
-      ${titleEn},
-      ${bodyEs},
-      ${bodyEn},
-      ${paragraphsEs},
-      ${paragraphsEn},
-      ${awardsEs},
-      ${awardsEn},
-      NOW()
+  await db
+    .prepare(
+      `INSERT INTO project_overrides (
+        id, status, disabled_reason_es, disabled_reason_en, live_url,
+        github, team_json,
+        title_es, title_en, body_es, body_en,
+        paragraphs_es, paragraphs_en, awards_es, awards_en,
+        updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT (id) DO UPDATE SET
+        status = excluded.status,
+        disabled_reason_es = excluded.disabled_reason_es,
+        disabled_reason_en = excluded.disabled_reason_en,
+        live_url = excluded.live_url,
+        github = excluded.github,
+        team_json = excluded.team_json,
+        title_es = excluded.title_es,
+        title_en = excluded.title_en,
+        body_es = excluded.body_es,
+        body_en = excluded.body_en,
+        paragraphs_es = excluded.paragraphs_es,
+        paragraphs_en = excluded.paragraphs_en,
+        awards_es = excluded.awards_es,
+        awards_en = excluded.awards_en,
+        updated_at = excluded.updated_at`,
     )
-    ON CONFLICT (id) DO UPDATE SET
-      status = EXCLUDED.status,
-      disabled_reason_es = EXCLUDED.disabled_reason_es,
-      disabled_reason_en = EXCLUDED.disabled_reason_en,
-      live_url = EXCLUDED.live_url,
-      github = EXCLUDED.github,
-      team_json = EXCLUDED.team_json,
-      title_es = EXCLUDED.title_es,
-      title_en = EXCLUDED.title_en,
-      body_es = EXCLUDED.body_es,
-      body_en = EXCLUDED.body_en,
-      paragraphs_es = EXCLUDED.paragraphs_es,
-      paragraphs_en = EXCLUDED.paragraphs_en,
-      awards_es = EXCLUDED.awards_es,
-      awards_en = EXCLUDED.awards_en,
-      updated_at = NOW()
-  `;
+    .bind(
+      input.id,
+      status,
+      reasonEs,
+      reasonEn,
+      liveUrl,
+      github,
+      teamJson,
+      titleEs,
+      titleEn,
+      bodyEs,
+      bodyEn,
+      paragraphsEs,
+      paragraphsEn,
+      awardsEs,
+      awardsEn,
+      nowIso(),
+    )
+    .run();
 }
+
 
 export { requireAdminSession } from "@/lib/blog";

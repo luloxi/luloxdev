@@ -16,6 +16,17 @@
   ],
   // Public Neon Auth endpoint (not a secret). Secrets DATABASE_URL and
   // NEON_AUTH_COOKIE_SECRET live in Cloudflare as encrypted secrets.
+  // Cloudflare D1 replaces Neon Postgres for blog_posts / project_overrides.
+  // database_id is a placeholder until `wrangler d1 create luloxdev` runs
+  // (needs the d1:write scope); local dev/preview works with any id.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "luloxdev",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
   "vars": {
     "NEON_AUTH_BASE_URL": "https://ep-odd-glitter-awjav466.neonauth.c-12.us-east-1.aws.neon.tech/neondb/auth"
   },

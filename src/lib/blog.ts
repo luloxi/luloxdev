@@ -4,65 +4,78 @@ import {
   type BlogPost,
   type BlogPostRow,
 } from "@/content/blog/types";
-import { getSql, hasDatabase } from "@/lib/db";
+import { getDb, nowIso, requireDb } from "@/lib/db";
 
 let ensurePromise: Promise<void> | null = null;
 
+/**
+ * Schema lives in migrations/0001_init.sql (applied with wrangler d1 migrations).
+ * This only seeds the default posts if the table is empty (fresh local DB).
+ */
 export async function ensureBlogSchemaAndSeed() {
-  if (!hasDatabase()) return;
+  const db = await getDb();
+  if (!db) return;
   if (!ensurePromise) {
     ensurePromise = (async () => {
-      const sql = getSql();
-      await sql`
-        CREATE TABLE IF NOT EXISTS blog_posts (
-          slug TEXT PRIMARY KEY,
-          published_at TIMESTAMPTZ NOT NULL,
-          cover_image TEXT NOT NULL DEFAULT '',
-          tags TEXT[] NOT NULL DEFAULT '{}',
-          title_es TEXT NOT NULL,
-          title_en TEXT NOT NULL,
-          summary_es TEXT NOT NULL,
-          summary_en TEXT NOT NULL,
-          body_es TEXT NOT NULL,
-          body_en TEXT NOT NULL,
-          published BOOLEAN NOT NULL DEFAULT true,
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        )
-      `;
-
-      const countRows = await sql`SELECT COUNT(*)::int AS n FROM blog_posts`;
-      const n = Number((countRows[0] as { n: number }).n ?? 0);
-      if (n > 0) return;
-
-      for (const post of seedPosts) {
-        await sql`
-          INSERT INTO blog_posts (
-            slug, published_at, cover_image, tags,
-            title_es, title_en, summary_es, summary_en,
-            body_es, body_en, published, updated_at
-          ) VALUES (
-            ${post.slug},
-            ${post.publishedAt},
-            ${post.coverImage},
-            ${post.tags as unknown as string},
-            ${post.title.es},
-            ${post.title.en},
-            ${post.summary.es},
-            ${post.summary.en},
-            ${post.body.es},
-            ${post.body.en},
-            ${post.published !== false},
-            NOW()
-          )
-          ON CONFLICT (slug) DO NOTHING
-        `;
-      }
+      const row = await db
+        .prepare("SELECT COUNT(*) AS n FROM blog_posts")
+        .first<{ n: number }>();
+      if (Number(row?.n ?? 0) > 0) return;
+      await db.batch(
+        seedPosts.map((post) =>
+          db
+            .prepare(
+              `INSERT INTO blog_posts (
+                slug, published_at, cover_image, tags,
+                title_es, title_en, summary_es, summary_en,
+                body_es, body_en, published, updated_at
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              ON CONFLICT (slug) DO NOTHING`,
+            )
+            .bind(
+              post.slug,
+              toIsoDate(post.publishedAt),
+              post.coverImage,
+              JSON.stringify(post.tags ?? []),
+              post.title.es,
+              post.title.en,
+              post.summary.es,
+              post.summary.en,
+              post.body.es,
+              post.body.en,
+              post.published !== false ? 1 : 0,
+              nowIso(),
+            ),
+        ),
+      );
     })().catch((err) => {
       ensurePromise = null;
       throw err;
     });
   }
   await ensurePromise;
+}
+
+/** Normalize YYYY-MM-DD or any ISO string to full ISO UTC (matches Neon export). */
+function toIsoDate(value: string) {
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? nowIso() : d.toISOString();
+}
+
+type D1BlogRow = Omit<BlogPostRow, "tags" | "published"> & {
+  tags: string | null;
+  published: number;
+};
+
+function d1RowToPost(row: D1BlogRow): BlogPost {
+  let tags: string[] = [];
+  try {
+    const parsed = JSON.parse(row.tags ?? "[]") as unknown;
+    if (Array.isArray(parsed)) tags = parsed.map(String);
+  } catch {
+    tags = [];
+  }
+  return rowToPost({ ...row, tags, published: row.published === 1 });
 }
 
 function sortByDateDesc(posts: BlogPost[]) {
@@ -89,21 +102,21 @@ function seedPostBySlug(slug: string, includeDrafts?: boolean) {
 export async function getAllPosts(opts?: {
   includeDrafts?: boolean;
 }): Promise<BlogPost[]> {
-  if (!hasDatabase()) {
+  const db = await getDb();
+  if (!db) {
     return seedPostsFiltered(opts?.includeDrafts);
   }
 
   try {
     await ensureBlogSchemaAndSeed();
-    const sql = getSql();
-    const rows = opts?.includeDrafts
-      ? await sql`SELECT * FROM blog_posts ORDER BY published_at DESC`
-      : await sql`
-          SELECT * FROM blog_posts
-          WHERE published = true
-          ORDER BY published_at DESC
-        `;
-    return (rows as BlogPostRow[]).map(rowToPost);
+    const { results } = await db
+      .prepare(
+        opts?.includeDrafts
+          ? "SELECT * FROM blog_posts ORDER BY published_at DESC"
+          : "SELECT * FROM blog_posts WHERE published = 1 ORDER BY published_at DESC",
+      )
+      .all<D1BlogRow>();
+    return results.map(d1RowToPost);
   } catch (err) {
     console.error("[blog] getAllPosts fallback to seed:", err);
     return seedPostsFiltered(opts?.includeDrafts);
@@ -114,22 +127,22 @@ export async function getPostBySlug(
   slug: string,
   opts?: { includeDrafts?: boolean },
 ): Promise<BlogPost | null> {
-  if (!hasDatabase()) {
+  const db = await getDb();
+  if (!db) {
     return seedPostBySlug(slug, opts?.includeDrafts);
   }
 
   try {
     await ensureBlogSchemaAndSeed();
-    const sql = getSql();
-    const rows = opts?.includeDrafts
-      ? await sql`SELECT * FROM blog_posts WHERE slug = ${slug} LIMIT 1`
-      : await sql`
-          SELECT * FROM blog_posts
-          WHERE slug = ${slug} AND published = true
-          LIMIT 1
-        `;
-    const row = (rows as BlogPostRow[])[0];
-    return row ? rowToPost(row) : null;
+    const row = await db
+      .prepare(
+        opts?.includeDrafts
+          ? "SELECT * FROM blog_posts WHERE slug = ? LIMIT 1"
+          : "SELECT * FROM blog_posts WHERE slug = ? AND published = 1 LIMIT 1",
+      )
+      .bind(slug)
+      .first<D1BlogRow>();
+    return row ? d1RowToPost(row) : null;
   } catch (err) {
     console.error("[blog] getPostBySlug fallback to seed:", err);
     return seedPostBySlug(slug, opts?.includeDrafts);
@@ -138,47 +151,48 @@ export async function getPostBySlug(
 
 export async function upsertPost(post: BlogPost) {
   await ensureBlogSchemaAndSeed();
-  const sql = getSql();
-  const published = post.published;
-
-  await sql`
-    INSERT INTO blog_posts (
-      slug, published_at, cover_image, tags,
-      title_es, title_en, summary_es, summary_en,
-      body_es, body_en, published, updated_at
-    ) VALUES (
-      ${post.slug},
-      ${post.publishedAt},
-      ${post.coverImage},
-      ${post.tags as unknown as string},
-      ${post.title.es},
-      ${post.title.en},
-      ${post.summary.es},
-      ${post.summary.en},
-      ${post.body.es},
-      ${post.body.en},
-      ${published},
-      NOW()
+  const db = await requireDb();
+  await db
+    .prepare(
+      `INSERT INTO blog_posts (
+        slug, published_at, cover_image, tags,
+        title_es, title_en, summary_es, summary_en,
+        body_es, body_en, published, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT (slug) DO UPDATE SET
+        published_at = excluded.published_at,
+        cover_image = excluded.cover_image,
+        tags = excluded.tags,
+        title_es = excluded.title_es,
+        title_en = excluded.title_en,
+        summary_es = excluded.summary_es,
+        summary_en = excluded.summary_en,
+        body_es = excluded.body_es,
+        body_en = excluded.body_en,
+        published = excluded.published,
+        updated_at = excluded.updated_at`,
     )
-    ON CONFLICT (slug) DO UPDATE SET
-      published_at = EXCLUDED.published_at,
-      cover_image = EXCLUDED.cover_image,
-      tags = EXCLUDED.tags,
-      title_es = EXCLUDED.title_es,
-      title_en = EXCLUDED.title_en,
-      summary_es = EXCLUDED.summary_es,
-      summary_en = EXCLUDED.summary_en,
-      body_es = EXCLUDED.body_es,
-      body_en = EXCLUDED.body_en,
-      published = EXCLUDED.published,
-      updated_at = NOW()
-  `;
+    .bind(
+      post.slug,
+      toIsoDate(post.publishedAt),
+      post.coverImage,
+      JSON.stringify(post.tags ?? []),
+      post.title.es,
+      post.title.en,
+      post.summary.es,
+      post.summary.en,
+      post.body.es,
+      post.body.en,
+      post.published ? 1 : 0,
+      nowIso(),
+    )
+    .run();
 }
 
 export async function deletePost(slug: string) {
   await ensureBlogSchemaAndSeed();
-  const sql = getSql();
-  await sql`DELETE FROM blog_posts WHERE slug = ${slug}`;
+  const db = await requireDb();
+  await db.prepare("DELETE FROM blog_posts WHERE slug = ?").bind(slug).run();
 }
 
 export async function requireAdminSession() {
