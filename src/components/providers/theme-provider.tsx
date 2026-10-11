@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useSyncExternalStore,
   type ReactNode,
@@ -11,6 +12,9 @@ import {
 import {
   THEME_COOKIE,
   THEME_STORAGE_KEY,
+  normalizeTheme,
+  readCookie,
+  readStorage,
   writePrefCookie,
   type Theme,
 } from "@/lib/prefs-shared";
@@ -66,6 +70,21 @@ export function ThemeProvider({
       localStorage.setItem(THEME_STORAGE_KEY, next);
     } catch {
       /* ignore */
+    }
+  }, []);
+
+  // Safety net if the head script didn't run: apply the saved theme (cookie,
+  // else legacy next-themes value). Never writes the server default.
+  useEffect(() => {
+    const fromCookie = normalizeTheme(readCookie(THEME_COOKIE));
+    const raw = readStorage(THEME_STORAGE_KEY);
+    const wanted =
+      fromCookie ??
+      normalizeTheme(raw, window.matchMedia?.("(prefers-color-scheme: light)").matches);
+    if (!wanted) return;
+    if (readDomTheme() !== wanted) applyTheme(wanted);
+    if (!fromCookie && raw?.replace(/"/g, "").trim() !== "system") {
+      writePrefCookie(THEME_COOKIE, wanted);
     }
   }, []);
 

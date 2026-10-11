@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -13,6 +14,9 @@ import type { Locale } from "./types";
 import {
   LOCALE_COOKIE,
   LOCALE_STORAGE_KEY,
+  normalizeLocale,
+  readCookie,
+  readStorage,
   writePrefCookie,
 } from "@/lib/prefs-shared";
 
@@ -48,6 +52,19 @@ export function LocaleProvider({
   children: ReactNode;
 }) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
+
+  // Safety net: if the server rendered a different language than the saved
+  // preference (cookie, else legacy localStorage) — e.g. cookies blocked or
+  // the one-time reload was already used this session — switch client-side.
+  // Never writes the server default.
+  useEffect(() => {
+    const fromCookie = normalizeLocale(readCookie(LOCALE_COOKIE));
+    const wanted = fromCookie ?? normalizeLocale(readStorage(LOCALE_STORAGE_KEY));
+    if (!wanted) return;
+    if (!fromCookie) writePrefCookie(LOCALE_COOKIE, wanted);
+    document.documentElement.lang = wanted;
+    if (wanted !== initialLocale) setLocaleState(wanted); // eslint-disable-line react-hooks/set-state-in-effect -- one-time correction after hydration
+  }, [initialLocale]);
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);

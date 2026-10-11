@@ -26,23 +26,59 @@ export function writePrefCookie(name: string, value: string) {
   document.cookie = `${name}=${value}; Path=/; Max-Age=${ONE_YEAR}; SameSite=Lax${secure}`;
 }
 
+/** Lenient parse of a stored language: "es", "\"es\"" (JSON), "es-AR", " ES " -> es. */
+export function normalizeLocale(v: unknown): "es" | "en" | null {
+  if (typeof v !== "string") return null;
+  const s = v.trim().replace(/^"|"$/g, "").trim().toLowerCase();
+  if (s.startsWith("es")) return "es";
+  if (s.startsWith("en")) return "en";
+  return null;
+}
+
+/** Lenient parse of a stored theme (next-themes writes plain "light" | "dark" | "system"). */
+export function normalizeTheme(v: unknown, prefersLight = false): Theme | null {
+  if (typeof v !== "string") return null;
+  const s = v.trim().replace(/^"|"$/g, "").trim().toLowerCase();
+  if (s === "light" || s === "dark") return s;
+  if (s === "system") return prefersLight ? "light" : "dark";
+  return null;
+}
+
+export function readCookie(name: string): string | null {
+  const m = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+export function readStorage(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
 /**
- * Blocking <head> script, runs before first paint:
- * - theme: cookie, else old localStorage value (migrated into the cookie)
- * - lang: cookie, else old localStorage value; if it differs from what the
- *   server rendered, set the cookie and reload once so text matches (one-time
- *   migration for visitors who only have localStorage).
+ * Blocking <head> script, runs before first paint.
+ * Legacy keys written by the pre-cookie site (verified in its source):
+ *   localStorage "lulox-locale" = "es" | "en"   (LocaleProvider, plain string)
+ *   localStorage "theme" = "light" | "dark" | "system"  (next-themes 0.4.6 default storageKey, plain string)
+ * - theme: cookie, else legacy value (light/dark migrated into the cookie)
+ * - lang: cookie, else legacy value -> cookie; if it differs from what the
+ *   server rendered, reload once (sessionStorage guard) so text matches.
+ * Sets <html data-prefs> to what happened, for debugging.
  */
-export const PREFS_HEAD_SCRIPT = `(function(){try{
-var d=document.documentElement;
+export const PREFS_HEAD_SCRIPT = `(function(){var d=document.documentElement,st='default';try{
 function gc(n){var m=document.cookie.match(new RegExp('(?:^|; )'+n+'=([^;]*)'));return m?decodeURIComponent(m[1]):null}
 function sc(n,v){document.cookie=n+'='+v+'; Path=/; Max-Age=${ONE_YEAR}; SameSite=Lax'+(location.protocol==='https:'?'; Secure':'')}
 function ls(k){try{return localStorage.getItem(k)}catch(e){return null}}
-var t=gc('${THEME_COOKIE}');
-if(t!=='light'&&t!=='dark'){var lt=ls('${THEME_STORAGE_KEY}');if(lt==='light'||lt==='dark'){t=lt;sc('${THEME_COOKIE}',t)}}
-if(t==='light'||t==='dark'){d.classList.remove('light','dark');d.classList.add(t);d.style.colorScheme=t}
-var l=gc('${LOCALE_COOKIE}');
-if(l!=='es'&&l!=='en'){var ll=ls('${LOCALE_STORAGE_KEY}');if(ll==='es'||ll==='en'){sc('${LOCALE_COOKIE}',ll);
-if(ll!==d.getAttribute('data-ssr-locale')&&gc('${LOCALE_COOKIE}')===ll&&!sessionStorage.getItem('lulox-lang-reload')){sessionStorage.setItem('lulox-lang-reload','1');location.replace(location.href);return}
-d.lang=ll}}
-}catch(e){}})();`;
+function cl(v){return typeof v==='string'?v.trim().replace(/^"|"$/g,'').trim().toLowerCase():''}
+function nl(v){v=cl(v);return v.indexOf('es')===0?'es':v.indexOf('en')===0?'en':null}
+function nt(v){v=cl(v);if(v==='light'||v==='dark')return v;if(v==='system'){try{return matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}catch(e){return 'dark'}}return null}
+var t=nt(gc('${THEME_COOKIE}'));
+if(t){st='cookie'}else{var lr=cl(ls('${THEME_STORAGE_KEY}'));t=nt(lr);if(t){st='legacy';if(lr==='light'||lr==='dark')sc('${THEME_COOKIE}',t)}}
+if(t){d.classList.remove('light','dark');d.classList.add(t);d.style.colorScheme=t}
+var l=nl(gc('${LOCALE_COOKIE}'));
+if(!l){l=nl(ls('${LOCALE_STORAGE_KEY}'));if(l){st='legacy';sc('${LOCALE_COOKIE}',l);d.lang=l;
+if(l!==d.getAttribute('data-ssr-locale')&&nl(gc('${LOCALE_COOKIE}'))===l){var done=null;try{done=sessionStorage.getItem('lulox-lang-reload')}catch(e){}
+if(!done){try{sessionStorage.setItem('lulox-lang-reload','1')}catch(e){}d.setAttribute('data-prefs','reload');location.replace(location.href);return}}}}
+}catch(e){st='error'}d.setAttribute('data-prefs',st)})();`;

@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { localeFromAcceptLanguage } from "../src/lib/prefs.ts";
-import { PREFS_HEAD_SCRIPT } from "../src/lib/prefs-shared.ts";
+import { PREFS_HEAD_SCRIPT, normalizeLocale, normalizeTheme } from "../src/lib/prefs-shared.ts";
 
 test("Accept-Language fallback matches the old browser rule", () => {
   assert.equal(localeFromAcceptLanguage(null), "en");
@@ -12,18 +12,20 @@ test("Accept-Language fallback matches the old browser rule", () => {
   assert.equal(localeFromAcceptLanguage("fr-FR"), "en");
 });
 
-function run(cookie: string, ls: Record<string, string>, ssrLocale: string) {
+function run(cookie: string, ls: Record<string, string>, ssrLocale: string, ssIn: Record<string, string> | null = {}) {
   const cls = new Set(["dark"]);
   let jar = cookie;
   let reloaded = false;
-  const ss: Record<string, string> = {};
+  const ss: Record<string, string> = { ...(ssIn ?? {}) };
+  const attrs: Record<string, string> = { "data-ssr-locale": ssrLocale };
   const documentElement = {
     classList: {
       remove: (...a: string[]) => a.forEach((x) => cls.delete(x)),
       add: (x: string) => cls.add(x),
     },
     style: {} as Record<string, string>,
-    getAttribute: () => ssrLocale,
+    getAttribute: (k: string) => attrs[k] ?? null,
+    setAttribute: (k: string, v: string) => void (attrs[k] = v),
     lang: ssrLocale,
   };
   const document = {
@@ -40,15 +42,22 @@ function run(cookie: string, ls: Record<string, string>, ssrLocale: string) {
   const env = {
     document,
     localStorage: { getItem: (k: string) => ls[k] ?? null },
-    sessionStorage: { getItem: (k: string) => ss[k] ?? null, setItem: (k: string, v: string) => void (ss[k] = v) },
+    sessionStorage: ssIn === null
+      ? { getItem: () => { throw new Error("denied"); }, setItem: () => { throw new Error("denied"); } }
+      : { getItem: (k: string) => ss[k] ?? null, setItem: (k: string, v: string) => void (ss[k] = v) },
+    matchMedia: () => ({ matches: true }),
     location: { protocol: "https:", href: "https://www.lulox.dev/", replace: () => void (reloaded = true) },
   };
   new Function(...Object.keys(env), PREFS_HEAD_SCRIPT)(...Object.values(env));
-  return { theme: [...cls].join(","), cookie: jar, reloaded };
+  return { theme: [...cls].join(","), cookie: jar, reloaded, status: attrs["data-prefs"], lang: documentElement.lang };
 }
 
 test("head script: no prefs keeps server defaults", () => {
-  assert.deepEqual(run("", {}, "en"), { theme: "dark", cookie: "", reloaded: false });
+  const r = run("", {}, "en");
+  assert.equal(r.theme, "dark");
+  assert.equal(r.cookie, "");
+  assert.equal(r.reloaded, false);
+  assert.equal(r.status, "default");
 });
 
 test("head script: cookie theme applied before paint", () => {
@@ -62,4 +71,52 @@ test("head script: localStorage-only prefs migrate to cookies, reload once if la
   assert.match(r.cookie, /lulox-locale=es/);
   assert.equal(r.reloaded, true);
   assert.equal(run("", { "lulox-locale": "en" }, "en").reloaded, false);
+});
+
+test("normalizers accept the real legacy formats and JSON-quoted variants", () => {
+  assert.equal(normalizeLocale("es"), "es");
+  assert.equal(normalizeLocale('"es"'), "es");
+  assert.equal(normalizeLocale(" es-AR "), "es");
+  assert.equal(normalizeLocale("EN"), "en");
+  assert.equal(normalizeLocale("fr"), null);
+  assert.equal(normalizeLocale(null), null);
+  assert.equal(normalizeTheme("light"), "light");
+  assert.equal(normalizeTheme('"light"'), "light");
+  assert.equal(normalizeTheme("system", true), "light");
+  assert.equal(normalizeTheme("system", false), "dark");
+  assert.equal(normalizeTheme("blue"), null);
+});
+
+test("head script: JSON-quoted legacy values migrate too", () => {
+  const r = run("", { theme: '"light"', "lulox-locale": '"es"' }, "en");
+  assert.equal(r.theme, "light");
+  assert.match(r.cookie, /lulox-locale=es/);
+  assert.equal(r.reloaded, true);
+});
+
+test("head script: reload guard prevents loops but still fixes lang/theme", () => {
+  const r = run("", { theme: "light", "lulox-locale": "es" }, "en", { "lulox-lang-reload": "1" });
+  assert.equal(r.reloaded, false);
+  assert.equal(r.theme, "light");
+  assert.equal(r.lang, "es");
+  assert.equal(r.status, "legacy");
+});
+
+test("head script: sessionStorage denied still reloads once (cookie then matches server)", () => {
+  const r = run("", { "lulox-locale": "es" }, "en", null);
+  assert.equal(r.reloaded, true);
+  assert.match(r.cookie, /lulox-locale=es/);
+});
+
+test("head script: cookie wins over legacy storage, no reload", () => {
+  const r = run("lulox-locale=en; lulox-theme=dark", { theme: "light", "lulox-locale": "es" }, "en");
+  assert.equal(r.theme, "dark");
+  assert.equal(r.reloaded, false);
+  assert.equal(r.status, "cookie");
+});
+
+test("head script: system theme applied but not persisted", () => {
+  const r = run("", { theme: "system" }, "en");
+  assert.equal(r.theme, "light");
+  assert.doesNotMatch(r.cookie, /lulox-theme/);
 });
