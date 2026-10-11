@@ -4,17 +4,17 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
 import { getMessages, type Messages } from "./messages";
+import type { Locale } from "./types";
 import {
-  DEFAULT_LOCALE,
+  LOCALE_COOKIE,
   LOCALE_STORAGE_KEY,
-  type Locale,
-} from "./types";
+  writePrefCookie,
+} from "@/lib/prefs-shared";
 
 type LocaleContextValue = {
   locale: Locale;
@@ -25,73 +25,49 @@ type LocaleContextValue = {
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-/** Spanish (any region) → es; everything else → en */
-export function detectBrowserLocale(): Locale {
-  if (typeof navigator === "undefined") return DEFAULT_LOCALE;
-
-  const candidates =
-    navigator.languages?.length > 0
-      ? navigator.languages
-      : [navigator.language];
-
-  for (const raw of candidates) {
-    if (!raw) continue;
-    const base = raw.toLowerCase().split("-")[0];
-    if (base === "es") return "es";
+function persist(locale: Locale) {
+  document.documentElement.lang = locale;
+  writePrefCookie(LOCALE_COOKIE, locale);
+  try {
+    localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  } catch {
+    /* ignore */
   }
-
-  return "en";
 }
 
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale | null;
-      if (stored === "es" || stored === "en") {
-        setLocaleState(stored);
-      } else {
-        setLocaleState(detectBrowserLocale());
-      }
-    } catch {
-      setLocaleState(detectBrowserLocale());
-    }
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (!ready) return;
-    document.documentElement.lang = locale;
-    try {
-      localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-    } catch {
-      /* ignore */
-    }
-  }, [locale, ready]);
+/**
+ * The server picks the locale (cookie, else Accept-Language) and renders with
+ * it, so first paint is already in the right language. Changes are saved to
+ * the cookie (for the server) and localStorage (legacy).
+ */
+export function LocaleProvider({
+  initialLocale,
+  children,
+}: {
+  initialLocale: Locale;
+  children: ReactNode;
+}) {
+  const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
+    persist(next);
   }, []);
 
   const toggleLocale = useCallback(() => {
-    setLocaleState((prev) => (prev === "es" ? "en" : "es"));
+    setLocaleState((prev) => {
+      const next = prev === "es" ? "en" : "es";
+      persist(next);
+      return next;
+    });
   }, []);
 
   const value = useMemo(
-    () => ({
-      locale,
-      setLocale,
-      toggleLocale,
-      t: getMessages(locale),
-    }),
+    () => ({ locale, setLocale, toggleLocale, t: getMessages(locale) }),
     [locale, setLocale, toggleLocale],
   );
 
-  return (
-    <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
-  );
+  return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 
 export function useLocale() {

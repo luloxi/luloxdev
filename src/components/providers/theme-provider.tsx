@@ -1,17 +1,84 @@
 "use client";
 
-import { ThemeProvider as NextThemesProvider } from "next-themes";
-import type { ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
+import {
+  THEME_COOKIE,
+  THEME_STORAGE_KEY,
+  writePrefCookie,
+  type Theme,
+} from "@/lib/prefs-shared";
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="dark"
-      enableSystem
-      disableTransitionOnChange
-    >
-      {children}
-    </NextThemesProvider>
+type ThemeContextValue = {
+  theme: Theme;
+  resolvedTheme: Theme;
+  setTheme: (theme: Theme) => void;
+};
+
+const ThemeContext = createContext<ThemeContextValue | null>(null);
+
+function readDomTheme(): Theme {
+  return document.documentElement.classList.contains("light") ? "light" : "dark";
+}
+
+function subscribe(onChange: () => void) {
+  const obs = new MutationObserver(onChange);
+  obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  return () => obs.disconnect();
+}
+
+function applyTheme(theme: Theme) {
+  const root = document.documentElement;
+  // Avoid every element animating colors during the switch.
+  const style = document.createElement("style");
+  style.textContent = "*,*::before,*::after{transition:none!important}";
+  document.head.appendChild(style);
+  root.classList.remove("light", "dark");
+  root.classList.add(theme);
+  root.style.colorScheme = theme;
+  void window.getComputedStyle(document.body).opacity;
+  setTimeout(() => style.remove(), 1);
+}
+
+/**
+ * Theme lives on <html class> (server-rendered from the cookie, corrected
+ * before paint by the head script). The DOM is the source of truth.
+ */
+export function ThemeProvider({
+  initialTheme,
+  children,
+}: {
+  initialTheme: Theme;
+  children: ReactNode;
+}) {
+  const theme = useSyncExternalStore(subscribe, readDomTheme, () => initialTheme);
+
+  const setTheme = useCallback((next: Theme) => {
+    applyTheme(next);
+    writePrefCookie(THEME_COOKIE, next);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, next);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const value = useMemo(
+    () => ({ theme, resolvedTheme: theme, setTheme }),
+    [theme, setTheme],
   );
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
+
+export function useTheme() {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
+  return ctx;
 }

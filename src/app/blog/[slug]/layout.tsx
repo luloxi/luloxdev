@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { localizePost } from "@/content/blog/types";
-import { DEFAULT_LOCALE } from "@/i18n/types";
 import { getPublishedPost } from "@/lib/blog";
+import { getServerPrefs } from "@/lib/prefs";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -15,7 +15,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) {
     return { title: "Blog", robots: { index: false } };
   }
-  const L = localizePost(post, DEFAULT_LOCALE);
+  const { locale } = await getServerPrefs();
+  const L = localizePost(post, locale);
   const url = `/blog/${post.slug}`;
   const images = post.coverImage ? [{ url: post.coverImage }] : undefined;
   return {
@@ -25,6 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords: post.tags,
     openGraph: {
       type: "article",
+      locale: locale === "es" ? "es_AR" : "en_US",
       url,
       title: L.title,
       description: L.summary,

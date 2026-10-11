@@ -1,27 +1,55 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
+import { pastProjectIds } from "@/content/projects";
+import { getPostBySlug } from "@/lib/blog";
 
 /**
- * Protect /rothko (blog CMS). Cheap cookie check only: no session cookie means
- * straight to sign-in. The real check (valid session + admin email allowlist)
- * runs in the /api/blog and /api/projects handlers via requireAdminSession().
+ * Next renders notFound() thrown inside a dynamic page as an empty
+ * `__next_error__` shell (vercel/next.js#99793), so missing posts/projects
+ * are detected here and rewritten to an unmatched path: that 404 is fully
+ * server-rendered by app/not-found.tsx inside the root layout.
  */
-export default function proxy(request: NextRequest) {
-  if (!request.nextUrl.pathname.startsWith("/rothko")) {
+function notFoundRewrite(request: NextRequest) {
+  const url = request.nextUrl.clone();
+  url.pathname = "/__not-found";
+  url.search = "";
+  return NextResponse.rewrite(url, { status: 404 });
+}
+
+export default async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (pathname.startsWith("/rothko")) {
+    // Cheap cookie check only; the real check (valid session + admin email
+    // allowlist) runs in the /api/blog and /api/projects handlers.
+    if (!getSessionCookie(request)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/sign-in";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
     return NextResponse.next();
   }
 
-  if (!getSessionCookie(request)) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/sign-in";
-    url.search = "";
-    return NextResponse.redirect(url);
+  const blog = pathname.match(/^\/blog\/([^/]+)\/?$/);
+  if (blog) {
+    const slug = decodeURIComponent(blog[1]);
+    const post = await getPostBySlug(slug, { includeDrafts: false });
+    return post ? NextResponse.next() : notFoundRewrite(request);
+  }
+
+  const project = pathname.match(/^\/projects\/([^/]+)\/?$/);
+  if (project) {
+    const id = decodeURIComponent(project[1]);
+    return (pastProjectIds as string[]).includes(id)
+      ? NextResponse.next()
+      : notFoundRewrite(request);
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/rothko", "/rothko/:path*"],
+  matcher: ["/rothko", "/rothko/:path*", "/blog/:slug", "/projects/:id"],
 };

@@ -1,11 +1,12 @@
-"use client";
-
 import Link from "next/link";
 import { site } from "@/content/site";
-import { useLocale } from "@/i18n/locale-provider";
+import { getMessages } from "@/i18n/messages";
+import { getServerPrefs } from "@/lib/prefs";
 
-export default function NotFound() {
-  const { t } = useLocale();
+/** Server component so the 404 page is fully in the HTML (no client-only render). */
+export default async function NotFound() {
+  const { locale } = await getServerPrefs();
+  const t = getMessages(locale);
 
   return (
     <div className="relative flex min-h-dvh flex-col items-center justify-center px-6 pt-14 text-center">

@@ -2,8 +2,7 @@
 
 import { useLocale } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useTheme } from "@/components/providers/theme-provider";
 
 /**
  * Foolproof theme control: small "tema"/"theme" label + two color chips
@@ -12,26 +11,6 @@ import { useEffect, useState } from "react";
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const { t } = useLocale();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) {
-    return (
-      <div className="cp-theme" aria-hidden>
-        <span className="cp-theme-label">··</span>
-        <div className="cp-theme-swatches">
-          <span className="cp-lang-btn">
-            <span className="cp-theme-swatch cp-theme-swatch-light cp-theme-placeholder" />
-          </span>
-          <span className="cp-lang-btn">
-            <span className="cp-theme-swatch cp-theme-swatch-dark cp-theme-placeholder" />
-          </span>
-        </div>
-      </div>
-    );
-  }
-
   const isDark = resolvedTheme === "dark";
 
   return (

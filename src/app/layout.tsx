@@ -3,7 +3,8 @@ import { Orbitron, Space_Grotesk } from "next/font/google";
 import { CosmicBg } from "@/components/cosmic-bg";
 import { SiteControls } from "@/components/site-controls";
 import { LocaleProvider } from "@/i18n/locale-provider";
-import { DEFAULT_LOCALE } from "@/i18n/types";
+import { getServerPrefs } from "@/lib/prefs";
+import { PREFS_HEAD_SCRIPT } from "@/lib/prefs-shared";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { site } from "@/content/site";
 import "./globals.css";
@@ -94,23 +95,30 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Per-request: language + theme from cookies (else Accept-Language / dark).
+  const { locale, theme } = await getServerPrefs();
   return (
     <html
-      lang={DEFAULT_LOCALE}
+      lang={locale}
+      data-ssr-locale={locale}
       suppressHydrationWarning
-      className={`${spaceGrotesk.variable} ${orbitron.variable} dark h-full`}
+      className={`${spaceGrotesk.variable} ${orbitron.variable} ${theme} h-full`}
+      style={{ colorScheme: theme }}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: PREFS_HEAD_SCRIPT }} />
+      </head>
       <body
         className={`${spaceGrotesk.className} relative min-h-full`}
         suppressHydrationWarning
       >
-        <ThemeProvider>
-          <LocaleProvider>
+        <ThemeProvider initialTheme={theme}>
+          <LocaleProvider initialLocale={locale}>
             <CosmicBg />
             <SiteControls />
             <div className="relative z-10">{children}</div>
