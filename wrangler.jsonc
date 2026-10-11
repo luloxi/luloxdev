@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "luloxdev",
-  "main": ".open-next/worker.js",
+  "main": "worker.ts",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
@@ -24,6 +24,14 @@
       "database_id": "61d3b739-db00-4fed-86d5-0387bf50b2cc",
       "migrations_dir": "migrations"
     }
+  ],
+  // Custom domains (Cloudflare zone lulox.dev). The apex is redirected to www
+  // in worker.ts, matching the previous Vercel behaviour (307 to www).
+  "workers_dev": true,
+  "preview_urls": true,
+  "routes": [
+    { "pattern": "www.lulox.dev", "custom_domain": true },
+    { "pattern": "lulox.dev", "custom_domain": true }
   ],
   "observability": {
     "enabled": true
