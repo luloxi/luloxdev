@@ -3,6 +3,7 @@ import { Orbitron, Space_Grotesk } from "next/font/google";
 import { CosmicBg } from "@/components/cosmic-bg";
 import { SiteControls } from "@/components/site-controls";
 import { LocaleProvider } from "@/i18n/locale-provider";
+import { DEFAULT_LOCALE } from "@/i18n/types";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { site } from "@/content/site";
 import "./globals.css";
@@ -100,7 +101,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="es"
+      lang={DEFAULT_LOCALE}
       suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${orbitron.variable} dark h-full`}
     >

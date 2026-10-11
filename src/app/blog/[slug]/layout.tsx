@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { getPostBySlug } from "@/lib/blog";
+import { localizePost } from "@/content/blog/types";
+import { DEFAULT_LOCALE } from "@/i18n/types";
+import { getPublishedPost } from "@/lib/blog";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -8,22 +10,34 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  // Include drafts so admin preview still gets a real title
-  const post = await getPostBySlug(slug, { includeDrafts: true });
+  // Published only: drafts must not leak their title/summary.
+  const post = await getPublishedPost(slug);
   if (!post) {
-    return { title: "Blog" };
+    return { title: "Blog", robots: { index: false } };
   }
+  const L = localizePost(post, DEFAULT_LOCALE);
+  const url = `/blog/${post.slug}`;
+  const images = post.coverImage ? [{ url: post.coverImage }] : undefined;
   return {
-    title: post.title.es,
-    description: post.summary.es,
+    title: L.title,
+    description: L.summary,
+    alternates: { canonical: url },
+    keywords: post.tags,
     openGraph: {
-      title: post.title.es,
-      description: post.summary.es,
       type: "article",
+      url,
+      title: L.title,
+      description: L.summary,
+      publishedTime: post.publishedAt,
+      authors: ["Luciano Oliva Bianco"],
+      tags: post.tags,
+      ...(images ? { images } : {}),
     },
     twitter: {
-      title: post.title.es,
-      description: post.summary.es,
+      card: "summary",
+      title: L.title,
+      description: L.summary,
+      ...(images ? { images: images.map((i) => i.url) } : {}),
     },
   };
 }

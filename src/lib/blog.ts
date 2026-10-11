@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { seedPosts } from "@/content/blog/seed";
 import {
   rowToPost,
@@ -213,3 +214,12 @@ export async function requireAdminSession() {
 
   return { ok: true as const, user, session };
 }
+
+/**
+ * Server-render helpers (published only). `cache` dedupes the D1 read between
+ * generateMetadata and the page within one request.
+ */
+export const getPublishedPosts = cache(() => getAllPosts({ includeDrafts: false }));
+export const getPublishedPost = cache((slug: string) =>
+  getPostBySlug(slug, { includeDrafts: false }),
+);
