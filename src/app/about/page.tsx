@@ -2,11 +2,17 @@
 
 import type { ComponentType, ReactNode } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { CpRow } from "@/components/cp-row";
 import { BuidlGuidlIcon } from "@/components/icons/brands";
-import { LinkedInIcon } from "@/components/icons/social";
+import {
+  LastFmIcon,
+  LetterboxdBrandIcon,
+  LinkedInIcon,
+  SpotifyIcon,
+} from "@/components/icons/social";
 import { PageShell } from "@/components/page-shell";
-import { socials } from "@/content/site";
+import { socials, tasteLinks } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 
 const linkedInHref =
@@ -59,6 +65,33 @@ const orgLogos: Record<string, OrgLogo> = {
 const timelineAccents = [
   "var(--section-about)",
   "var(--section-projects)",
+];
+
+const platforms = [
+  {
+    id: "letterboxd" as const,
+    label: "Letterboxd",
+    href: tasteLinks.letterboxd,
+    Icon: LetterboxdBrandIcon,
+    iconClass: undefined as string | undefined,
+    accent: "#ff8000",
+  },
+  {
+    id: "lastfm" as const,
+    label: "Last.fm",
+    href: tasteLinks.lastfm,
+    Icon: LastFmIcon,
+    iconClass: "text-[#D51007]",
+    accent: "#D51007",
+  },
+  {
+    id: "spotify" as const,
+    label: "Spotify",
+    href: tasteLinks.spotify,
+    Icon: SpotifyIcon,
+    iconClass: "text-[#1DB954]",
+    accent: "#1DB954",
+  },
 ];
 
 export default function AboutPage() {
@@ -146,6 +179,29 @@ export default function AboutPage() {
               iconClass="text-[#0A66C2]"
             />
           </div>
+        </section>
+
+        <section>
+          <h2 className="cp-heading">{t.tastes.title}</h2>
+          <div className="cp-list">
+            {platforms.map((p) => (
+              <CpRow
+                key={p.id}
+                href={p.href}
+                label={p.label}
+                detail={t.tastes.platforms[p.id]}
+                accent={p.accent}
+                Icon={p.Icon as ComponentType<{ className?: string }>}
+                iconClass={p.iconClass}
+                iconSize="lg"
+              />
+            ))}
+          </div>
+          <p className="mt-6 text-right font-mono text-xs text-muted">
+            <Link href="/projects" className="hover:underline">
+              {t.tastes.projectsLink}
+            </Link>
+          </p>
         </section>
       </div>
     </PageShell>

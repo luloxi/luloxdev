@@ -196,6 +196,7 @@ export const messages = {
       authorContact: "Contactame",
     },
     tastes: {
+      projectsLink: "Ver proyectos anteriores",
       title: "Gustos",
       platforms: {
         letterboxd: "Películas que vi con ratings y reviews",
@@ -405,11 +406,12 @@ export const messages = {
       authorContact: "Contact me",
     },
     tastes: {
+      projectsLink: "See past projects",
       title: "Tastes",
       platforms: {
         letterboxd: "Movies I've watched, with ratings and reviews",
         lastfm: "Music I've been listening to for years",
-        spotify: "Music I listen to; I like curating playlists",
+        spotify: "Music I listen to, I like curating playlists",
       },
     },
     contact: {
