@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Mail } from "lucide-react";
 import { BlogMarkdown } from "@/components/blog-markdown";
 import { PageShell } from "@/components/page-shell";
+import { ResearchTopics } from "@/components/research-topics";
 import {
   GitHubIcon,
   InstagramIcon,
@@ -91,6 +92,10 @@ export function BlogPostView({ post }: { post: BlogPost }) {
             <BlogMarkdown content={L.body} />
           </div>
         </div>
+
+        {post.topics && post.topics.length > 0 ? (
+          <ResearchTopics ids={post.topics} />
+        ) : null}
 
         <aside
           className="cp-panel"

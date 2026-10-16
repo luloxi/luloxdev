@@ -1,8 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { BlogPost } from "@/content/blog/types";
+import { focusTopics, suggestTopics } from "@/content/projects";
+import { cn } from "@/lib/utils";
 import { useLocale } from "@/i18n/locale-provider";
 
 type Props = {
@@ -27,6 +29,16 @@ export function BlogEditor({ initial, isNew }: Props) {
   const [bodyEs, setBodyEs] = useState(initial?.body.es ?? "");
   const [bodyEn, setBodyEn] = useState(initial?.body.en ?? "");
   const [published, setPublished] = useState(initial?.published ?? true);
+  const [topics, setTopics] = useState<string[]>(initial?.topics ?? []);
+  const suggested = useMemo(
+    () =>
+      suggestTopics(`${titleEs}\n${titleEn}\n${bodyEs}\n${bodyEn}`).filter(
+        (id) => !topics.includes(id),
+      ),
+    [titleEs, titleEn, bodyEs, bodyEn, topics],
+  );
+  const toggleTopic = (id: string) =>
+    setTopics((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
 
   async function save() {
     setSaving(true);
@@ -36,6 +48,7 @@ export function BlogEditor({ initial, isNew }: Props) {
       publishedAt,
       coverImage: coverImage.trim(),
       tags: initial?.tags ?? [],
+      topics,
       published,
       title: { es: titleEs, en: titleEn },
       summary: { es: summaryEs, en: summaryEn },
@@ -196,6 +209,47 @@ export function BlogEditor({ initial, isNew }: Props) {
           />
         </div>
       </fieldset>
+
+      <div className="blog-field">
+        <span className="blog-label">{t.blog.fieldTopics}</span>
+        <div className="flex flex-wrap gap-2">
+          {focusTopics.map((topic) => {
+            const on = topics.includes(topic.id);
+            return (
+              <button
+                key={topic.id}
+                type="button"
+                role="checkbox"
+                aria-checked={on}
+                onClick={() => toggleTopic(topic.id)}
+                className={cn("focus-topic-chip", on && "focus-topic-chip-active")}
+              >
+                <span className="focus-topic-chip-title">
+                  {on ? "✓ " : ""}
+                  {t.projects.focus[topic.id].title}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {suggested.length > 0 ? (
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span className="font-mono text-[11px] text-muted">
+              {t.blog.topicsSuggested}:
+            </span>
+            {suggested.map((id) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => toggleTopic(id)}
+                className="blog-admin-btn-ghost text-xs"
+              >
+                + {t.projects.focus[id].title}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
 
       {error ? (
         <p className="cp-prose text-[color:var(--section-tastes)]">{error}</p>

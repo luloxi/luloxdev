@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
-import { ResearchTopics } from "@/components/research-topics";
 import type { BlogPost } from "@/content/blog/types";
 import { localizePost } from "@/content/blog/types";
 import { useLocale } from "@/i18n/locale-provider";
@@ -86,10 +85,6 @@ export function BlogList({ posts, error }: { posts: BlogPost[]; error?: boolean 
         {!error && posts.length === 0 ? (
           <p className="cp-prose">{t.blog.empty}</p>
         ) : null}
-
-        <div className="pt-6">
-          <ResearchTopics />
-        </div>
       </div>
     </PageShell>
   );

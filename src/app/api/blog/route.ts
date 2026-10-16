@@ -1,3 +1,4 @@
+import { focusTopicIds } from "@/content/projects";
 import { NextResponse } from "next/server";
 import type { BlogPost } from "@/content/blog/types";
 import {
@@ -51,6 +52,9 @@ export async function PUT(request: Request) {
     slug,
     published: Boolean(post.published),
     tags: Array.isArray(post.tags) ? post.tags : [],
+    topics: Array.isArray(post.topics)
+      ? post.topics.map(String).filter((id: string) => focusTopicIds.includes(id))
+      : [],
     coverImage: post.coverImage || "",
     publishedAt: post.publishedAt || new Date().toISOString().slice(0, 10),
     summary: {

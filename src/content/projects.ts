@@ -23,9 +23,12 @@ export const focusTopics: {
   icon: string;
   /** 1-3 relevant external references shown under each topic */
   links: FocusLink[];
+  /** Lowercase substrings that suggest this topic in a post body (admin editor) */
+  keywords: string[];
 }[] = [
   {
     id: "hermes",
+    keywords: ["hermes", "nous research", "nous"],
     icon: "/projects/focus/nous.png",
     links: [
       { label: "Hermes Agent", href: "https://hermes-agent.nousresearch.com/" },
@@ -35,6 +38,7 @@ export const focusTopics: {
   },
   {
     id: "lcp",
+    keywords: ["lcp", "liquid commerce", "comercio agéntico", "agentic commerce"],
     icon: "/projects/focus/lcp.svg",
     links: [
       { label: "LCP", href: "https://legalcontextprotocol.org/" },
@@ -46,6 +50,7 @@ export const focusTopics: {
   },
   {
     id: "x402",
+    keywords: ["x402", "http 402", "402 payment"],
     icon: "/projects/focus/x402.svg",
     links: [
       { label: "x402", href: "https://x402.org/" },
@@ -58,6 +63,7 @@ export const focusTopics: {
   },
   {
     id: "erc8004",
+    keywords: ["erc-8004", "erc8004", "8004"],
     icon: "/projects/focus/erc8004.svg",
     links: [
       {
@@ -73,6 +79,7 @@ export const focusTopics: {
   },
   {
     id: "midnight",
+    keywords: ["midnight", "zk", "zero-knowledge", "conocimiento cero"],
     icon: "/projects/focus/midnight.svg",
     links: [
       { label: "Midnight", href: "https://midnight.network/" },
@@ -82,6 +89,7 @@ export const focusTopics: {
   },
   {
     id: "tokenization",
+    keywords: ["tokeniz", "rwa", "erc-3643", "cip-113", "real world asset"],
     icon: "/projects/focus/tokenization.svg",
     links: [
       {
@@ -242,3 +250,13 @@ export function getPastProject(id: string): PastProject | undefined {
 }
 
 export const pastProjectIds = pastProjects.map((p) => p.id);
+
+export const focusTopicIds: string[] = focusTopics.map((t) => t.id);
+
+/** Topics whose keywords appear in the text (case-insensitive). Suggestion only. */
+export function suggestTopics(text: string): FocusTopicId[] {
+  const lower = text.toLowerCase();
+  return focusTopics
+    .filter((t) => t.keywords.some((k) => lower.includes(k)))
+    .map((t) => t.id);
+}

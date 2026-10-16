@@ -7,6 +7,8 @@ export type BlogPost = {
   /** Cover image path under /public or absolute URL */
   coverImage: string;
   tags: string[];
+  /** Opt-in research topic ids explained at the end of the post */
+  topics?: string[];
   /** Public listing / public post page when true */
   published: boolean;
   title: Record<Locale, string>;
@@ -20,6 +22,7 @@ export type BlogPostRow = {
   published_at: string;
   cover_image: string;
   tags: string[] | null;
+  topics?: string[] | null;
   title_es: string;
   title_en: string;
   summary_es: string;
@@ -36,6 +39,7 @@ export function rowToPost(row: BlogPostRow): BlogPost {
     publishedAt: row.published_at,
     coverImage: row.cover_image,
     tags: row.tags ?? [],
+    topics: row.topics ?? [],
     published: Boolean(row.published),
     title: { es: row.title_es, en: row.title_en },
     summary: { es: row.summary_es, en: row.summary_en },
@@ -49,6 +53,7 @@ export function localizePost(post: BlogPost, locale: Locale) {
     publishedAt: post.publishedAt,
     coverImage: post.coverImage,
     tags: post.tags,
+    topics: post.topics ?? [],
     title: post.title[locale],
     summary: post.summary[locale],
     body: post.body[locale],

@@ -15,19 +15,24 @@ const focusAccents: Record<FocusTopicId, string> = {
   erc8004: "var(--section-projects)",
 };
 
-export function ResearchTopics() {
+export function ResearchTopics({ ids }: { ids?: string[] }) {
   const { t } = useLocale();
-  const [selected, setSelected] = useState<FocusTopicId>(focusTopics[0].id);
+  const topics = ids ? focusTopics.filter((x) => ids.includes(x.id)) : focusTopics;
+  const [selected, setSelected] = useState<FocusTopicId>(
+    (topics[0] ?? focusTopics[0]).id,
+  );
   const activeTopic = focusTopics.find((topic) => topic.id === selected)!;
   const activeCopy = t.projects.focus[selected];
   const activeAccent = focusAccents[selected];
+
+  if (topics.length === 0) return null;
 
   return (
       <section>
         <h2 className="cp-heading">{t.projects.focusHeading}</h2>
 
         <div className="focus-topic-grid mt-4">
-          {focusTopics.map((topic) => {
+          {topics.map((topic) => {
             const copy = t.projects.focus[topic.id];
             const accent = focusAccents[topic.id];
             const isActive = selected === topic.id;

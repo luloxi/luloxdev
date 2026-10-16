@@ -63,8 +63,9 @@ function toIsoDate(value: string) {
   return Number.isNaN(d.getTime()) ? nowIso() : d.toISOString();
 }
 
-type D1BlogRow = Omit<BlogPostRow, "tags" | "published"> & {
+type D1BlogRow = Omit<BlogPostRow, "tags" | "topics" | "published"> & {
   tags: string | null;
+  topics?: string | null;
   published: number;
 };
 
@@ -76,7 +77,14 @@ function d1RowToPost(row: D1BlogRow): BlogPost {
   } catch {
     tags = [];
   }
-  return rowToPost({ ...row, tags, published: row.published === 1 });
+  let topics: string[] = [];
+  try {
+    const parsed = JSON.parse(row.topics ?? "[]") as unknown;
+    if (Array.isArray(parsed)) topics = parsed.map(String);
+  } catch {
+    topics = [];
+  }
+  return rowToPost({ ...row, tags, topics, published: row.published === 1 });
 }
 
 function sortByDateDesc(posts: BlogPost[]) {
@@ -156,14 +164,15 @@ export async function upsertPost(post: BlogPost) {
   await db
     .prepare(
       `INSERT INTO blog_posts (
-        slug, published_at, cover_image, tags,
+        slug, published_at, cover_image, tags, topics,
         title_es, title_en, summary_es, summary_en,
         body_es, body_en, published, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT (slug) DO UPDATE SET
         published_at = excluded.published_at,
         cover_image = excluded.cover_image,
         tags = excluded.tags,
+        topics = excluded.topics,
         title_es = excluded.title_es,
         title_en = excluded.title_en,
         summary_es = excluded.summary_es,
@@ -178,6 +187,7 @@ export async function upsertPost(post: BlogPost) {
       toIsoDate(post.publishedAt),
       post.coverImage,
       JSON.stringify(post.tags ?? []),
+      JSON.stringify(post.topics ?? []),
       post.title.es,
       post.title.en,
       post.summary.es,
