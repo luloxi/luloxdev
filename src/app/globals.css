@@ -3399,3 +3399,28 @@
 .call-form-email-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .call-form-google { font-size: 0.72rem; color: var(--section-blog); text-decoration: underline; text-underline-offset: 2px; }
 .call-form-google-on { font-style: normal; font-size: 0.72rem; color: var(--section-contact); }
+
+/* Required-field highlight: electric cyan, contrasts with punzó in both themes */
+@keyframes call-form-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px #00e5ff, 0 0 8px 2px color-mix(in oklab, #00e5ff 55%, transparent); }
+  50% { box-shadow: 0 0 0 3px #00e5ff, 0 0 22px 6px color-mix(in oklab, #00e5ff 75%, transparent); }
+}
+.call-form-missing {
+  border-radius: 10px;
+  outline: none;
+  animation: call-form-pulse 1.1s ease-in-out infinite;
+}
+.call-form-req {
+  font-style: normal;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #008fa3;
+  margin: 0;
+}
+.dark .call-form-req { color: #00e5ff; }
+@media (prefers-reduced-motion: reduce) {
+  .call-form-missing {
+    animation: none;
+    box-shadow: 0 0 0 3px #00e5ff, 0 0 12px 3px color-mix(in oklab, #00e5ff 60%, transparent);
+  }
+}

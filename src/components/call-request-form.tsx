@@ -22,6 +22,7 @@ const copy = {
     when: "Fecha y hora propuesta (hora Argentina)",
     google: "Usar mi email de Google",
     signedAs: "Con Google",
+    required: "Este campo es obligatorio",
     send: "Enviar",
     sending: "Enviando...",
     ok: "Listo, te llegó a mi bandeja. Te respondo a tu email.",
@@ -41,6 +42,7 @@ const copy = {
     when: "Proposed date and time (Argentina time)",
     google: "Use my Google email",
     signedAs: "Via Google",
+    required: "This field is required",
     send: "Send",
     sending: "Sending...",
     ok: "Done, it landed in my inbox. I'll reply to your email.",
@@ -68,6 +70,12 @@ export function CallRequestForm() {
   const widgetRef = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | null>(null);
   const [tsReady, setTsReady] = useState(false);
+  const [missing, setMissing] = useState<Record<string, boolean>>({});
+  const msgRef = useRef<HTMLTextAreaElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const whenRef = useRef<HTMLInputElement>(null);
+  const clearMissing = (k: string) =>
+    setMissing((m) => (m[k] ? { ...m, [k]: false } : m));
 
   const session = authClient.useSession();
   const googleEmail = session.data?.user?.email ?? "";
@@ -92,6 +100,20 @@ export function CallRequestForm() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (state === "sending") return;
+    const empties: [string, HTMLElement | null][] = [];
+    if (!message.trim()) empties.push(["message", msgRef.current]);
+    if (!email.trim()) empties.push(["email", emailRef.current]);
+    if (!when) empties.push(["when", whenRef.current]);
+    if (empties.length > 0) {
+      setMissing(Object.fromEntries(empties.map(([k]) => [k, true])));
+      empties[0][1]?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    if (!token) {
+      setState("error");
+      setError(c.errors.captcha);
+      return;
+    }
     setState("sending");
     setError("");
     try {
@@ -120,7 +142,7 @@ export function CallRequestForm() {
   }
 
   return (
-    <form className="call-form" onSubmit={submit} noValidate={false}>
+    <form className="call-form" onSubmit={submit} noValidate>
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
         strategy="afterInteractive"
@@ -129,7 +151,10 @@ export function CallRequestForm() {
       <h2 className="cp-heading">{c.heading}</h2>
       <div className="call-form-card">
         <textarea
-          className="call-form-text"
+          ref={msgRef}
+          onFocus={() => clearMissing("message")}
+          aria-invalid={missing.message || undefined}
+          className={cn("call-form-text", missing.message && "call-form-missing")}
           rows={4}
           maxLength={MAX}
           required
@@ -138,6 +163,7 @@ export function CallRequestForm() {
           onChange={(e) => setMessage(e.target.value)}
           aria-label={c.placeholder}
         />
+        {missing.message ? <p className="call-form-req">{c.required}</p> : null}
         <div className="call-form-row">
           <label className="call-form-field">
             <span className="call-form-email-head">
@@ -160,21 +186,32 @@ export function CallRequestForm() {
               )}
             </span>
             <input
+              ref={emailRef}
+              onFocus={() => clearMissing("email")}
+              aria-invalid={missing.email || undefined}
+              className={cn(missing.email && "call-form-missing")}
               type="email"
               required
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            {missing.email ? <em className="call-form-req">{c.required}</em> : null}
           </label>
           <label className="call-form-field">
             <span>{c.when}</span>
             <input
+              ref={whenRef}
+              onFocus={() => clearMissing("when")}
+              onClick={() => clearMissing("when")}
+              aria-invalid={missing.when || undefined}
+              className={cn(missing.when && "call-form-missing")}
               type="datetime-local"
               required
               value={when}
               onChange={(e) => setWhen(e.target.value)}
             />
+            {missing.when ? <em className="call-form-req">{c.required}</em> : null}
           </label>
         </div>
         <input
@@ -201,7 +238,7 @@ export function CallRequestForm() {
           <button
             type="submit"
             className="call-form-send"
-            disabled={state === "sending" || len === 0 || len > MAX || !token}
+            disabled={state === "sending" || len > MAX}
           >
             {state === "sending" ? c.sending : c.send}
           </button>
