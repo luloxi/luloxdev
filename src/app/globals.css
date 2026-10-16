@@ -18,11 +18,11 @@
   --email-border: color-mix(in oklab, #fb923c 55%, transparent);
   --email-fg: #fdba74;
   --email-btn-bg: color-mix(in oklab, #f97316 28%, transparent);
-  --section-about: #f43f5e;
-  --section-projects: #ef4444;
-  --section-blog: #fbbf24;
+  --section-about: #F25022;
+  --section-projects: #FFB900;
+  --section-blog: #00A4EF;
   --section-tastes: #fb7185;
-  --section-contact: #fb923c;
+  --section-contact: #7FBA00;
 }
 
 /* Light mode: Day HUD — cool pearl paper, glass panels, soft ink (not chalky white) */
@@ -43,11 +43,11 @@
   --email-fg: #9a3412;
   --email-btn-bg: color-mix(in oklab, #fdba74 45%, #ffffff);
   /* Deep jewel tones that read clean on pearl, not neon-on-white */
-  --section-about: #a50021;
-  --section-projects: #b91c1c;
-  --section-blog: #a16207;
+  --section-about: #C8371A;
+  --section-projects: #9A6B00;
+  --section-blog: #0072A8;
   --section-tastes: #be123c;
-  --section-contact: #c2410c;
+  --section-contact: #4F7500;
   /* Shared light elevation */
   --light-ink: color-mix(in oklab, #221113 8%, transparent);
   --light-glass: color-mix(in oklab, #ffffff 78%, transparent);
@@ -69,11 +69,11 @@
   --email-border: color-mix(in oklab, #fb923c 55%, transparent);
   --email-fg: #fdba74;
   --email-btn-bg: color-mix(in oklab, #f97316 28%, transparent);
-  --section-about: #f43f5e;
-  --section-projects: #ef4444;
-  --section-blog: #fbbf24;
+  --section-about: #F25022;
+  --section-projects: #FFB900;
+  --section-blog: #00A4EF;
   --section-tastes: #fb7185;
-  --section-contact: #fb923c;
+  --section-contact: #7FBA00;
 }
 
 @theme inline {
