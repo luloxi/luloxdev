@@ -1,5 +1,4 @@
 import type { BetterAuthOptions } from "better-auth";
-import { isAdminUser } from "./admin";
 
 export type AuthEnv = {
   BETTER_AUTH_SECRET?: string;
@@ -61,14 +60,10 @@ export function buildAuthOptions(
       defaultCookieAttributes: { sameSite: "lax" },
       ipAddress: { ipAddressHeaders: ["cf-connecting-ip"] },
     },
-    databaseHooks: {
-      user: {
-        create: {
-          // Only allowlisted admins can ever get an account (no open sign-up).
-          before: async (user) => (isAdminUser(user) ? { data: user } : false),
-        },
-      },
-    },
+    // Public visitors may sign in with Google (contact form email autofill).
+    // That grants nothing: every admin API checks requireAdminSession(), which
+    // enforces the ADMIN_EMAILS allowlist (isAdminUser) on each request.
+    // Google scopes are Better Auth defaults only: openid, email, profile.
     telemetry: { enabled: false },
   };
 }

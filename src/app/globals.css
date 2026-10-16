@@ -3330,3 +3330,72 @@
 :root:not(.dark) .cp-heading {
   color: #a50021;
 }
+
+/* ── Contact: tweet-style call request form ── */
+.call-form-card {
+  position: relative;
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--surface) 92%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--section-contact) 40%, transparent),
+    0 12px 30px color-mix(in oklab, var(--section-contact) 12%, transparent);
+}
+.call-form-text {
+  width: 100%;
+  resize: vertical;
+  min-height: 6rem;
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: var(--foreground);
+  font-size: 1.15rem;
+  line-height: 1.45;
+}
+.call-form-text::placeholder { color: var(--muted); }
+.call-form-row { display: grid; gap: 0.75rem; }
+@media (min-width: 640px) { .call-form-row { grid-template-columns: 1fr 1fr; } }
+.call-form-field { display: grid; gap: 0.3rem; font-size: 0.75rem; color: var(--muted); font-family: var(--font-mono, ui-monospace, monospace); }
+.call-form-field input {
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--background) 70%, transparent);
+  border: 1px solid color-mix(in oklab, var(--section-contact) 35%, transparent);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  color-scheme: inherit;
+}
+.call-form-field input:focus { outline: 2px solid var(--section-contact); outline-offset: 1px; }
+.call-form-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.call-form-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.9rem;
+  border-top: 1px solid color-mix(in oklab, var(--section-contact) 25%, transparent);
+  padding-top: 0.75rem;
+}
+.call-form-count { font-family: ui-monospace, monospace; font-size: 0.85rem; color: var(--muted); }
+.call-form-count-warn { color: var(--section-projects); }
+.call-form-count-over { color: var(--accent); font-weight: 700; }
+.call-form-send {
+  border-radius: 999px;
+  padding: 0.55rem 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--section-contact);
+  box-shadow: 0 6px 18px color-mix(in oklab, var(--section-contact) 35%, transparent);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.call-form-send:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+.call-form-send:disabled { opacity: 0.5; cursor: not-allowed; }
+.call-form-msg { font-size: 0.9rem; margin: 0; }
+.call-form-ok { color: var(--section-contact); }
+.call-form-err { color: var(--accent); }
+.dark .call-form-send { color: #0e0607; }
+.call-form-email-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.call-form-google { font-size: 0.72rem; color: var(--section-blog); text-decoration: underline; text-underline-offset: 2px; }
+.call-form-google-on { font-style: normal; font-size: 0.72rem; color: var(--section-contact); }
