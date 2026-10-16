@@ -31,7 +31,9 @@
   "preview_urls": true,
   "routes": [
     { "pattern": "www.lulox.dev", "custom_domain": true },
-    { "pattern": "lulox.dev", "custom_domain": true }
+    { "pattern": "lulox.dev", "custom_domain": true },
+    { "pattern": "lulox.com.ar", "custom_domain": true },
+    { "pattern": "www.lulox.com.ar", "custom_domain": true }
   ],
   // Contact form: Email Routing send binding (lulox.com.ar, verified destination).
   // Recipient is provisional until a lulox.com.ar mailbox exists.
