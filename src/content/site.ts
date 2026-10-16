@@ -31,6 +31,7 @@ export type SectionId =
 export const sections = [
   { id: "about" as const, href: "/about" },
   { id: "blog" as const, href: "/blog" },
+  { id: "projects" as const, href: "/projects" },
   { id: "contact" as const, href: "/contact" },
 ];
 

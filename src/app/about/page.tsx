@@ -2,7 +2,6 @@
 
 import type { ComponentType, ReactNode } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { CpRow } from "@/components/cp-row";
 import { BuidlGuidlIcon } from "@/components/icons/brands";
 import {
@@ -197,11 +196,6 @@ export default function AboutPage() {
               />
             ))}
           </div>
-          <p className="mt-6 text-right font-mono text-xs text-muted">
-            <Link href="/projects" className="hover:underline">
-              {t.tastes.projectsLink}
-            </Link>
-          </p>
         </section>
       </div>
     </PageShell>
