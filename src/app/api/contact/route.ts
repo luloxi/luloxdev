@@ -50,7 +50,7 @@ function calDates(v: string, minutes = 30) {
   return `${f(start)}/${f(end)}`;
 }
 
-function calUrl(email: string, details: string, dates: string, invite: boolean) {
+function calUrl(email: string, details: string, dates: string) {
   const q = new URLSearchParams({
     action: "TEMPLATE",
     text: `Llamada con ${email}`,
@@ -58,13 +58,10 @@ function calUrl(email: string, details: string, dates: string, invite: boolean) 
     ctz: "America/Buenos_Aires",
     details,
   });
-  if (invite) q.set("add", email);
+  q.set("add", email);
   return `https://calendar.google.com/calendar/render?${q.toString()}`;
 }
 
-function button(href: string, label: string, bg: string) {
-  return `<td style="padding:0 8px 8px 0"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${bg}" style="border-radius:8px;background:${bg}"><a href="${esc(href)}" target="_blank" style="display:inline-block;padding:12px 18px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:8px">${label}</a></td></tr></table></td>`;
-}
 
 function esc(s: string) {
   return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -141,16 +138,15 @@ export async function POST(request: Request) {
   const to = env.CONTACT_TO ?? "lucianoolivabianco@gmail.com";
   const from = env.CONTACT_FROM ?? "web@lulox.com.ar";
   const dates = calDates(body.when as string);
-  const invite = calUrl(email, message, dates, true);
-  const mine = calUrl(email, message, dates, false);
-  const reply = `mailto:${email}?subject=${encodeURIComponent("Re: Contacto en Lulox Web")}`;
-  const buttons = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px"><tr>${button(invite, "Agendar e invitar", "#c8102e")}${button(mine, "Solo mi calendario", "#0078c8")}${button(reply, "Responder", "#4e8a00")}</tr></table>`;
+  const invite = calUrl(email, message, dates);
+  // Punzó #C8102E = favicon stroke / --neon-crimson brand token. White text 5.9:1.
+  const buttons = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px"><tr><td align="center"><table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td align="center" bgcolor="#C8102E" style="border-radius:8px;background:#C8102E"><a href="${esc(invite)}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;color:#FFFFFF;text-decoration:none;border-radius:8px">Agendar e invitar</a></td></tr></table></td></tr></table>`;
   const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#241213">
 <p style="font-size:17px;line-height:1.5;white-space:pre-wrap;margin:0 0 28px">${esc(message)}</p>
 <p style="font-size:40px;font-weight:700;letter-spacing:0.02em;color:#a50021;margin:0;font-variant-numeric:tabular-nums">${when}</p>
 ${buttons}
 </div>`;
-  const text = `${message}\n\n${when}\n\nAgendar e invitar: ${invite}\nSolo mi calendario: ${mine}\nResponder: ${reply}\n`;
+  const text = `${message}\n\n${when}\n\nAgendar e invitar: ${invite}\n`;
 
   try {
     await env.CONTACT_EMAIL.send({
