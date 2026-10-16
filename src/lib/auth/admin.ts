@@ -1,6 +1,6 @@
 /**
  * Only these identities can edit the blog.
- * Sign-in is Google via Better Auth (D1); other emails can't create an account.
+ * Sign-in is Google via Better Auth (D1); anyone can sign in, only these are admin.
  * Google: lucianoolivabianco@gmail.com
  */
 export const ADMIN_EMAILS = ["lucianoolivabianco@gmail.com"] as const;
