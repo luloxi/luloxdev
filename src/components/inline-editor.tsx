@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import { flattenCopy } from "@/i18n/copy-overrides";
 import { useLocale } from "@/i18n/locale-provider";
 import { CopyMarkdown } from "@/components/copy-markdown";
-import { MdToolbar } from "@/components/md-toolbar";
+import { MdToolbar, mdKeyDown } from "@/components/md-toolbar";
 
 type Target = { key: string; value: string; top: number; left: number; id: number; md?: boolean };
 
@@ -140,7 +140,18 @@ export function InlineEditor() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key: editing.key, locale, value: draft }),
       });
-      if (!res.ok) throw new Error(String(res.status));
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string; max?: number };
+        const es = locale === "es";
+        const msg =
+          data.error === "too_long"
+            ? es ? `Muy largo: ${draft.trim().length} de ${data.max} caracteres.` : `Too long: ${draft.trim().length} of ${data.max} characters.`
+            : res.status === 401
+              ? es ? "Tu sesión expiró. Volvé a ingresar." : "Session expired. Sign in again."
+              : es ? `No se pudo guardar (${data.error ?? res.status}).` : `Couldn't save (${data.error ?? res.status}).`;
+        setError(msg);
+        return;
+      }
       setEditing(null);
       router.refresh();
     } catch {
@@ -223,6 +234,7 @@ export function InlineEditor() {
                 autoFocus
                 rows={editing.md ? 10 : Math.min(12, Math.max(3, Math.ceil(draft.length / 40)))}
                 onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={editing.md ? (e) => mdKeyDown(e, setDraft, locale === "es") : undefined}
               />
             )}
             {error ? <p className="ie-error">{error}</p> : null}

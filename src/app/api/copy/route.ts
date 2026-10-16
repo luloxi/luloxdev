@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminSession } from "@/lib/blog";
+import { COPY_MAX_LENGTH, normalizeCopyValue } from "@/lib/copy-value";
 import { isKnownCopyKey, setCopy } from "@/lib/site-copy";
 
 export const dynamic = "force-dynamic";
@@ -25,14 +26,11 @@ export async function PUT(request: Request) {
   if (raw === null) {
     return NextResponse.json({ error: "invalid_value" }, { status: 400 });
   }
-  // Plain text only: normalize line endings, drop control chars except \n and \t.
-  const value = raw
-    .replace(/\r\n?/g, "\n")
-    .replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, "")
-    .trim();
-  if (!value || value.length > 5000) {
-    return NextResponse.json({ error: "invalid_value" }, { status: 400 });
+  const norm = normalizeCopyValue(raw);
+  if (!norm.ok) {
+    return NextResponse.json({ error: norm.error, max: COPY_MAX_LENGTH }, { status: 400 });
   }
+  const value = norm.value;
   await setCopy(key, locale, value);
   return NextResponse.json({ ok: true, key, locale, value });
 }
