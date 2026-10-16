@@ -130,7 +130,7 @@ function splitSections(md: string): { intro: string; sections: Section[] } {
 
 function Accordion({ sections, pClass }: { sections: Section[]; pClass: string }) {
   const base = useId();
-  const [open, setOpen] = useState<boolean[]>(() => sections.map((_, i) => i === 0));
+  const [open, setOpen] = useState<boolean[]>(() => sections.map(() => false));
   let last = -1;
   open.forEach((o, i) => { if (o) last = i; });
   let hint = -1;
