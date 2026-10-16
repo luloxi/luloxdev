@@ -7,13 +7,24 @@ import { flattenCopy } from "@/i18n/copy-overrides";
 import { useLocale } from "@/i18n/locale-provider";
 import { CopyMarkdown } from "@/components/copy-markdown";
 import { MdToolbar, mdKeyDown } from "@/components/md-toolbar";
-import { COPY_EDIT_EVENT, type CopyEditDetail } from "@/components/admin-context";
+import { COPY_EDIT_EVENT, type CopyEditDetail, type ProjectField } from "@/components/admin-context";
+import type { PastProject, ProjectStatus } from "@/content/projects";
 import { deleteSection, introBody, replaceIntro, sectionBody, splitSections, upsertSection } from "@/lib/md-sections";
 
 /** section: "intro", a section index, or "new" (append a section). */
 type SectionRef = "intro" | number | "new";
 type Target = { key: string; value: string; top: number; left: number; id: number; md?: boolean; section?: SectionRef };
-type Editing = { key: string; value: string; md?: boolean; section?: SectionRef };
+type ProjectEdit = { id: string; field: ProjectField; data: PastProject };
+type Editing = { key: string; value: string; md?: boolean; section?: SectionRef; project?: ProjectEdit };
+type DetailsDraft = { status: ProjectStatus; liveUrl: string; github: string; team: string; awards: string; reason: string };
+
+const teamToText = (team: PastProject["team"]) => team.map((m) => (m.href ? `${m.name} | ${m.href}` : m.name)).join("\n");
+const textToTeam = (text: string) =>
+  text.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
+    const [n, ...rest] = l.split("|");
+    const href = rest.join("|").trim();
+    return href ? { name: n.trim(), href } : { name: n.trim() };
+  }).filter((m) => m.name);
 
 function parseSection(v: string | undefined): SectionRef | undefined {
   if (v === undefined || v === "") return undefined;
@@ -43,6 +54,7 @@ export function InlineEditor() {
   const [targets, setTargets] = useState<Target[]>([]);
   const [editing, setEditing] = useState<Editing | null>(null);
   const [titleDraft, setTitleDraft] = useState("");
+  const [details, setDetails] = useState<DetailsDraft | null>(null);
   const [preview, setPreview] = useState(false);
   const [vh, setVh] = useState<number | null>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
@@ -56,6 +68,7 @@ export function InlineEditor() {
     const flat = flattenCopy(t);
     const m = new Map<string, string>();
     for (const [k, v] of Object.entries(flat)) {
+      if (k.startsWith("projects.past.")) continue;
       const n = norm(v);
       if (n.length >= 2 && !m.has(n)) m.set(n, k);
     }
@@ -186,7 +199,8 @@ export function InlineEditor() {
   useEffect(() => {
     const onReq = (e: Event) => {
       const d = (e as CustomEvent<CopyEditDetail>).detail;
-      if (d?.key) openEdit(d.key, d.section, d.md);
+      if (d?.project) void openProject(d.project.id, d.project.field);
+      else if (d?.key) openEdit(d.key, d.section, d.md);
     };
     window.addEventListener(COPY_EDIT_EVENT, onReq);
     return () => window.removeEventListener(COPY_EDIT_EVENT, onReq);
@@ -196,6 +210,39 @@ export function InlineEditor() {
   useEffect(() => {
     document.body.classList.toggle("ie-off", !on);
   }, [on]);
+
+  async function openProject(id: string, field: ProjectField) {
+    setError("");
+    const res = await fetch("/api/projects");
+    if (!res.ok) {
+      window.alert(locale === "es" ? "No se pudo cargar el proyecto." : "Couldn't load the project.");
+      return;
+    }
+    const { projects } = (await res.json()) as { projects: PastProject[] };
+    const data = projects.find((x) => x.id === id);
+    if (!data) return;
+    const c = data.copy[locale as "es" | "en"] ?? data.copy.es;
+    setPreview(false);
+    setDetails(null);
+    if (field === "summary") {
+      setTitleDraft(c.title);
+      setDraft(c.body);
+    } else if (field === "paragraphs") {
+      setTitleDraft("");
+      setDraft(c.paragraphs.join("\n\n"));
+    } else {
+      setDraft("");
+      setDetails({
+        status: data.status,
+        liveUrl: data.liveUrl ?? "",
+        github: data.github ?? "",
+        team: teamToText(data.team ?? []),
+        awards: c.awards ?? "",
+        reason: (locale === "en" ? data.disabledReason?.en : data.disabledReason?.es) ?? "",
+      });
+    }
+    setEditing({ key: `project:${id}`, value: "", md: field !== "details", project: { id, field, data } });
+  }
 
   /** Full value to store: for a section edit, rewrite only that part of the body. */
   function buildValue(ed: Editing): string {
@@ -213,8 +260,55 @@ export function InlineEditor() {
     await save(deleteSection((flat[editing.key] ?? editing.value).replace(/\r\n?/g, "\n"), editing.section));
   }
 
+  async function saveProject(ed: Editing & { project: ProjectEdit }) {
+    const p = ed.project.data;
+    const L = locale as "es" | "en";
+    const copy = { es: { ...p.copy.es }, en: { ...p.copy.en } };
+    let status: ProjectStatus = p.status;
+    let liveUrl = p.liveUrl ?? "";
+    let github = p.github ?? "";
+    let team = p.team ?? [];
+    const reason = { es: p.disabledReason?.es ?? "", en: p.disabledReason?.en ?? "" };
+    if (ed.project.field === "summary") {
+      if (!titleDraft.trim()) throw new Error("empty_title");
+      copy[L] = { ...copy[L], title: titleDraft.trim(), body: draft.trim() };
+    } else if (ed.project.field === "paragraphs") {
+      copy[L] = { ...copy[L], paragraphs: draft.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean) };
+    } else if (details) {
+      status = details.status;
+      liveUrl = details.liveUrl.trim();
+      github = details.github.trim();
+      team = textToTeam(details.team);
+      copy[L] = { ...copy[L], awards: details.awards };
+      reason[L] = details.reason;
+    }
+    return fetch("/api/projects", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: p.id, status, liveUrl, github, team, disabledReason: reason, copy }),
+    });
+  }
+
   async function save(override?: string) {
     if (!editing) return;
+    if (editing.project) {
+      setSaving(true);
+      setError("");
+      try {
+        const res = await saveProject(editing as Editing & { project: ProjectEdit });
+        if (!res.ok) {
+          setError(res.status === 401 ? (locale === "es" ? "Tu sesión expiró. Volvé a ingresar." : "Session expired. Sign in again.") : (locale === "es" ? `No se pudo guardar (${res.status}).` : `Couldn't save (${res.status}).`));
+          return;
+        }
+        setEditing(null);
+        router.refresh();
+      } catch {
+        setError(locale === "es" ? "Falta el título." : "Title is required.");
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     let value: string;
     try {
       value = override ?? buildValue(editing);
@@ -303,7 +397,27 @@ export function InlineEditor() {
               {typeof editing.section === "number" ? ` · ${locale === "es" ? "Sección" : "Section"} ${editing.section + 1}` : null}
               {editing.section === "new" ? (locale === "es" ? " · Nueva sección" : " · New section") : null}
             </p>
-            {typeof editing.section === "number" || editing.section === "new" ? (
+            {editing.project?.field === "details" && details ? (
+              <div className="ie-details">
+                <label>{locale === "es" ? "Estado" : "Status"}
+                  <select value={details.status} onChange={(e) => setDetails({ ...details, status: e.target.value as ProjectStatus })}>
+                    <option value="live">live</option>
+                    <option value="disabled">disabled</option>
+                    <option value="archive">archive</option>
+                  </select>
+                </label>
+                <label>Live URL<input value={details.liveUrl} onChange={(e) => setDetails({ ...details, liveUrl: e.target.value })} /></label>
+                <label>GitHub<input value={details.github} onChange={(e) => setDetails({ ...details, github: e.target.value })} /></label>
+                <label>{locale === "es" ? "Equipo (una persona por línea: nombre | url)" : "Team (one per line: name | url)"}
+                  <textarea rows={3} value={details.team} onChange={(e) => setDetails({ ...details, team: e.target.value })} />
+                </label>
+                <label>{locale === "es" ? "Premios" : "Awards"}<input value={details.awards} onChange={(e) => setDetails({ ...details, awards: e.target.value })} /></label>
+                <label>{locale === "es" ? "Motivo si está deshabilitado" : "Reason if disabled"}
+                  <textarea rows={2} value={details.reason} onChange={(e) => setDetails({ ...details, reason: e.target.value })} />
+                </label>
+              </div>
+            ) : null}
+            {typeof editing.section === "number" || editing.section === "new" || editing.project?.field === "summary" ? (
               <input
                 className="ie-title"
                 value={titleDraft}
@@ -323,7 +437,7 @@ export function InlineEditor() {
                 es={locale === "es"}
               />
             ) : null}
-            {editing.md && preview ? (
+            {editing.project?.field === "details" ? null : editing.md && preview ? (
               <div className="ie-preview">
                 <CopyMarkdown text={draft} />
               </div>
@@ -351,7 +465,14 @@ export function InlineEditor() {
               <button
                 type="button"
                 className="ie-btn ie-save"
-                disabled={saving || (editing.section === undefined || editing.section === "intro" ? !draft.trim() : !titleDraft.trim())}
+                disabled={
+                  saving ||
+                  (editing.project
+                    ? editing.project.field === "summary" && !titleDraft.trim()
+                    : editing.section === undefined || editing.section === "intro"
+                      ? !draft.trim()
+                      : !titleDraft.trim())
+                }
                 onClick={() => void save()}
               >
                 {saving ? "…" : locale === "es" ? "Guardar" : "Save"}

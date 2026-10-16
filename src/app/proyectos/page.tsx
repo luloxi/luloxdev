@@ -1,15 +1,10 @@
-"use client";
+import { ProjectsView } from "@/components/views/projects-view";
+import { getMergedPastProjects } from "@/lib/projects";
 
-import { PageShell } from "@/components/page-shell";
-import { ProjectsAccordion } from "@/components/projects-accordion";
-import { useLocale } from "@/i18n/locale-provider";
+export const dynamic = "force-dynamic";
 
-export default function ProjectsPage() {
-  const { t } = useLocale();
-
-  return (
-    <PageShell title={t.projects.title}>
-      <ProjectsAccordion />
-    </PageShell>
-  );
+/** Same source as /proyectos/<id>: static projects merged with D1 overrides. */
+export default async function ProjectsPage() {
+  const projects = await getMergedPastProjects();
+  return <ProjectsView projects={projects} />;
 }

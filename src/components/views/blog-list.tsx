@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
+import { useIsAdmin } from "@/components/admin-context";
 import type { BlogPost } from "@/content/blog/types";
 import { localizePost } from "@/content/blog/types";
 import { useLocale } from "@/i18n/locale-provider";
@@ -22,9 +23,17 @@ function formatDate(iso: string, locale: string) {
 /** Blog index, rendered on the server with posts from D1 (published only). */
 export function BlogList({ posts, error }: { posts: BlogPost[]; error?: boolean }) {
   const { t, locale } = useLocale();
+  const isAdmin = useIsAdmin();
 
   return (
     <PageShell title={t.blog.title}>
+      {isAdmin ? (
+        <div className="mb-5 flex">
+          <Link href="/rothko" className="admin-pill">
+            {locale === "es" ? "Administrar blog" : "Manage blog"}
+          </Link>
+        </div>
+      ) : null}
       <div className="space-y-4">
         {error ? (
           <p className="cp-prose text-[color:var(--section-tastes)]">

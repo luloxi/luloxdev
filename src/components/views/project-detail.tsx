@@ -6,6 +6,7 @@ import { GitHubIcon } from "@/components/icons/social";
 import { PageShell } from "@/components/page-shell";
 import type { PastProject, ProjectStatus } from "@/content/projects";
 import { useLocale } from "@/i18n/locale-provider";
+import { InflowPencil, requestCopyEdit, useIsAdmin, type ProjectField } from "@/components/admin-context";
 
 const statusClass: Record<ProjectStatus, string> = {
   live: "project-status-live",
@@ -16,6 +17,13 @@ const statusClass: Record<ProjectStatus, string> = {
 /** Project detail, rendered on the server with D1 overrides already merged. */
 export function ProjectDetail({ project }: { project: PastProject }) {
   const { t, locale } = useLocale();
+  const admin = useIsAdmin();
+  const pencil = (field: ProjectField, label: string) =>
+    admin ? (
+      <span className="ie-row-pencil">
+        <InflowPencil label={label} onClick={() => requestCopyEdit({ project: { id: project.id, field } })} />
+      </span>
+    ) : null;
 
   const copy = project.copy[locale] ?? project.copy.es;
   const statusLabel =
@@ -33,7 +41,7 @@ export function ProjectDetail({ project }: { project: PastProject }) {
       footerHref="/proyectos"
       footerLabel={t.projects.backToProjectsCta}
     >
-      <div className="space-y-6">
+      <div className="space-y-6" data-copy-inflow="1">
         <div
           className="cp-panel project-detail-hero"
           style={{ ["--cp-accent" as string]: "var(--section-projects)" }}
@@ -42,6 +50,7 @@ export function ProjectDetail({ project }: { project: PastProject }) {
             <span className="cp-nav-corner cp-nav-corner-tl" />
             <span className="cp-nav-corner cp-nav-corner-br" />
           </span>
+          {pencil("summary", "Edit title and summary")}
           <div className="cp-panel-inner flex items-center gap-4 sm:gap-5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -73,6 +82,7 @@ export function ProjectDetail({ project }: { project: PastProject }) {
             <span className="cp-nav-corner cp-nav-corner-tl" />
             <span className="cp-nav-corner cp-nav-corner-br" />
           </span>
+          {pencil("paragraphs", "Edit description")}
           <div className="cp-panel-inner space-y-3">
             {copy.paragraphs.map((p) => (
               <CopyMarkdown key={p.slice(0, 48)} text={p} />
@@ -80,6 +90,8 @@ export function ProjectDetail({ project }: { project: PastProject }) {
           </div>
         </div>
 
+        <div className="relative">
+        {pencil("details", "Edit details")}
         <dl className="project-meta">
           <div className="project-meta-row">
             <dt>{t.projects.metaTeam}</dt>
@@ -126,6 +138,7 @@ export function ProjectDetail({ project }: { project: PastProject }) {
             </div>
           ) : null}
         </dl>
+        </div>
 
         <div className="!mt-4 space-y-2 sm:!mt-6">
           {project.liveUrl ? (

@@ -13,7 +13,10 @@ export function useIsAdmin() {
   return useContext(AdminContext);
 }
 
-export type CopyEditDetail = { key: string; section?: "intro" | number | "new"; md?: boolean };
+export type ProjectField = "summary" | "paragraphs" | "details";
+export type CopyEditDetail =
+  | { key: string; section?: "intro" | number | "new"; md?: boolean; project?: undefined }
+  | { project: { id: string; field: ProjectField }; key?: undefined; section?: undefined; md?: undefined };
 export const COPY_EDIT_EVENT = "lulox:copy-edit";
 
 /** In-flow pencils ask the InlineEditor to open via this event. */

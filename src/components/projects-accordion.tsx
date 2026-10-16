@@ -4,7 +4,8 @@ import { CopyMarkdown } from "@/components/copy-markdown";
 import Link from "next/link";
 import { CpRow } from "@/components/cp-row";
 import { GitHubIcon } from "@/components/icons/social";
-import { pastProjects } from "@/content/projects";
+import type { PastProject } from "@/content/projects";
+import { InflowPencil, requestCopyEdit, useIsAdmin } from "@/components/admin-context";
 import { github } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 
@@ -14,8 +15,9 @@ const pastAccents = [
   "var(--section-projects)",
 ];
 
-export function ProjectsAccordion() {
-  const { t } = useLocale();
+export function ProjectsAccordion({ projects }: { projects: PastProject[] }) {
+  const { t, locale } = useLocale();
+  const admin = useIsAdmin();
   return (
     <div className="space-y-10">
       {/* Code: GitHub CTA + past projects underneath */}
@@ -30,11 +32,11 @@ export function ProjectsAccordion() {
           iconSize="lg"
         />
         <ul className="cp-list mt-3">
-          {pastProjects.map((project, i) => {
-            const copy = t.projects.past[project.id];
+          {projects.map((project, i) => {
+            const copy = project.copy[locale] ?? project.copy.es;
             const accent = pastAccents[i % pastAccents.length];
             return (
-              <li key={project.id}>
+              <li key={project.id} className="relative" data-copy-inflow="1">
                 <Link
                   href={`/proyectos/${project.id}`}
                   className="cp-row group"
@@ -67,6 +69,14 @@ export function ProjectsAccordion() {
                   </span>
                   <span className="cp-nav-bar cp-row-bar" aria-hidden />
                 </Link>
+                {admin ? (
+                  <span className="ie-row-pencil">
+                    <InflowPencil
+                      label={`Edit ${project.id}`}
+                      onClick={() => requestCopyEdit({ project: { id: project.id, field: "summary" } })}
+                    />
+                  </span>
+                ) : null}
               </li>
             );
           })}
