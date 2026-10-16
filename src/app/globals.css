@@ -3629,3 +3629,15 @@ span.md-copy { display: inline; }
   .md-acc-hint .md-acc-title, .md-acc-hint .md-acc-chev { animation: none; color: var(--acc-text); }
   .md-acc-panel, .md-acc-body, .md-acc-chev { transition: none; }
 }
+
+/* Accordion panel: let the revving header render past the cut-corner clip.
+   The clipped shape moves to a background layer so the panel looks the same. */
+.cp-panel:has(.md-acc) { clip-path: none; background: none; }
+.cp-panel:has(.md-acc)::after {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: color-mix(in oklab, var(--cp-accent) 7%, transparent);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+.md-acc-btn { position: relative; }
+.md-acc-hint { z-index: 5; }
+body { overflow-x: clip; }
