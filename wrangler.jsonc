@@ -25,8 +25,8 @@
       "migrations_dir": "migrations"
     }
   ],
-  // Custom domains (Cloudflare zone lulox.dev). The apex is redirected to www
-  // in worker.ts, matching the previous Vercel behaviour (307 to www).
+  // Custom domains. lulox.com.ar is canonical (www 301s to apex in worker.ts).
+  // lulox.dev + www are 301'd to lulox.com.ar by a Redirect Rule on that zone.
   "workers_dev": true,
   "preview_urls": true,
   "routes": [
