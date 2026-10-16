@@ -3596,32 +3596,36 @@ span.md-copy { display: inline; }
 /* Revving start: idle, build-up vibration as the neon flickers on, lunge forward, spring back, power off. */
 @keyframes md-acc-neon {
   0%, 58% { background-color: transparent; box-shadow: none; transform: none; border-color: transparent; }
-  60% { transform: translateX(-1px); background-color: rgb(46 90 172 / .15); }
+  60% { transform: translateX(-1px); background-color: rgb(var(--acc-bg) / .15); }
   62% { transform: translateX(1px); background-color: transparent; }
-  64% { transform: translateX(-2px) rotate(-.3deg); background-color: rgb(46 90 172 / .45); box-shadow: 0 0 10px 1px rgb(232 116 42 / .4); }
-  66% { transform: translateX(2px) rotate(.3deg); background-color: rgb(46 90 172 / .1); box-shadow: none; }
-  68% { transform: translateX(-3px) rotate(-.5deg); background-color: rgb(46 90 172 / .7); box-shadow: 0 0 16px 3px rgb(232 116 42 / .55); }
-  70% { transform: translateX(3px) rotate(.5deg); background-color: rgb(46 90 172 / .35); }
-  72% { transform: translateX(-4px) scale(.98); background-color: #2e5aac; box-shadow: 0 0 22px 5px rgb(232 116 42 / .7); border-color: #e8742a; }
-  75% { transform: translateX(18px) scale(1.04); background-color: #2e5aac; box-shadow: -18px 0 30px 6px rgb(232 116 42 / .55), 0 0 40px 10px rgb(232 116 42 / .45); border-color: #f5a26a; }
+  64% { transform: translateX(-2px) rotate(-.3deg); background-color: rgb(var(--acc-bg) / .45); box-shadow: 0 0 10px 1px rgb(var(--acc-glow) / .4); }
+  66% { transform: translateX(2px) rotate(.3deg); background-color: rgb(var(--acc-bg) / .1); box-shadow: none; }
+  68% { transform: translateX(-3px) rotate(-.5deg); background-color: rgb(var(--acc-bg) / .7); box-shadow: 0 0 16px 3px rgb(var(--acc-glow) / .55); }
+  70% { transform: translateX(3px) rotate(.5deg); background-color: rgb(var(--acc-bg) / .35); }
+  72% { transform: translateX(-4px) scale(.98); background-color: rgb(var(--acc-bg)); box-shadow: 0 0 22px 5px rgb(var(--acc-glow) / .7); border-color: rgb(var(--acc-glow)); }
+  75% { transform: translateX(18px) scale(1.04); background-color: rgb(var(--acc-bg)); box-shadow: -18px 0 30px 6px rgb(var(--acc-glow) / .55), 0 0 40px 10px rgb(var(--acc-glow) / .45); border-color: var(--acc-peak); }
   79% { transform: translateX(-6px) scale(.99); }
   82% { transform: translateX(3px); }
   85% { transform: translateX(-1px); }
-  88% { transform: none; background-color: #2e5aac; box-shadow: 0 0 24px 6px rgb(232 116 42 / .6); border-color: #e8742a; }
-  92% { background-color: rgb(46 90 172 / .55); box-shadow: 0 0 10px 2px rgb(232 116 42 / .3); }
-  93% { background-color: #2e5aac; box-shadow: 0 0 18px 4px rgb(232 116 42 / .5); }
+  88% { transform: none; background-color: rgb(var(--acc-bg)); box-shadow: 0 0 24px 6px rgb(var(--acc-glow) / .6); border-color: rgb(var(--acc-glow)); }
+  92% { background-color: rgb(var(--acc-bg) / .55); box-shadow: 0 0 10px 2px rgb(var(--acc-glow) / .3); }
+  93% { background-color: rgb(var(--acc-bg)); box-shadow: 0 0 18px 4px rgb(var(--acc-glow) / .5); }
   100% { background-color: transparent; box-shadow: none; transform: none; border-color: transparent; }
 }
 @keyframes md-acc-neon-text {
   0%, 63% { color: inherit; }
-  64%, 68%, 72%, 88%, 93% { color: #fff; }
+  64%, 68%, 72%, 88%, 93% { color: var(--acc-text); }
   66%, 70% { color: inherit; }
   100% { color: inherit; }
 }
 
 .md-acc-hint .md-acc-title { color: inherit; }
+/* Dark: Judy blue pill + glow, Nick orange text. Light: Nick orange pill + glow, Judy blue text. */
+.md-acc-btn { --acc-bg: 31 63 122; --acc-glow: 46 90 172; --acc-peak: #3b6fd4; --acc-text: #ff9a4d; }
+:root:not(.dark) .md-acc-btn { --acc-bg: 246 180 126; --acc-glow: 232 116 42; --acc-peak: #d9692a; --acc-text: #1a3570; }
+.md-acc-hint .md-acc-title { font-weight: 800; }
 @media (prefers-reduced-motion: reduce) {
-  .md-acc-hint { animation: none; background-color: #2e5aac; border-color: #e8742a; box-shadow: 0 0 14px 2px rgb(232 116 42 / .55); }
-  .md-acc-hint .md-acc-title, .md-acc-hint .md-acc-chev { animation: none; color: #fff; }
+  .md-acc-hint { animation: none; background-color: rgb(var(--acc-bg)); border-color: rgb(var(--acc-glow)); box-shadow: 0 0 14px 2px rgb(var(--acc-glow) / .55); }
+  .md-acc-hint .md-acc-title, .md-acc-hint .md-acc-chev { animation: none; color: var(--acc-text); }
   .md-acc-panel, .md-acc-body, .md-acc-chev { transition: none; }
 }
