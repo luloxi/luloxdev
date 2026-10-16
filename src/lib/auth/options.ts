@@ -10,8 +10,6 @@ export type AuthEnv = {
 export const ALLOWED_HOSTS = [
   "lulox.com.ar",
   "www.lulox.com.ar",
-  "www.lulox.dev",
-  "lulox.dev",
   "luloxdev.lucianoolivabianco.workers.dev",
   "localhost:*",
 ];
@@ -20,8 +18,6 @@ export const ALLOWED_HOSTS = [
 export const TRUSTED_ORIGINS = [
   "https://lulox.com.ar",
   "https://www.lulox.com.ar",
-  "https://www.lulox.dev",
-  "https://lulox.dev",
   "https://luloxdev.lucianoolivabianco.workers.dev",
   "http://localhost:3000",
   "http://localhost:8787",

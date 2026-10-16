@@ -26,12 +26,10 @@
     }
   ],
   // Custom domains. lulox.com.ar is canonical (www 301s to apex in worker.ts).
-  // lulox.dev + www are 301'd to lulox.com.ar by a Redirect Rule on that zone.
+  // lulox.dev + www are NOT served by this Worker: they are 301'd to lulox.com.ar by a Redirect Rule on that zone.
   "workers_dev": true,
   "preview_urls": true,
   "routes": [
-    { "pattern": "www.lulox.dev", "custom_domain": true },
-    { "pattern": "lulox.dev", "custom_domain": true },
     { "pattern": "lulox.com.ar", "custom_domain": true },
     { "pattern": "www.lulox.com.ar", "custom_domain": true }
   ],
