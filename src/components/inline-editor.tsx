@@ -7,8 +7,19 @@ import { flattenCopy } from "@/i18n/copy-overrides";
 import { useLocale } from "@/i18n/locale-provider";
 import { CopyMarkdown } from "@/components/copy-markdown";
 import { MdToolbar, mdKeyDown } from "@/components/md-toolbar";
+import { deleteSection, introBody, replaceIntro, sectionBody, splitSections, upsertSection } from "@/lib/md-sections";
 
-type Target = { key: string; value: string; top: number; left: number; id: number; md?: boolean };
+/** section: "intro", a section index, or "new" (append a section). */
+type SectionRef = "intro" | number | "new";
+type Target = { key: string; value: string; top: number; left: number; id: number; md?: boolean; section?: SectionRef };
+type Editing = { key: string; value: string; md?: boolean; section?: SectionRef };
+
+function parseSection(v: string | undefined): SectionRef | undefined {
+  if (v === undefined || v === "") return undefined;
+  if (v === "intro" || v === "new") return v;
+  const n = Number(v);
+  return Number.isInteger(n) ? n : undefined;
+}
 
 const norm = (s: string) => s.replace(/\s+/g, " ").trim();
 const SKIP = new Set(["SCRIPT", "STYLE", "TEXTAREA", "INPUT", "SELECT", "OPTION", "NOSCRIPT", "SVG"]);
@@ -29,7 +40,8 @@ export function InlineEditor() {
   const router = useRouter();
   const [on, setOn] = useState(true);
   const [targets, setTargets] = useState<Target[]>([]);
-  const [editing, setEditing] = useState<{ key: string; value: string; md?: boolean } | null>(null);
+  const [editing, setEditing] = useState<Editing | null>(null);
+  const [titleDraft, setTitleDraft] = useState("");
   const [preview, setPreview] = useState(false);
   const [vh, setVh] = useState<number | null>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
@@ -57,16 +69,29 @@ export function InlineEditor() {
       if (SKIP.has(el.tagName.toUpperCase())) return;
       if (rootRef.current && rootRef.current.contains(el)) return;
       if ((el as HTMLElement).dataset?.inlineEditor) return;
-      const explicit = (el as HTMLElement).dataset?.copyKey;
-      if (explicit && explicit in flat) {
+      const ds = (el as HTMLElement).dataset ?? {};
+      const adder = ds.copyAdd;
+      if (adder && adder in flat) {
+        // "+" under the list adds a section; the section headers inside get their own pencils.
         const r = el.getBoundingClientRect();
         if (r.width > 0 && r.height > 0) {
+          found.push({ key: adder, value: flat[adder], md: true, section: "new", top: r.bottom + window.scrollY + 4, left: r.left + window.scrollX, id: id++ });
+        }
+      }
+      const explicit = ds.copyKey;
+      if (explicit && explicit in flat) {
+        const r = el.getBoundingClientRect();
+        const section = parseSection(ds.copySection);
+        if (r.width > 0 && r.height > 0) {
+          const isHeader = typeof section === "number";
           found.push({
             key: explicit,
             value: flat[explicit],
-            md: (el as HTMLElement).dataset?.copyMd === "1",
-            top: r.top + window.scrollY,
-            left: Math.min(r.right + window.scrollX - 30, document.documentElement.clientWidth - 40),
+            md: ds.copyMd === "1",
+            section,
+            // Section pencils sit inside the header bar, left of the chevron.
+            top: isHeader ? r.top + window.scrollY + r.height / 2 - 9 : r.top + window.scrollY,
+            left: Math.min(r.right + window.scrollX - (isHeader ? 62 : 30), document.documentElement.clientWidth - 40),
             id: id++,
           });
         }
@@ -130,22 +155,45 @@ export function InlineEditor() {
     return () => vv.removeEventListener("resize", upd);
   }, [editing?.md]);
 
-  async function save() {
+  /** Full value to store: for a section edit, rewrite only that part of the body. */
+  function buildValue(ed: Editing): string {
+    const base = (flat[ed.key] ?? ed.value).replace(/\r\n?/g, "\n");
+    if (ed.section === "intro") return replaceIntro(base, draft);
+    if (ed.section === "new") return upsertSection(base, Number.MAX_SAFE_INTEGER, titleDraft, draft);
+    if (typeof ed.section === "number") return upsertSection(base, ed.section, titleDraft, draft);
+    return draft;
+  }
+
+  async function removeSection() {
+    if (!editing || typeof editing.section !== "number") return;
+    const es = locale === "es";
+    if (!window.confirm(es ? `¿Borrar la sección "${titleDraft}"? No se puede deshacer.` : `Delete section "${titleDraft}"? This can't be undone.`)) return;
+    await save(deleteSection((flat[editing.key] ?? editing.value).replace(/\r\n?/g, "\n"), editing.section));
+  }
+
+  async function save(override?: string) {
     if (!editing) return;
+    let value: string;
+    try {
+      value = override ?? buildValue(editing);
+    } catch {
+      setError(locale === "es" ? "La sección necesita un título." : "The section needs a title.");
+      return;
+    }
     setSaving(true);
     setError("");
     try {
       const res = await fetch("/api/copy", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: editing.key, locale, value: draft }),
+        body: JSON.stringify({ key: editing.key, locale, value }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string; max?: number };
         const es = locale === "es";
         const msg =
           data.error === "too_long"
-            ? es ? `Muy largo: ${draft.trim().length} de ${data.max} caracteres.` : `Too long: ${draft.trim().length} of ${data.max} characters.`
+            ? es ? `Muy largo: ${value.trim().length} de ${data.max} caracteres.` : `Too long: ${value.trim().length} of ${data.max} characters.`
             : res.status === 401
               ? es ? "Tu sesión expiró. Volvé a ingresar." : "Session expired. Sign in again."
               : es ? `No se pudo guardar (${data.error ?? res.status}).` : `Couldn't save (${data.error ?? res.status}).`;
@@ -172,18 +220,30 @@ export function InlineEditor() {
               type="button"
               className="ie-pencil"
               style={{ top: tg.top, left: tg.left }}
-              aria-label={`Edit ${tg.key}`}
+              aria-label={tg.section === "new" ? (locale === "es" ? "Agregar sección" : "Add section") : `Edit ${tg.key}${tg.section !== undefined ? ` (${tg.section})` : ""}`}
               title={tg.key}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setEditing({ key: tg.key, value: tg.value, md: tg.md });
+                setEditing({ key: tg.key, value: tg.value, md: tg.md, section: tg.section });
                 setPreview(false);
-                setDraft(tg.value);
+                const sp = splitSections(tg.value.replace(/\r\n?/g, "\n"));
+                if (tg.section === "intro") {
+                  setTitleDraft("");
+                  setDraft(introBody(tg.value.replace(/\r\n?/g, "\n")));
+                } else if (typeof tg.section === "number" && sp.sections[tg.section]) {
+                  setTitleDraft(sp.sections[tg.section].title);
+                  setDraft(sectionBody(sp.sections[tg.section]));
+                } else if (tg.section === "new") {
+                  setTitleDraft("");
+                  setDraft("");
+                } else {
+                  setDraft(tg.value);
+                }
                 setError("");
               }}
             >
-              <Pencil />
+              {tg.section === "new" ? <span className="ie-add">+ {locale === "es" ? "sección" : "section"}</span> : <Pencil />}
             </button>
           ))
         : null}
@@ -211,7 +271,20 @@ export function InlineEditor() {
             <p className="ie-key">
               {editing.key} · {locale.toUpperCase()}
               {editing.md ? " · Markdown" : ""}
+              {editing.section === "intro" ? (locale === "es" ? " · Intro" : " · Intro") : null}
+              {typeof editing.section === "number" ? ` · ${locale === "es" ? "Sección" : "Section"} ${editing.section + 1}` : null}
+              {editing.section === "new" ? (locale === "es" ? " · Nueva sección" : " · New section") : null}
             </p>
+            {typeof editing.section === "number" || editing.section === "new" ? (
+              <input
+                className="ie-title"
+                value={titleDraft}
+                placeholder={locale === "es" ? "Título de la sección" : "Section title"}
+                aria-label={locale === "es" ? "Título de la sección" : "Section title"}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                autoFocus={editing.section === "new"}
+              />
+            ) : null}
             {editing.md ? (
               <MdToolbar
                 taRef={taRef}
@@ -239,13 +312,18 @@ export function InlineEditor() {
             )}
             {error ? <p className="ie-error">{error}</p> : null}
             <div className="ie-actions">
+              {typeof editing.section === "number" ? (
+                <button type="button" className="ie-btn ie-delete" disabled={saving} onClick={() => void removeSection()}>
+                  {locale === "es" ? "Borrar" : "Delete"}
+                </button>
+              ) : null}
               <button type="button" className="ie-btn ie-cancel" disabled={saving} onClick={() => setEditing(null)}>
                 {locale === "es" ? "Cancelar" : "Cancel"}
               </button>
               <button
                 type="button"
                 className="ie-btn ie-save"
-                disabled={saving || !draft.trim()}
+                disabled={saving || (editing.section === undefined || editing.section === "intro" ? !draft.trim() : !titleDraft.trim())}
                 onClick={() => void save()}
               >
                 {saving ? "…" : locale === "es" ? "Guardar" : "Save"}

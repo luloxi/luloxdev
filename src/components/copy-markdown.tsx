@@ -6,6 +6,7 @@ import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
+import { splitSections } from "@/lib/md-sections";
 
 /**
  * Site copy rendered as Markdown. No raw HTML (skipHtml), no automatic term
@@ -76,12 +77,16 @@ export function CopyMarkdown({
   sections?: boolean;
 }) {
   if (sections && !inline) {
-    const parts = splitSections(prep(text));
+    const parts = toSections(prep(text));
     if (parts.sections.length > 0) {
       return (
-        <div data-copy-key={copyKey} data-copy-md={copyKey ? "1" : undefined} className={`md-copy md-acc ${className}`.trim()}>
-          {parts.intro.trim() ? <MdBlock text={parts.intro} pClass={pClass} /> : null}
-          <Accordion sections={parts.sections} pClass={pClass} />
+        <div className={`md-copy md-acc ${className}`.trim()}>
+          {parts.intro.trim() ? (
+            <div data-copy-key={copyKey} data-copy-md={copyKey ? "1" : undefined} data-copy-section={copyKey ? "intro" : undefined}>
+              <MdBlock text={parts.intro} pClass={pClass} />
+            </div>
+          ) : null}
+          <Accordion sections={parts.sections} pClass={pClass} copyKey={copyKey} />
         </div>
       );
     }
@@ -112,23 +117,18 @@ function MdBlock({ text, pClass }: { text: string; pClass: string }) {
 
 type Section = { title: string; body: string };
 
-/** Split already-prepped Markdown at top-level "## " headings (ignores fenced code). */
-function splitSections(md: string): { intro: string; sections: Section[] } {
-  const lines = md.split("\n");
-  const intro: string[] = [];
-  const sections: { title: string; body: string[] }[] = [];
-  let fence = false;
-  for (const line of lines) {
-    if (/^\s*(```|~~~)/.test(line)) fence = !fence;
-    const m = !fence ? /^##[ \t]+(.+?)[ \t#]*$/.exec(line) : null;
-    if (m) sections.push({ title: m[1], body: [] });
-    else if (sections.length) sections[sections.length - 1].body.push(line);
-    else intro.push(line);
-  }
-  return { intro: intro.join("\n"), sections: sections.map((x) => ({ title: x.title.replace(/[*_`]/g, "").replace(/\\(.)/g, "$1"), body: x.body.join("\n") })) };
+function toSections(md: string): { intro: string; sections: Section[] } {
+  const sp = splitSections(md);
+  return {
+    intro: sp.intro.join("\n"),
+    sections: sp.sections.map((x) => ({
+      title: x.title.replace(/[*_`]/g, "").replace(/\\(.)/g, "$1"),
+      body: x.lines.join("\n"),
+    })),
+  };
 }
 
-function Accordion({ sections, pClass }: { sections: Section[]; pClass: string }) {
+function Accordion({ sections, pClass, copyKey }: { sections: Section[]; pClass: string; copyKey?: string }) {
   const base = useId();
   const [open, setOpen] = useState<boolean[]>(() => sections.map(() => false));
   let last = -1;
@@ -136,13 +136,13 @@ function Accordion({ sections, pClass }: { sections: Section[]; pClass: string }
   let hint = -1;
   for (let i = last + 1; i < sections.length; i++) if (!open[i]) { hint = i; break; }
   return (
-    <div className="md-acc-list">
+    <div className="md-acc-list" data-copy-add={copyKey}>
       {sections.map((sec, i) => {
         const isOpen = open[i] ?? false;
         const id = `${base}-s${i}`;
         return (
           <section key={id} className={`md-acc-item${isOpen ? " is-open" : ""}`}>
-            <h2 className="md-acc-h">
+            <h2 className="md-acc-h" data-copy-key={copyKey} data-copy-md={copyKey ? "1" : undefined} data-copy-section={copyKey ? String(i) : undefined}>
               <button
                 type="button"
                 id={`${id}-btn`}

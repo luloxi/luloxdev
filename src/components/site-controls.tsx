@@ -1,7 +1,7 @@
 "use client";
 
 import { LocaleToggle } from "@/components/locale-toggle";
-import { LogoutButton } from "@/components/logout-button";
+import { LoginLink, LogoutButton } from "@/components/logout-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
@@ -14,9 +14,9 @@ export function SiteControls({ className, isAdmin = false }: { className?: strin
         className,
       )}
     >
-      {isAdmin ? <LogoutButton /> : null}
       <LocaleToggle />
       <ThemeToggle />
+      {isAdmin ? <LogoutButton /> : <LoginLink />}
     </div>
   );
 }

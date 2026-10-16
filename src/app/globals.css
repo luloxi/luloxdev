@@ -3641,3 +3641,12 @@ span.md-copy { display: inline; }
 .md-acc-btn { position: relative; }
 .md-acc-hint { z-index: 5; }
 body { overflow-x: clip; }
+.ie-title {
+  width: 100%; margin: 0 0 8px; padding: 10px 12px; border-radius: 10px;
+  font-size: 17px; font-weight: 800; letter-spacing: 0.02em;
+  color: var(--foreground); background: color-mix(in oklab, var(--surface) 90%, transparent);
+  border: 1px solid color-mix(in oklab, #c8102e 45%, transparent);
+}
+.ie-delete { flex: 0 0 auto; padding: 0 16px; background: transparent; color: #e0001b; border: 1px solid color-mix(in srgb, #e0001b 50%, transparent); }
+.ie-add { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
+.ie-pencil:has(.ie-add) { width: auto; padding: 0 8px; }
