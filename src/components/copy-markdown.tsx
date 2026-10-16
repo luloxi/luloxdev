@@ -7,6 +7,8 @@ import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import { splitSections } from "@/lib/md-sections";
+import { useLocale } from "@/i18n/locale-provider";
+import { InflowPencil, requestCopyEdit, useIsAdmin } from "@/components/admin-context";
 
 /**
  * Site copy rendered as Markdown. No raw HTML (skipHtml), no automatic term
@@ -82,9 +84,7 @@ export function CopyMarkdown({
       return (
         <div className={`md-copy md-acc ${className}`.trim()}>
           {parts.intro.trim() ? (
-            <div data-copy-key={copyKey} data-copy-md={copyKey ? "1" : undefined} data-copy-section={copyKey ? "intro" : undefined}>
-              <MdBlock text={parts.intro} pClass={pClass} />
-            </div>
+            <IntroBlock text={parts.intro} pClass={pClass} copyKey={copyKey} />
           ) : null}
           <Accordion sections={parts.sections} pClass={pClass} copyKey={copyKey} />
         </div>
@@ -128,21 +128,35 @@ function toSections(md: string): { intro: string; sections: Section[] } {
   };
 }
 
+function IntroBlock({ text, pClass, copyKey }: { text: string; pClass: string; copyKey?: string }) {
+  const admin = useIsAdmin() && Boolean(copyKey);
+  return (
+    <div className={admin ? "md-intro-admin" : undefined} data-copy-inflow={copyKey ? "1" : undefined}>
+      <MdBlock text={text} pClass={pClass} />
+      {admin ? (
+        <InflowPencil label="Edit intro" onClick={() => requestCopyEdit({ key: copyKey!, section: "intro", md: true })} />
+      ) : null}
+    </div>
+  );
+}
+
 function Accordion({ sections, pClass, copyKey }: { sections: Section[]; pClass: string; copyKey?: string }) {
   const base = useId();
+  const admin = useIsAdmin() && Boolean(copyKey);
+  const { locale } = useLocale();
   const [open, setOpen] = useState<boolean[]>(() => sections.map(() => false));
   let last = -1;
   open.forEach((o, i) => { if (o) last = i; });
   let hint = -1;
   for (let i = last + 1; i < sections.length; i++) if (!open[i]) { hint = i; break; }
   return (
-    <div className="md-acc-list" data-copy-add={copyKey}>
+    <div className="md-acc-list" data-copy-inflow={copyKey ? "1" : undefined}>
       {sections.map((sec, i) => {
         const isOpen = open[i] ?? false;
         const id = `${base}-s${i}`;
         return (
           <section key={id} className={`md-acc-item${isOpen ? " is-open" : ""}`}>
-            <h2 className="md-acc-h" data-copy-key={copyKey} data-copy-md={copyKey ? "1" : undefined} data-copy-section={copyKey ? String(i) : undefined}>
+            <h2 className={`md-acc-h${admin ? " md-acc-h-admin" : ""}`}>
               <button
                 type="button"
                 id={`${id}-btn`}
@@ -156,6 +170,9 @@ function Accordion({ sections, pClass, copyKey }: { sections: Section[]; pClass:
                   <path d="m6 9 6 6 6-6" />
                 </svg>
               </button>
+              {admin ? (
+                <InflowPencil label={`Edit section ${i + 1}`} onClick={() => requestCopyEdit({ key: copyKey!, section: i, md: true })} />
+              ) : null}
             </h2>
             <div id={`${id}-panel`} role="region" aria-labelledby={`${id}-btn`} className="md-acc-panel" inert={!isOpen}>
               <div className="md-acc-inner">
@@ -167,6 +184,11 @@ function Accordion({ sections, pClass, copyKey }: { sections: Section[]; pClass:
           </section>
         );
       })}
+      {admin ? (
+        <button type="button" className="ie-add-section" onClick={() => requestCopyEdit({ key: copyKey!, section: "new", md: true })}>
+          {locale === "es" ? "+ sección" : "+ section"}
+        </button>
+      ) : null}
     </div>
   );
 }

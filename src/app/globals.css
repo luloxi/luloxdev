@@ -3650,3 +3650,24 @@ body { overflow-x: clip; }
 .ie-delete { flex: 0 0 auto; padding: 0 16px; background: transparent; color: #e0001b; border: 1px solid color-mix(in srgb, #e0001b 50%, transparent); }
 .ie-add { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
 .ie-pencil:has(.ie-add) { width: auto; padding: 0 8px; }
+
+/* In-flow admin pencils (rendered inside their block, never measured overlays) */
+.ie-inflow {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; flex: 0 0 auto; padding: 0; border: 0; border-radius: 6px;
+  background: transparent; color: var(--foreground); opacity: 0.45; cursor: pointer;
+  transition: opacity .15s, color .15s;
+}
+.ie-inflow:hover, .ie-inflow:focus-visible { opacity: 1; color: #c8102e; }
+.ie-inflow:focus-visible { outline: 1px solid #c8102e; outline-offset: 1px; }
+.md-acc-h-admin { display: flex; align-items: center; gap: 2px; }
+.md-acc-h-admin > .md-acc-btn { flex: 1 1 auto; min-width: 0; }
+.md-intro-admin { display: flex; align-items: flex-start; gap: 4px; }
+.md-intro-admin > :first-child { flex: 1 1 auto; min-width: 0; }
+.ie-add-section {
+  align-self: flex-start; margin-top: 0.4rem; padding: 6px 8px; border-radius: 6px;
+  background: transparent; border: 1px dashed var(--border); color: var(--foreground); opacity: 0.55;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.ie-add-section:hover, .ie-add-section:focus-visible { opacity: 1; color: #c8102e; border-color: #c8102e; }
+body.ie-off .ie-inflow, body.ie-off .ie-add-section { display: none; }

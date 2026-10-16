@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 export function SiteControls({ className, isAdmin = false }: { className?: string; isAdmin?: boolean }) {
   return (
     <div
+      data-inline-editor="skip"
       className={cn(
         "fixed right-3 top-3 z-50 flex items-center gap-2 sm:right-5 sm:top-4",
         className,

@@ -7,6 +7,7 @@ import { flattenCopy } from "@/i18n/copy-overrides";
 import { useLocale } from "@/i18n/locale-provider";
 import { CopyMarkdown } from "@/components/copy-markdown";
 import { MdToolbar, mdKeyDown } from "@/components/md-toolbar";
+import { COPY_EDIT_EVENT, type CopyEditDetail } from "@/components/admin-context";
 import { deleteSection, introBody, replaceIntro, sectionBody, splitSections, upsertSection } from "@/lib/md-sections";
 
 /** section: "intro", a section index, or "new" (append a section). */
@@ -70,6 +71,7 @@ export function InlineEditor() {
       if (rootRef.current && rootRef.current.contains(el)) return;
       if ((el as HTMLElement).dataset?.inlineEditor) return;
       const ds = (el as HTMLElement).dataset ?? {};
+      if (ds.copyInflow) return; // block renders its own in-flow pencils
       const adder = ds.copyAdd;
       if (adder && adder in flat) {
         // "+" under the list adds a section; the section headers inside get their own pencils.
@@ -135,13 +137,18 @@ export function InlineEditor() {
     queue();
     const timer = window.setTimeout(queue, 600);
     const mo = new MutationObserver(queue);
-    mo.observe(document.body, { subtree: true, childList: true, characterData: true });
+    mo.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["class", "aria-expanded", "style", "inert"] });
+    const ro = new ResizeObserver(queue);
+    ro.observe(document.body);
     window.addEventListener("resize", queue);
+    document.addEventListener("transitionend", queue, true);
     return () => {
       cancelAnimationFrame(raf);
       window.clearTimeout(timer);
       mo.disconnect();
+      ro.disconnect();
       window.removeEventListener("resize", queue);
+      document.removeEventListener("transitionend", queue, true);
     };
   }, [on, scan]);
 
@@ -154,6 +161,41 @@ export function InlineEditor() {
     vv.addEventListener("resize", upd);
     return () => vv.removeEventListener("resize", upd);
   }, [editing?.md]);
+
+  const openEdit = useCallback((key: string, section: SectionRef | undefined, md?: boolean) => {
+    const value = flat[key];
+    if (value === undefined) return;
+    setEditing({ key, value, md, section });
+    setPreview(false);
+    setError("");
+    const sp = splitSections(value.replace(/\r\n?/g, "\n"));
+    if (section === "intro") {
+      setTitleDraft("");
+      setDraft(introBody(value.replace(/\r\n?/g, "\n")));
+    } else if (typeof section === "number" && sp.sections[section]) {
+      setTitleDraft(sp.sections[section].title);
+      setDraft(sectionBody(sp.sections[section]));
+    } else if (section === "new") {
+      setTitleDraft("");
+      setDraft("");
+    } else {
+      setDraft(value);
+    }
+  }, [flat]);
+
+  useEffect(() => {
+    const onReq = (e: Event) => {
+      const d = (e as CustomEvent<CopyEditDetail>).detail;
+      if (d?.key) openEdit(d.key, d.section, d.md);
+    };
+    window.addEventListener(COPY_EDIT_EVENT, onReq);
+    return () => window.removeEventListener(COPY_EDIT_EVENT, onReq);
+  }, [openEdit]);
+
+  // Toggle hides in-flow pencils too.
+  useEffect(() => {
+    document.body.classList.toggle("ie-off", !on);
+  }, [on]);
 
   /** Full value to store: for a section edit, rewrite only that part of the body. */
   function buildValue(ed: Editing): string {
@@ -225,21 +267,7 @@ export function InlineEditor() {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setEditing({ key: tg.key, value: tg.value, md: tg.md, section: tg.section });
-                setPreview(false);
-                const sp = splitSections(tg.value.replace(/\r\n?/g, "\n"));
-                if (tg.section === "intro") {
-                  setTitleDraft("");
-                  setDraft(introBody(tg.value.replace(/\r\n?/g, "\n")));
-                } else if (typeof tg.section === "number" && sp.sections[tg.section]) {
-                  setTitleDraft(sp.sections[tg.section].title);
-                  setDraft(sectionBody(sp.sections[tg.section]));
-                } else if (tg.section === "new") {
-                  setTitleDraft("");
-                  setDraft("");
-                } else {
-                  setDraft(tg.value);
-                }
+                openEdit(tg.key, tg.section, tg.md);
                 setError("");
               }}
             >

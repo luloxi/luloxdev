@@ -7,6 +7,7 @@ import { getServerPrefs } from "@/lib/prefs";
 import { getCopyOverrides } from "@/lib/site-copy";
 import { isAdminRequest } from "@/lib/admin-request";
 import { InlineEditor } from "@/components/inline-editor";
+import { AdminProvider } from "@/components/admin-context";
 import { PREFS_HEAD_SCRIPT } from "@/lib/prefs-shared";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { site } from "@/content/site";
@@ -128,7 +129,9 @@ export default async function RootLayout({
           <LocaleProvider initialLocale={locale} overrides={overrides}>
             <CosmicBg />
             <SiteControls isAdmin={isAdmin} />
-            <div className="relative z-10">{children}</div>
+            <AdminProvider isAdmin={isAdmin}>
+              <div className="relative z-10">{children}</div>
+            </AdminProvider>
             {/* Only rendered (and its JS only shipped) for the allowlisted admin. */}
             {isAdmin ? <InlineEditor /> : null}
           </LocaleProvider>
