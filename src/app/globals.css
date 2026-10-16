@@ -3596,33 +3596,34 @@ span.md-copy { display: inline; }
 /* Revving start: idle, build-up vibration as the neon flickers on, lunge forward, spring back, power off. */
 @keyframes md-acc-neon {
   0%, 58% { background-color: transparent; box-shadow: none; transform: none; border-color: transparent; }
-  60% { transform: translateX(-1px); background-color: rgb(255 122 0 / .15); }
+  60% { transform: translateX(-1px); background-color: rgb(232 116 42 / .15); }
   62% { transform: translateX(1px); background-color: transparent; }
-  64% { transform: translateX(-2px) rotate(-.3deg); background-color: rgb(255 122 0 / .45); box-shadow: 0 0 10px 1px rgb(255 122 0 / .4); }
-  66% { transform: translateX(2px) rotate(.3deg); background-color: rgb(255 122 0 / .1); box-shadow: none; }
-  68% { transform: translateX(-3px) rotate(-.5deg); background-color: rgb(255 122 0 / .7); box-shadow: 0 0 16px 3px rgb(255 122 0 / .55); }
-  70% { transform: translateX(3px) rotate(.5deg); background-color: rgb(255 122 0 / .35); }
-  72% { transform: translateX(-4px) scale(.98); background-color: #ff7a00; box-shadow: 0 0 22px 5px rgb(255 122 0 / .7); border-color: #ff7a00; }
-  75% { transform: translateX(18px) scale(1.04); background-color: #ff7a00; box-shadow: -18px 0 30px 6px rgb(255 122 0 / .55), 0 0 40px 10px rgb(255 122 0 / .45); border-color: #ffb066; }
+  64% { transform: translateX(-2px) rotate(-.3deg); background-color: rgb(232 116 42 / .45); box-shadow: 0 0 10px 1px rgb(232 116 42 / .4); }
+  66% { transform: translateX(2px) rotate(.3deg); background-color: rgb(232 116 42 / .1); box-shadow: none; }
+  68% { transform: translateX(-3px) rotate(-.5deg); background-color: rgb(232 116 42 / .7); box-shadow: 0 0 16px 3px rgb(232 116 42 / .55); }
+  70% { transform: translateX(3px) rotate(.5deg); background-color: rgb(232 116 42 / .35); }
+  72% { transform: translateX(-4px) scale(.98); background-color: #e8742a; box-shadow: 0 0 22px 5px rgb(232 116 42 / .7); border-color: #e8742a; }
+  75% { transform: translateX(18px) scale(1.04); background-color: #e8742a; box-shadow: -18px 0 30px 6px rgb(232 116 42 / .55), 0 0 40px 10px rgb(232 116 42 / .45); border-color: #f5a26a; }
   79% { transform: translateX(-6px) scale(.99); }
   82% { transform: translateX(3px); }
   85% { transform: translateX(-1px); }
-  88% { transform: none; background-color: #ff7a00; box-shadow: 0 0 24px 6px rgb(255 122 0 / .6); border-color: #ff7a00; }
-  92% { background-color: rgb(255 122 0 / .55); box-shadow: 0 0 10px 2px rgb(255 122 0 / .3); }
-  93% { background-color: #ff7a00; box-shadow: 0 0 18px 4px rgb(255 122 0 / .5); }
+  88% { transform: none; background-color: #e8742a; box-shadow: 0 0 24px 6px rgb(232 116 42 / .6); border-color: #e8742a; }
+  92% { background-color: rgb(232 116 42 / .55); box-shadow: 0 0 10px 2px rgb(232 116 42 / .3); }
+  93% { background-color: #e8742a; box-shadow: 0 0 18px 4px rgb(232 116 42 / .5); }
   100% { background-color: transparent; box-shadow: none; transform: none; border-color: transparent; }
 }
 @keyframes md-acc-neon-text {
-  0%, 63% { color: inherit; text-shadow: none; }
-  64%, 68% { color: #0b2fae; text-shadow: none; }
-  66%, 70% { color: inherit; }
-  72%, 93% { color: #0b2fae; text-shadow: 0 0 8px rgb(30 91 255 / .6); }
-  92% { color: #0b2fae; text-shadow: none; }
-  100% { color: inherit; text-shadow: none; }
+  0%, 63% { color: inherit; -webkit-text-stroke: 0 transparent; text-shadow: none; }
+  64%, 68% { color: #2e5aac; -webkit-text-stroke: 4px #fff; text-shadow: none; }
+  66%, 70% { color: inherit; -webkit-text-stroke: 0 transparent; }
+  72%, 93% { color: #2e5aac; -webkit-text-stroke: 4px #fff; text-shadow: 0 0 1px #fff; }
+  92% { color: #2e5aac; -webkit-text-stroke: 4px #fff; text-shadow: none; }
+  100% { color: inherit; -webkit-text-stroke: 0 transparent; text-shadow: none; }
 }
-.md-acc-hint .md-acc-title { color: inherit; }
+.md-acc-hint .md-acc-title { color: inherit; paint-order: stroke fill; }
+.md-acc-hint .md-acc-chev { filter: drop-shadow(0 0 1.5px #fff); }
 @media (prefers-reduced-motion: reduce) {
-  .md-acc-hint { animation: none; background-color: #ff7a00; border-color: #ff7a00; }
-  .md-acc-hint .md-acc-title, .md-acc-hint .md-acc-chev { animation: none; color: #0b2fae; }
+  .md-acc-hint { animation: none; background-color: #e8742a; border-color: #e8742a; }
+  .md-acc-hint .md-acc-title, .md-acc-hint .md-acc-chev { animation: none; color: #2e5aac; -webkit-text-stroke: 4px #fff; }
   .md-acc-panel, .md-acc-body, .md-acc-chev { transition: none; }
 }
