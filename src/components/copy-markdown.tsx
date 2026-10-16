@@ -131,7 +131,6 @@ function splitSections(md: string): { intro: string; sections: Section[] } {
 function Accordion({ sections, pClass }: { sections: Section[]; pClass: string }) {
   const base = useId();
   const [open, setOpen] = useState<boolean[]>(() => sections.map((_, i) => i === 0));
-  const [quiet, setQuiet] = useState(-1);
   let last = -1;
   open.forEach((o, i) => { if (o) last = i; });
   let hint = -1;
@@ -147,11 +146,9 @@ function Accordion({ sections, pClass }: { sections: Section[]; pClass: string }
               <button
                 type="button"
                 id={`${id}-btn`}
-                className={`md-acc-btn${hint === i && quiet !== i ? " md-acc-hint" : ""}`}
+                className={`md-acc-btn${hint === i ? " md-acc-hint" : ""}`}
                 aria-expanded={isOpen}
                 aria-controls={`${id}-panel`}
-                onMouseEnter={() => hint === i && setQuiet(i)}
-                onFocus={() => hint === i && setQuiet(i)}
                 onClick={() => setOpen((prev) => prev.map((v, j) => (j === i ? !v : v)))}
               >
                 <span className="md-acc-title">{sec.title}</span>
