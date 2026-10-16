@@ -3441,3 +3441,10 @@
 @media (prefers-reduced-motion: reduce) {
   .call-form-send.call-form-send-blocked { animation: none; }
 }
+.call-form-cooldown { color: var(--muted); }
+.call-form-countdown {
+  font-family: ui-monospace, monospace;
+  font-size: 1.05rem;
+  color: var(--section-contact);
+  font-variant-numeric: tabular-nums;
+}

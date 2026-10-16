@@ -14,6 +14,70 @@ type TurnstileApi = {
   reset: (id?: string) => void;
 };
 
+async function sha256(s: string) {
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Lightweight in-house fingerprint: only its hash leaves the browser. */
+async function fingerprint() {
+  let canvas = "";
+  try {
+    const c = document.createElement("canvas");
+    c.width = 220;
+    c.height = 40;
+    const g = c.getContext("2d");
+    if (g) {
+      g.textBaseline = "top";
+      g.font = "16px Arial";
+      g.fillStyle = "#c8102e";
+      g.fillRect(0, 0, 60, 20);
+      g.fillStyle = "#00a4ef";
+      g.fillText("lulox ✓ 2026", 4, 12);
+      canvas = c.toDataURL();
+    }
+  } catch {}
+  const n = navigator as Navigator & { deviceMemory?: number };
+  return sha256(
+    [
+      n.userAgent,
+      n.language,
+      n.languages?.join(","),
+      n.platform,
+      n.hardwareConcurrency,
+      n.deviceMemory,
+      `${screen.width}x${screen.height}x${screen.colorDepth}`,
+      window.devicePixelRatio,
+      Intl.DateTimeFormat().resolvedOptions().timeZone,
+      new Date().getTimezoneOffset(),
+      canvas,
+    ].join("|"),
+  );
+}
+
+function clientId() {
+  const k = "lulox-cid";
+  let id = "";
+  try {
+    id = localStorage.getItem(k) ?? "";
+  } catch {}
+  if (!id) {
+    const m = document.cookie.match(/(?:^|; )lulox-cid=([^;]+)/);
+    id = m?.[1] ?? crypto.randomUUID();
+  }
+  try {
+    localStorage.setItem(k, id);
+  } catch {}
+  document.cookie = `${k}=${id}; path=/; max-age=31536000; samesite=lax; secure`;
+  return id;
+}
+
+function hms(ms: number) {
+  const t = Math.max(0, Math.ceil(ms / 1000));
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${p(Math.floor(t / 3600))}:${p(Math.floor((t % 3600) / 60))}:${p(t % 60)}`;
+}
+
 const copy = {
   es: {
     heading: "Pedime una llamada",
@@ -23,6 +87,7 @@ const copy = {
     google: "Usar mi email de Google",
     signedAs: "Con Google",
     required: "Este campo es obligatorio",
+    cooldown: "Ya recibí tu mensaje. Podés mandar otro en",
     send: "Enviar",
     sending: "Enviando...",
     ok: "Listo, te llegó a mi bandeja. Te respondo a tu email.",
@@ -43,6 +108,7 @@ const copy = {
     google: "Use my Google email",
     signedAs: "Via Google",
     required: "This field is required",
+    cooldown: "I got your message. You can send another one in",
     send: "Send",
     sending: "Sending...",
     ok: "Done, it landed in my inbox. I'll reply to your email.",
@@ -71,6 +137,38 @@ export function CallRequestForm() {
   const widgetId = useRef<string | null>(null);
   const [tsReady, setTsReady] = useState(false);
   const [blocked, setBlocked] = useState(false);
+  const [ids, setIds] = useState<{ fp: string; cid: string }>({ fp: "", cid: "" });
+  const [retryAt, setRetryAt] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      const cid = clientId();
+      const fp = await fingerprint();
+      if (!live) return;
+      setIds({ fp, cid });
+      try {
+        const r = await fetch(`/api/contact?fp=${fp}&cid=${encodeURIComponent(cid)}`, {
+          cache: "no-store",
+        });
+        const d = (await r.json()) as { retryAt?: number | null };
+        if (live && d.retryAt && d.retryAt > Date.now()) setRetryAt(d.retryAt);
+      } catch {}
+    })();
+    return () => {
+      live = false;
+    };
+  }, []);
+  useEffect(() => {
+    if (!retryAt) return;
+    const id = window.setInterval(() => {
+      const t = Date.now();
+      setNow(t);
+      if (t >= retryAt) setRetryAt(null);
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [retryAt]);
+  const cooling = retryAt !== null && retryAt > now;
   const blockTimer = useRef<number | null>(null);
   useEffect(() => () => {
     if (blockTimer.current) window.clearTimeout(blockTimer.current);
@@ -104,7 +202,7 @@ export function CallRequestForm() {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (state === "sending") return;
+    if (state === "sending" || cooling) return;
     const empties: [string, HTMLElement | null][] = [];
     if (!message.trim()) empties.push(["message", msgRef.current]);
     if (!email.trim()) empties.push(["email", emailRef.current]);
@@ -128,9 +226,21 @@ export function CallRequestForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, email, when, website, token }),
+        body: JSON.stringify({ message, email, when, website, token, ...ids }),
       });
-      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        retryAt?: number;
+      };
+      if (data.retryAt) {
+        setNow(Date.now());
+        setRetryAt(data.retryAt);
+      }
+      if (data.error === "cooldown") {
+        setState("idle");
+        return;
+      }
       if (res.ok && data.ok) {
         setState("ok");
         setMessage("");
@@ -246,11 +356,17 @@ export function CallRequestForm() {
           <button
             type="submit"
             className={cn("call-form-send", blocked && "call-form-send-blocked")}
-            disabled={state === "sending" || len > MAX || blocked}
+            disabled={state === "sending" || len > MAX || blocked || cooling}
           >
             {state === "sending" ? c.sending : c.send}
           </button>
         </div>
+        {cooling ? (
+          <p className="call-form-msg call-form-cooldown" role="status" aria-live="off">
+            {c.cooldown}{" "}
+            <strong className="call-form-countdown">{hms((retryAt ?? 0) - now)}</strong>
+          </p>
+        ) : null}
         {state === "ok" ? (
           <p className="call-form-msg call-form-ok" role="status">{c.ok}</p>
         ) : null}

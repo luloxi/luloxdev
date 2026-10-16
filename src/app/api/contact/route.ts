@@ -1,5 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextResponse } from "next/server";
+import { cooldownUntil, startCooldown } from "@/lib/contact-cooldown";
 
 type Env = {
   CONTACT_EMAIL?: { send: (msg: unknown) => Promise<{ messageId?: string }> };
@@ -7,7 +8,24 @@ type Env = {
   CONTACT_TO?: string;
   CONTACT_FROM?: string;
   TURNSTILE_SECRET?: string;
+  BETTER_AUTH_SECRET?: string;
 };
+
+const str = (v: unknown) => (typeof v === "string" ? v.slice(0, 200) : "");
+
+/** Cooldown status for this browser/IP (email is unknown until submit). */
+export async function GET(request: Request) {
+  const { env: rawEnv } = await getCloudflareContext({ async: true });
+  const env = rawEnv as unknown as Env;
+  if (!env.BETTER_AUTH_SECRET) return NextResponse.json({ retryAt: null });
+  const u = new URL(request.url);
+  const retryAt = await cooldownUntil(env.BETTER_AUTH_SECRET, {
+    ip: request.headers.get("cf-connecting-ip") ?? "",
+    fp: str(u.searchParams.get("fp")),
+    cid: str(u.searchParams.get("cid")),
+  });
+  return NextResponse.json({ retryAt }, { headers: { "Cache-Control": "no-store" } });
+}
 
 const EMAIL_RE = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]{2,}$/;
 const DT_RE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/;
@@ -91,6 +109,14 @@ export async function POST(request: Request) {
     }
   }
 
+  const ids = { ip, fp: str(body.fp), cid: str(body.cid), email };
+  if (env.BETTER_AUTH_SECRET) {
+    const retryAt = await cooldownUntil(env.BETTER_AUTH_SECRET, ids);
+    if (retryAt) {
+      return NextResponse.json({ error: "cooldown", retryAt }, { status: 429 });
+    }
+  }
+
   if (!env.TURNSTILE_SECRET) {
     return NextResponse.json({ error: "not_configured" }, { status: 503 });
   }
@@ -140,5 +166,8 @@ ${buttons}
     return NextResponse.json({ error: "send_failed" }, { status: 502 });
   }
 
-  return NextResponse.json({ ok: true });
+  const retryAt = env.BETTER_AUTH_SECRET
+    ? await startCooldown(env.BETTER_AUTH_SECRET, ids)
+    : Date.now() + 24 * 60 * 60 * 1000;
+  return NextResponse.json({ ok: true, retryAt });
 }
