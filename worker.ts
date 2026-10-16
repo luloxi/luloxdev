@@ -11,6 +11,11 @@ const CANONICAL = "www.lulox.dev";
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     const url = new URL(request.url);
+    if (url.hostname === "www.lulox.com.ar") {
+      url.hostname = "lulox.com.ar";
+      url.protocol = "https:";
+      return Response.redirect(url.toString(), 301);
+    }
     if (url.hostname === APEX) {
       url.hostname = CANONICAL;
       url.protocol = "https:";

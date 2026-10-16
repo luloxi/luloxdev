@@ -16,7 +16,7 @@ export const site = {
   heroPhoto: "/avatar-hero.jpg",
   email: "lucianoolivabianco@gmail.com",
   /** Used for absolute OG/Twitter URLs when env is missing */
-  url: "https://www.lulox.dev",
+  url: "https://lulox.com.ar",
   xHandle: "@LuloxDev",
 } as const;
 

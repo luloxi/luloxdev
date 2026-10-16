@@ -44,7 +44,7 @@ export function buildAuthOptions(
     // so the base URL follows the request host but only for these hosts.
     baseURL: env.BETTER_AUTH_URL || {
       allowedHosts: ALLOWED_HOSTS,
-      fallback: "https://www.lulox.dev",
+      fallback: "https://lulox.com.ar",
     },
     trustedOrigins: TRUSTED_ORIGINS,
     emailAndPassword: { enabled: false },
