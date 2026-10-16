@@ -3424,3 +3424,20 @@
     box-shadow: 0 0 0 3px #00e5ff, 0 0 12px 3px color-mix(in oklab, #00e5ff 60%, transparent);
   }
 }
+
+@keyframes call-form-shake {
+  0%, 100% { transform: translateX(0); }
+  15%, 45%, 75% { transform: translateX(-6px); }
+  30%, 60%, 90% { transform: translateX(6px); }
+}
+.call-form-send.call-form-send-blocked,
+.call-form-send.call-form-send-blocked:disabled {
+  background: #e0001b;
+  color: #fff;
+  opacity: 1;
+  box-shadow: 0 6px 18px color-mix(in oklab, #e0001b 45%, transparent);
+  animation: call-form-shake 0.5s ease-in-out 2;
+}
+@media (prefers-reduced-motion: reduce) {
+  .call-form-send.call-form-send-blocked { animation: none; }
+}

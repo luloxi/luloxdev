@@ -70,6 +70,11 @@ export function CallRequestForm() {
   const widgetRef = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | null>(null);
   const [tsReady, setTsReady] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+  const blockTimer = useRef<number | null>(null);
+  useEffect(() => () => {
+    if (blockTimer.current) window.clearTimeout(blockTimer.current);
+  }, []);
   const [missing, setMissing] = useState<Record<string, boolean>>({});
   const msgRef = useRef<HTMLTextAreaElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -106,6 +111,9 @@ export function CallRequestForm() {
     if (!when) empties.push(["when", whenRef.current]);
     if (empties.length > 0) {
       setMissing(Object.fromEntries(empties.map(([k]) => [k, true])));
+      setBlocked(true);
+      if (blockTimer.current) window.clearTimeout(blockTimer.current);
+      blockTimer.current = window.setTimeout(() => setBlocked(false), 3000);
       empties[0][1]?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
@@ -237,8 +245,8 @@ export function CallRequestForm() {
           </span>
           <button
             type="submit"
-            className="call-form-send"
-            disabled={state === "sending" || len > MAX}
+            className={cn("call-form-send", blocked && "call-form-send-blocked")}
+            disabled={state === "sending" || len > MAX || blocked}
           >
             {state === "sending" ? c.sending : c.send}
           </button>
