@@ -20,7 +20,6 @@ export async function GET(request: Request) {
   if (!env.BETTER_AUTH_SECRET) return NextResponse.json({ retryAt: null });
   const u = new URL(request.url);
   const retryAt = await cooldownUntil(env.BETTER_AUTH_SECRET, {
-    ip: request.headers.get("cf-connecting-ip") ?? "",
     fp: str(u.searchParams.get("fp")),
     cid: str(u.searchParams.get("cid")),
   });
@@ -106,7 +105,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const ids = { ip, fp: str(body.fp), cid: str(body.cid), email };
+  const ids = { fp: str(body.fp), cid: str(body.cid), email };
   if (env.BETTER_AUTH_SECRET) {
     const retryAt = await cooldownUntil(env.BETTER_AUTH_SECRET, ids);
     if (retryAt) {
