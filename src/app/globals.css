@@ -3564,3 +3564,40 @@ span.md-copy { display: inline; }
   .ie-toolbar { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .ie-tb { flex: 0 0 auto; }
 }
+
+/* ── Sobre mí: H2 sections as accordion ── */
+.md-acc-list { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1.1rem; }
+.md-copy > .md-acc-list { margin-top: 1.1rem; }
+.md-acc-item { border-top: 1px solid color-mix(in srgb, var(--border) 80%, transparent); }
+.md-acc-h { margin: 0; font-size: inherit; }
+.md-acc-btn {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  min-height: 48px; padding: 0.7rem 0.6rem; margin-top: 0.4rem; border-radius: 10px;
+  background: transparent; border: 1px solid transparent; color: var(--foreground); cursor: pointer; text-align: left;
+  font-size: 1.05rem; font-weight: 800; letter-spacing: 0.02em; line-height: 1.25;
+  transition: color .2s, border-color .2s, background-color .2s;
+}
+.md-acc-btn:hover, .md-acc-btn:focus-visible { color: #c8102e; border-color: color-mix(in srgb, #c8102e 40%, transparent); }
+.md-acc-btn:focus-visible { outline: 2px solid #c8102e; outline-offset: 2px; }
+.md-acc-chev { flex: 0 0 auto; transition: transform .3s ease; color: #c8102e; }
+.is-open > .md-acc-h .md-acc-chev { transform: rotate(180deg); }
+.md-acc-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s ease; }
+.is-open > .md-acc-panel { grid-template-rows: 1fr; }
+.md-acc-inner { overflow: hidden; min-height: 0; }
+.md-acc-body { padding: 0.4rem 0.6rem 0.8rem; opacity: 0; transition: opacity .3s ease; }
+.is-open > .md-acc-panel .md-acc-body { opacity: 1; }
+.md-acc-body > * + * { margin-top: 0.9rem; }
+.md-acc-hint { animation: md-acc-pulse 2.2s ease-in-out infinite; border-color: color-mix(in srgb, #c8102e 35%, transparent); }
+@keyframes md-acc-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(200 16 46 / 0); background-color: transparent; }
+  50% { box-shadow: 0 0 18px 2px rgb(200 16 46 / 0.35); background-color: rgb(200 16 46 / 0.06); }
+}
+:root:not(.dark) .md-acc-hint { animation-name: md-acc-pulse-light; }
+@keyframes md-acc-pulse-light {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(200 16 46 / 0); background-color: transparent; }
+  50% { box-shadow: 0 0 14px 1px rgb(200 16 46 / 0.28); background-color: rgb(200 16 46 / 0.05); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-acc-hint { animation: none; box-shadow: 0 0 0 1px rgb(200 16 46 / 0.45); }
+  .md-acc-panel, .md-acc-body, .md-acc-chev { transition: none; }
+}

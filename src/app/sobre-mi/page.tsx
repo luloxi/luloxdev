@@ -81,7 +81,7 @@ export default function AboutPage() {
           </span>
           <div className="cp-panel-inner space-y-4">
             <p className="cp-headline">{about.headline}</p>
-            <CopyMarkdown copyKey="about.body" text={about.body} />
+            <CopyMarkdown copyKey="about.body" text={about.body} sections />
           </div>
         </div>
 

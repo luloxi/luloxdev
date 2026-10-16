@@ -1,5 +1,7 @@
 "use client";
 
+import { useId, useState } from "react";
+
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
@@ -62,6 +64,7 @@ export function CopyMarkdown({
   className = "",
   pClass = "cp-prose",
   inline = false,
+  sections = false,
 }: {
   text: string;
   copyKey?: string;
@@ -69,7 +72,20 @@ export function CopyMarkdown({
   pClass?: string;
   /** Inside a link/button: no block elements wrapper, links rendered as text. */
   inline?: boolean;
+  /** Each "## " section becomes a collapsible accordion (intro stays visible). */
+  sections?: boolean;
 }) {
+  if (sections && !inline) {
+    const parts = splitSections(prep(text));
+    if (parts.sections.length > 0) {
+      return (
+        <div data-copy-key={copyKey} data-copy-md={copyKey ? "1" : undefined} className={`md-copy md-acc ${className}`.trim()}>
+          {parts.intro.trim() ? <MdBlock text={parts.intro} pClass={pClass} /> : null}
+          <Accordion sections={parts.sections} pClass={pClass} />
+        </div>
+      );
+    }
+  }
   const Wrap = inline ? "span" : "div";
   return (
     <Wrap data-copy-key={copyKey} data-copy-md={copyKey ? "1" : undefined} className={`md-copy ${className}`.trim()}>
@@ -83,5 +99,77 @@ export function CopyMarkdown({
         {prep(text)}
       </ReactMarkdown>
     </Wrap>
+  );
+}
+
+function MdBlock({ text, pClass }: { text: string; pClass: string }) {
+  return (
+    <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} skipHtml components={makeComponents(pClass, false)}>
+      {text}
+    </ReactMarkdown>
+  );
+}
+
+type Section = { title: string; body: string };
+
+/** Split already-prepped Markdown at top-level "## " headings (ignores fenced code). */
+function splitSections(md: string): { intro: string; sections: Section[] } {
+  const lines = md.split("\n");
+  const intro: string[] = [];
+  const sections: { title: string; body: string[] }[] = [];
+  let fence = false;
+  for (const line of lines) {
+    if (/^\s*(```|~~~)/.test(line)) fence = !fence;
+    const m = !fence ? /^##[ \t]+(.+?)[ \t#]*$/.exec(line) : null;
+    if (m) sections.push({ title: m[1], body: [] });
+    else if (sections.length) sections[sections.length - 1].body.push(line);
+    else intro.push(line);
+  }
+  return { intro: intro.join("\n"), sections: sections.map((x) => ({ title: x.title.replace(/[*_`]/g, "").replace(/\\(.)/g, "$1"), body: x.body.join("\n") })) };
+}
+
+function Accordion({ sections, pClass }: { sections: Section[]; pClass: string }) {
+  const base = useId();
+  const [open, setOpen] = useState<boolean[]>(() => sections.map((_, i) => i === 0));
+  const [quiet, setQuiet] = useState(-1);
+  let last = -1;
+  open.forEach((o, i) => { if (o) last = i; });
+  let hint = -1;
+  for (let i = last + 1; i < sections.length; i++) if (!open[i]) { hint = i; break; }
+  return (
+    <div className="md-acc-list">
+      {sections.map((sec, i) => {
+        const isOpen = open[i] ?? false;
+        const id = `${base}-s${i}`;
+        return (
+          <section key={id} className={`md-acc-item${isOpen ? " is-open" : ""}`}>
+            <h2 className="md-acc-h">
+              <button
+                type="button"
+                id={`${id}-btn`}
+                className={`md-acc-btn${hint === i && quiet !== i ? " md-acc-hint" : ""}`}
+                aria-expanded={isOpen}
+                aria-controls={`${id}-panel`}
+                onMouseEnter={() => hint === i && setQuiet(i)}
+                onFocus={() => hint === i && setQuiet(i)}
+                onClick={() => setOpen((prev) => prev.map((v, j) => (j === i ? !v : v)))}
+              >
+                <span className="md-acc-title">{sec.title}</span>
+                <svg className="md-acc-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+            </h2>
+            <div id={`${id}-panel`} role="region" aria-labelledby={`${id}-btn`} className="md-acc-panel" inert={!isOpen}>
+              <div className="md-acc-inner">
+                <div className="md-acc-body">
+                  <MdBlock text={sec.body} pClass={pClass} />
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      })}
+    </div>
   );
 }
