@@ -4,7 +4,7 @@ import { PageShell } from "@/components/page-shell";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "How lulox.dev handles data: no tracking, Google sign-in only for the site owner.",
-  alternates: { canonical: "/privacy" },
+  alternates: { canonical: "/privacidad" },
 };
 
 const CONTACT = "lucianoolivabianco@gmail.com";

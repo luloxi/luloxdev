@@ -25,7 +25,7 @@ export default async function proxy(request: NextRequest) {
     // allowlist) runs in the /api/blog and /api/projects handlers.
     if (!getSessionCookie(request)) {
       const url = request.nextUrl.clone();
-      url.pathname = "/auth/sign-in";
+      url.pathname = "/ingresar";
       url.search = "";
       return NextResponse.redirect(url);
     }
@@ -39,7 +39,7 @@ export default async function proxy(request: NextRequest) {
     return post ? NextResponse.next() : notFoundRewrite(request);
   }
 
-  const project = pathname.match(/^\/projects\/([^/]+)\/?$/);
+  const project = pathname.match(/^\/proyectos\/([^/]+)\/?$/);
   if (project) {
     const id = decodeURIComponent(project[1]);
     return (pastProjectIds as string[]).includes(id)
@@ -51,5 +51,5 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/rothko", "/rothko/:path*", "/blog/:slug", "/projects/:id"],
+  matcher: ["/rothko", "/rothko/:path*", "/blog/:slug", "/proyectos/:id"],
 };

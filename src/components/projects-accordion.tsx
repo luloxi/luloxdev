@@ -35,7 +35,7 @@ export function ProjectsAccordion() {
             return (
               <li key={project.id}>
                 <Link
-                  href={`/projects/${project.id}`}
+                  href={`/proyectos/${project.id}`}
                   className="cp-row group"
                   style={{ ["--cp-accent" as string]: accent }}
                 >

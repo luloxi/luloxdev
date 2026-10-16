@@ -96,7 +96,7 @@ export default function AdminPage() {
     const sessionRes = await authClient.getSession();
     const user = sessionRes.data?.user;
     if (!user) {
-      router.replace("/auth/sign-in");
+      router.replace("/ingresar");
       return;
     }
     setEmail(user.email ?? null);
@@ -107,7 +107,7 @@ export default function AdminPage() {
     ]);
 
     if (blogRes.status === 401 || projectsRes.status === 401) {
-      router.replace("/auth/sign-in?error=forbidden");
+      router.replace("/ingresar?error=forbidden");
       return;
     }
 
@@ -341,7 +341,7 @@ export default function AdminPage() {
                         </p>
                       </div>
                       <Link
-                        href={`/projects/${project.id}`}
+                        href={`/proyectos/${project.id}`}
                         className="blog-admin-btn-ghost"
                       >
                         {t.blog.view}

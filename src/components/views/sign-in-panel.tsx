@@ -43,7 +43,7 @@ export function SignInPanel({ error }: { error: string | null }) {
       const result = await authClient.signIn.social({
         provider: "google",
         callbackURL: `${origin}/rothko`,
-        errorCallbackURL: `${origin}/auth/sign-in?error=oauth`,
+        errorCallbackURL: `${origin}/ingresar?error=oauth`,
       });
 
       const err =
@@ -57,19 +57,19 @@ export function SignInPanel({ error }: { error: string | null }) {
           code === "INVALID_CALLBACKURL" ||
           /callbackurl|trusted|domain/i.test(err.message ?? "")
         ) {
-          window.location.href = `/auth/sign-in?error=domain`;
+          window.location.href = `/ingresar?error=domain`;
           return;
         }
-        window.location.href = `/auth/sign-in?error=oauth`;
+        window.location.href = `/ingresar?error=oauth`;
       }
     } catch (err) {
       console.error("[auth] Google sign-in failed", err);
       const msg = err instanceof Error ? err.message : String(err);
       if (/callbackurl|trusted|domain|INVALID_CALLBACKURL/i.test(msg)) {
-        window.location.href = `/auth/sign-in?error=domain`;
+        window.location.href = `/ingresar?error=domain`;
         return;
       }
-      window.location.href = `/auth/sign-in?error=oauth`;
+      window.location.href = `/ingresar?error=oauth`;
     }
   }
 

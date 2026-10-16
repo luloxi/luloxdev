@@ -29,10 +29,10 @@ export type SectionId =
 
 /** Main sections - stacked Linktree-style buttons */
 export const sections = [
-  { id: "about" as const, href: "/about" },
+  { id: "about" as const, href: "/sobre-mi" },
   { id: "blog" as const, href: "/blog" },
-  { id: "projects" as const, href: "/projects" },
-  { id: "contact" as const, href: "/contact" },
+  { id: "projects" as const, href: "/proyectos" },
+  { id: "contact" as const, href: "/contacto" },
 ];
 
 

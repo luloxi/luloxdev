@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Proyectos",
+  alternates: { canonical: "/sobre-mi" },
+  title: "Sobre mí",
 };
 
-export default function ProjectsLayout({
+export default function AboutLayout({
   children,
 }: {
   children: React.ReactNode;

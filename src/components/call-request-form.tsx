@@ -185,7 +185,7 @@ export function CallRequestForm() {
                   onClick={() =>
                     void authClient.signIn.social({
                       provider: "google",
-                      callbackURL: "/contact",
+                      callbackURL: "/contacto",
                     })
                   }
                 >

@@ -27,9 +27,9 @@ export function ProjectDetail({ project }: { project: PastProject }) {
   return (
     <PageShell
       title={copy.title}
-      backHref="/projects"
+      backHref="/proyectos"
       backLabel={t.projects.backToProjects}
-      footerHref="/projects"
+      footerHref="/proyectos"
       footerLabel={t.projects.backToProjectsCta}
     >
       <div className="space-y-6">

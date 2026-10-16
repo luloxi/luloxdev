@@ -20,7 +20,7 @@ export default function EditBlogPostPage() {
     fetch("/api/blog")
       .then((r) => {
         if (r.status === 401) {
-          router.replace("/auth/sign-in?error=forbidden");
+          router.replace("/ingresar?error=forbidden");
           return null;
         }
         return r.json();
