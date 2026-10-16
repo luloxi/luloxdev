@@ -3453,22 +3453,35 @@
 .ie-root { position: absolute; top: 0; left: 0; width: 0; height: 0; z-index: 60; }
 .ie-pencil {
   position: absolute;
-  width: 34px; height: 34px;
-  margin-top: -4px;
+  width: 30px; height: 30px; /* hit area; icon itself is 14px */
+  margin-top: -6px;
   display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 999px;
-  font-size: 16px; line-height: 1;
-  color: #fff; background: #c8102e;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.35), 0 0 0 2px #fff;
-  opacity: 0.9;
+  padding: 0; border: 0; background: transparent; border-radius: 6px;
+  color: var(--foreground); opacity: 0.45;
+  transition: opacity .15s, color .15s;
 }
-.ie-pencil:hover, .ie-pencil:focus-visible { opacity: 1; transform: scale(1.08); }
+.ie-pencil:hover, .ie-pencil:focus-visible { opacity: 1; color: #c8102e; }
+.ie-pencil:focus-visible, .ie-toggle:focus-visible, .cp-logout:focus-visible { outline: 1px solid #c8102e; outline-offset: 1px; }
 .ie-toggle {
-  position: fixed; right: 14px; bottom: 14px; z-index: 61;
-  min-height: 48px; padding: 0 18px; border-radius: 999px;
-  font-weight: 700; color: #fff; background: #c8102e;
-  box-shadow: 0 6px 20px rgb(0 0 0 / 0.35);
+  position: fixed; right: 12px; bottom: 12px; z-index: 61;
+  display: inline-flex; align-items: center; gap: 5px;
+  min-height: 36px; padding: 0 10px; border-radius: 8px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em;
+  color: var(--foreground); background: transparent; border: 1px solid var(--border);
+  opacity: 0.55; transition: opacity .15s, color .15s;
 }
+.ie-toggle[aria-pressed="true"] { color: #c8102e; border-color: color-mix(in srgb, #c8102e 45%, transparent); }
+.ie-toggle:hover, .ie-toggle:focus-visible { opacity: 1; }
+.cp-logout {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 0.2rem;
+  padding: 2px 6px; min-height: 36px; justify-content: center;
+  background: transparent; border: 0; color: var(--foreground); opacity: 0.6;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.12em; line-height: 1; text-transform: uppercase; cursor: pointer;
+  transition: opacity .15s, color .15s;
+}
+.cp-logout:hover, .cp-logout:focus-visible { opacity: 1; color: #c8102e; }
+.cp-logout:disabled { opacity: 0.35; }
 .ie-sheet-backdrop {
   position: fixed; inset: 0; z-index: 70;
   background: rgb(0 0 0 / 0.5);

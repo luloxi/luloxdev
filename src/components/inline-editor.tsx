@@ -16,6 +16,12 @@ const SKIP = new Set(["SCRIPT", "STYLE", "TEXTAREA", "INPUT", "SELECT", "OPTION"
  * string and puts a pencil next to them. Edits go to /api/copy (admin-gated)
  * and then the server re-renders with the new D1 copy for everyone.
  */
+const Pencil = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+  </svg>
+);
+
 export function InlineEditor() {
   const { t, locale } = useLocale();
   const router = useRouter();
@@ -54,7 +60,7 @@ export function InlineEditor() {
             key: explicit,
             value: flat[explicit],
             top: r.top + window.scrollY,
-            left: Math.min(r.right + window.scrollX - 38, document.documentElement.clientWidth - 40),
+            left: Math.min(r.right + window.scrollX - 30, document.documentElement.clientWidth - 40),
             id: id++,
           });
         }
@@ -72,7 +78,7 @@ export function InlineEditor() {
             key,
             value: flat[key],
             top: r.top + window.scrollY,
-            left: Math.min(r.right + window.scrollX + 4, document.documentElement.clientWidth - 40),
+            left: Math.min(r.right + window.scrollX, document.documentElement.clientWidth - 40),
             id: id++,
           });
         }
@@ -149,13 +155,20 @@ export function InlineEditor() {
                 setError("");
               }}
             >
-              ✎
+              <Pencil />
             </button>
           ))
         : null}
 
-      <button type="button" className="ie-toggle" onClick={() => setOn((v) => !v)}>
-        {on ? "✎ ON" : "✎ OFF"}
+      <button
+        type="button"
+        className="ie-toggle"
+        aria-pressed={on}
+        aria-label={locale === "es" ? "Mostrar lápices de edición" : "Show edit pencils"}
+        title={locale === "es" ? "Modo edición" : "Edit mode"}
+        onClick={() => setOn((v) => !v)}
+      >
+        <Pencil /> <span>{on ? "ON" : "OFF"}</span>
       </button>
 
       {editing ? (

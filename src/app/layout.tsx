@@ -127,7 +127,7 @@ export default async function RootLayout({
         <ThemeProvider initialTheme={theme}>
           <LocaleProvider initialLocale={locale} overrides={overrides}>
             <CosmicBg />
-            <SiteControls />
+            <SiteControls isAdmin={isAdmin} />
             <div className="relative z-10">{children}</div>
             {/* Only rendered (and its JS only shipped) for the allowlisted admin. */}
             {isAdmin ? <InlineEditor /> : null}

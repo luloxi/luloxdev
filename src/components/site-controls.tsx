@@ -1,11 +1,12 @@
 "use client";
 
 import { LocaleToggle } from "@/components/locale-toggle";
+import { LogoutButton } from "@/components/logout-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 /** Fixed chrome — always same screen corner on every page */
-export function SiteControls({ className }: { className?: string }) {
+export function SiteControls({ className, isAdmin = false }: { className?: string; isAdmin?: boolean }) {
   return (
     <div
       className={cn(
@@ -13,6 +14,7 @@ export function SiteControls({ className }: { className?: string }) {
         className,
       )}
     >
+      {isAdmin ? <LogoutButton /> : null}
       <LocaleToggle />
       <ThemeToggle />
     </div>
