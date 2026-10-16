@@ -4,6 +4,9 @@ import { CosmicBg } from "@/components/cosmic-bg";
 import { SiteControls } from "@/components/site-controls";
 import { LocaleProvider } from "@/i18n/locale-provider";
 import { getServerPrefs } from "@/lib/prefs";
+import { getCopyOverrides } from "@/lib/site-copy";
+import { isAdminRequest } from "@/lib/admin-request";
+import { InlineEditor } from "@/components/inline-editor";
 import { PREFS_HEAD_SCRIPT } from "@/lib/prefs-shared";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { site } from "@/content/site";
@@ -101,7 +104,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Per-request: language + theme from cookies (else Accept-Language / dark).
-  const { locale, theme } = await getServerPrefs();
+  const [{ locale, theme }, overrides, isAdmin] = await Promise.all([
+    getServerPrefs(),
+    getCopyOverrides(),
+    isAdminRequest(),
+  ]);
   return (
     <html
       lang={locale}
@@ -118,10 +125,12 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <ThemeProvider initialTheme={theme}>
-          <LocaleProvider initialLocale={locale}>
+          <LocaleProvider initialLocale={locale} overrides={overrides}>
             <CosmicBg />
             <SiteControls />
             <div className="relative z-10">{children}</div>
+            {/* Only rendered (and its JS only shipped) for the allowlisted admin. */}
+            {isAdmin ? <InlineEditor /> : null}
           </LocaleProvider>
         </ThemeProvider>
       </body>

@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { getMessages, type Messages } from "./messages";
+import { applyCopy, type CopyOverrides } from "./copy-overrides";
 import type { Locale } from "./types";
 import {
   LOCALE_COOKIE,
@@ -46,9 +47,12 @@ function persist(locale: Locale) {
  */
 export function LocaleProvider({
   initialLocale,
+  overrides,
   children,
 }: {
   initialLocale: Locale;
+  /** Admin-edited copy from D1 (server-provided); code messages are the fallback. */
+  overrides?: CopyOverrides;
   children: ReactNode;
 }) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
@@ -80,8 +84,13 @@ export function LocaleProvider({
   }, []);
 
   const value = useMemo(
-    () => ({ locale, setLocale, toggleLocale, t: getMessages(locale) }),
-    [locale, setLocale, toggleLocale],
+    () => ({
+      locale,
+      setLocale,
+      toggleLocale,
+      t: applyCopy(getMessages(locale), overrides?.[locale]),
+    }),
+    [locale, setLocale, toggleLocale, overrides],
   );
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
