@@ -3497,3 +3497,10 @@
 .ie-cancel { background: transparent; color: var(--foreground); border: 1px solid var(--border); }
 .ie-save { background: #c8102e; color: #fff; }
 .ie-btn:disabled { opacity: 0.55; }
+
+/* Single line breaks in copy show as breaks */
+.cp-prose, .cp-headline, .cp-row-detail { white-space: pre-line; }
+@media (max-width: 699px) {
+  .ie-sheet { max-height: 96vh; }
+  .ie-text { height: 68vh; min-height: 68vh; }
+}

@@ -46,6 +46,20 @@ export function InlineEditor() {
       if (SKIP.has(el.tagName.toUpperCase())) return;
       if (rootRef.current && rootRef.current.contains(el)) return;
       if ((el as HTMLElement).dataset?.inlineEditor) return;
+      const explicit = (el as HTMLElement).dataset?.copyKey;
+      if (explicit && explicit in flat) {
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          found.push({
+            key: explicit,
+            value: flat[explicit],
+            top: r.top + window.scrollY,
+            left: Math.min(r.right + window.scrollX - 38, document.documentElement.clientWidth - 40),
+            id: id++,
+          });
+        }
+        return; // whole block is one editable; skip its children
+      }
       const text = norm(el.textContent ?? "");
       const key = text.length <= 5000 ? byValue.get(text) : undefined;
       if (key) {

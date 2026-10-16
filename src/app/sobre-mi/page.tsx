@@ -11,6 +11,7 @@ import {
   SpotifyIcon,
 } from "@/components/icons/social";
 import { PageShell } from "@/components/page-shell";
+import { RichText } from "@/components/rich-text";
 import { socials, tasteLinks } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 
@@ -110,11 +111,9 @@ export default function AboutPage() {
           </span>
           <div className="cp-panel-inner space-y-4">
             <p className="cp-headline">{about.headline}</p>
-            {about.paragraphs.map((p) => (
-              <p key={p.slice(0, 40)} className="cp-prose">
-                {linkifyAbout(p)}
-              </p>
-            ))}
+            <div data-copy-key="about.body" className="space-y-4">
+              <RichText text={about.body} className="cp-prose" render={linkifyAbout} />
+            </div>
           </div>
         </div>
 

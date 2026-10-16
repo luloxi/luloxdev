@@ -30,6 +30,8 @@ export const messages = {
         "Me interesa la adopción cripto a nivel mundial desde que conocí Bitcoin en 2010. Creo que lo que más uso traerá a blockchain es la tokenización, las stablecoins y el comercio agéntico.",
         "Soy embajador de Midnight, la blockchain de privacidad de IOG: privacidad selectiva, identidad y smart contracts que pueden probar hechos sin revelar datos de más. La privacidad es lo que permitirá que la tecnología blockchain sea adoptada por personas e instituciones que hoy prefieren no usarla por su transparencia.",
       ],
+      /** Whole section body: blank line = new paragraph, line break = <br>. */
+      body: "Soy Luciano Oliva Bianco (Lulox). Vivo en Buenos Aires, Argentina.\n\nCon Grok armo dapps y webapps, y automatizaciones sencillas como correo y calendario. Para automatizaciones más específicas uso n8n.\n\nMe interesa la adopción cripto a nivel mundial desde que conocí Bitcoin en 2010. Creo que lo que más uso traerá a blockchain es la tokenización, las stablecoins y el comercio agéntico.\n\nSoy embajador de Midnight, la blockchain de privacidad de IOG: privacidad selectiva, identidad y smart contracts que pueden probar hechos sin revelar datos de más. La privacidad es lo que permitirá que la tecnología blockchain sea adoptada por personas e instituciones que hoy prefieren no usarla por su transparencia.",
       timeline: [
         {
           period: "Jul 2025 - Presente",
@@ -241,6 +243,8 @@ export const messages = {
         "I've cared about global crypto adoption since I first learned about Bitcoin in 2010. I think what will drive the most real usage for blockchain is tokenization, stablecoins, and agentic commerce.",
         "I'm a Midnight Ambassador for IOG's privacy blockchain: selective privacy, identity, and smart contracts that can prove facts without oversharing data. Privacy is what will let blockchain be adopted by people and institutions that today prefer not to use it because of how transparent it is.",
       ],
+      /** Whole section body: blank line = new paragraph, line break = <br>. */
+      body: "I'm Luciano Oliva Bianco (Lulox). I live in Buenos Aires, Argentina.\n\nWith Grok I build dapps and webapps, and simple automations like email and calendar. For more specific automations I use n8n.\n\nI've cared about global crypto adoption since I first learned about Bitcoin in 2010. I think what will drive the most real usage for blockchain is tokenization, stablecoins, and agentic commerce.\n\nI'm a Midnight Ambassador for IOG's privacy blockchain: selective privacy, identity, and smart contracts that can prove facts without oversharing data. Privacy is what will let blockchain be adopted by people and institutions that today prefer not to use it because of how transparent it is.",
       timeline: [
         {
           period: "Jul 2025 - Present",
