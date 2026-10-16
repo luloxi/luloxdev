@@ -1,5 +1,6 @@
 "use client";
 
+import { CopyMarkdown } from "@/components/copy-markdown";
 import { CpRow } from "@/components/cp-row";
 import { GitHubIcon } from "@/components/icons/social";
 import { PageShell } from "@/components/page-shell";
@@ -54,7 +55,7 @@ export function ProjectDetail({ project }: { project: PastProject }) {
               <p className="cp-headline text-[1.05rem] sm:text-[1.2rem]">
                 {copy.title}
               </p>
-              <p className="cp-prose mt-1.5 text-[0.9rem]">{copy.body}</p>
+              <CopyMarkdown text={copy.body} className="mt-1.5" pClass="cp-prose text-[0.9rem]" />
               <span
                 className={`project-status-pill mt-3 ${statusClass[project.status]}`}
               >
@@ -74,9 +75,7 @@ export function ProjectDetail({ project }: { project: PastProject }) {
           </span>
           <div className="cp-panel-inner space-y-3">
             {copy.paragraphs.map((p) => (
-              <p key={p.slice(0, 48)} className="cp-prose">
-                {p}
-              </p>
+              <CopyMarkdown key={p.slice(0, 48)} text={p} />
             ))}
           </div>
         </div>

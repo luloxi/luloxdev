@@ -1,5 +1,6 @@
 "use client";
 
+import { CopyMarkdown } from "@/components/copy-markdown";
 import Image from "next/image";
 import { Mail } from "lucide-react";
 import { BlogMarkdown } from "@/components/blog-markdown";
@@ -109,7 +110,7 @@ export function BlogPostView({ post }: { post: BlogPost }) {
             <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--cp-accent)]">
               {t.blog.authorHeading}
             </p>
-            <p className="cp-prose">{t.blog.authorBio}</p>
+            <CopyMarkdown copyKey="blog.authorBio" text={t.blog.authorBio} />
             <nav className="blog-author-socials" aria-label={t.ui.social}>
               <a
                 href={`mailto:${site.email}`}

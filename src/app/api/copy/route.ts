@@ -4,7 +4,7 @@ import { isKnownCopyKey, setCopy } from "@/lib/site-copy";
 
 export const dynamic = "force-dynamic";
 
-/** Admin only: save one text (plain text, line breaks allowed). */
+/** Admin only: save one text (Markdown for body fields, rendered without raw HTML). */
 export async function PUT(request: Request) {
   const gate = await requireAdminSession();
   if (!gate.ok) {

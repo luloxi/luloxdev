@@ -1,5 +1,6 @@
 "use client";
 
+import { CopyMarkdown } from "@/components/copy-markdown";
 import { useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { focusTopics, type FocusTopicId } from "@/content/projects";
@@ -73,7 +74,7 @@ export function ResearchTopics({ ids }: { ids?: string[] }) {
           </span>
           <div className="cp-panel-inner space-y-3">
             <p className="cp-row-label text-[0.9rem]">{activeCopy.title}</p>
-            <p className="cp-prose text-[0.9rem]">{activeCopy.body}</p>
+            <CopyMarkdown copyKey={`projects.focus.${selected}.body`} text={activeCopy.body} pClass="cp-prose text-[0.9rem]" />
             {activeTopic.links.length > 0 ? (
               <ul className="focus-links">
                 {activeTopic.links.map((link) => (

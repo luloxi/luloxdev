@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType, ReactNode } from "react";
+import type { ComponentType } from "react";
 import Image from "next/image";
 import { CpRow } from "@/components/cp-row";
 import { BuidlGuidlIcon } from "@/components/icons/brands";
@@ -11,43 +11,13 @@ import {
   SpotifyIcon,
 } from "@/components/icons/social";
 import { PageShell } from "@/components/page-shell";
-import { RichText } from "@/components/rich-text";
+import { CopyMarkdown } from "@/components/copy-markdown";
 import { socials, tasteLinks } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 
 const linkedInHref =
   socials.find((s) => s.id === "linkedin")?.href ??
   "https://linkedin.com/in/lulox";
-
-/** Named terms in bio → official pages */
-const aboutLinks: Record<string, string> = {
-  n8n: "https://n8n.io",
-  Midnight: "https://midnight.network",
-  IOG: "https://www.iog.io",
-  Bitcoin: "https://bitcoin.org",
-  Grok: "https://grok.com",
-};
-
-const aboutLinkPattern = /(n8n|Midnight|IOG|Bitcoin|Grok)/g;
-
-function linkifyAbout(text: string): ReactNode[] {
-  const parts = text.split(aboutLinkPattern);
-  return parts.map((part, i) => {
-    const href = aboutLinks[part];
-    if (!href) return part;
-    return (
-      <a
-        key={`${part}-${i}`}
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="cp-prose-link"
-      >
-        {part}
-      </a>
-    );
-  });
-}
 
 type OrgLogo =
   | { type: "icon"; Icon: ComponentType<{ className?: string }> }
@@ -111,9 +81,7 @@ export default function AboutPage() {
           </span>
           <div className="cp-panel-inner space-y-4">
             <p className="cp-headline">{about.headline}</p>
-            <div data-copy-key="about.body" className="space-y-4">
-              <RichText text={about.body} className="cp-prose" render={linkifyAbout} />
-            </div>
+            <CopyMarkdown copyKey="about.body" text={about.body} />
           </div>
         </div>
 
@@ -158,9 +126,12 @@ export default function AboutPage() {
                         {item.title}
                       </p>
                       <p className="mt-0.5 text-sm text-muted">{item.org}</p>
-                      <p className="cp-prose mt-2 text-[0.9rem]">
-                        {item.description}
-                      </p>
+                      <CopyMarkdown
+                        copyKey={`about.timeline.${i}.description`}
+                        text={item.description}
+                        className="mt-2"
+                        pClass="cp-prose text-[0.9rem]"
+                      />
                     </div>
                   </div>
                 </li>

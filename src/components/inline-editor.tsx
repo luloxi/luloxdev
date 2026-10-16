@@ -5,8 +5,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { flattenCopy } from "@/i18n/copy-overrides";
 import { useLocale } from "@/i18n/locale-provider";
+import { CopyMarkdown } from "@/components/copy-markdown";
+import { MdToolbar } from "@/components/md-toolbar";
 
-type Target = { key: string; value: string; top: number; left: number; id: number };
+type Target = { key: string; value: string; top: number; left: number; id: number; md?: boolean };
 
 const norm = (s: string) => s.replace(/\s+/g, " ").trim();
 const SKIP = new Set(["SCRIPT", "STYLE", "TEXTAREA", "INPUT", "SELECT", "OPTION", "NOSCRIPT", "SVG"]);
@@ -27,7 +29,10 @@ export function InlineEditor() {
   const router = useRouter();
   const [on, setOn] = useState(true);
   const [targets, setTargets] = useState<Target[]>([]);
-  const [editing, setEditing] = useState<{ key: string; value: string } | null>(null);
+  const [editing, setEditing] = useState<{ key: string; value: string; md?: boolean } | null>(null);
+  const [preview, setPreview] = useState(false);
+  const [vh, setVh] = useState<number | null>(null);
+  const taRef = useRef<HTMLTextAreaElement>(null);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -59,6 +64,7 @@ export function InlineEditor() {
           found.push({
             key: explicit,
             value: flat[explicit],
+            md: (el as HTMLElement).dataset?.copyMd === "1",
             top: r.top + window.scrollY,
             left: Math.min(r.right + window.scrollX - 30, document.documentElement.clientWidth - 40),
             id: id++,
@@ -114,6 +120,16 @@ export function InlineEditor() {
     };
   }, [on, scan]);
 
+  // Keep the sheet above the on-screen keyboard (mobile).
+  useEffect(() => {
+    if (!editing?.md || typeof window === "undefined" || !window.visualViewport) return;
+    const vv = window.visualViewport;
+    const upd = () => setVh(window.innerWidth < 700 ? vv.height : null);
+    upd();
+    vv.addEventListener("resize", upd);
+    return () => vv.removeEventListener("resize", upd);
+  }, [editing?.md]);
+
   async function save() {
     if (!editing) return;
     setSaving(true);
@@ -150,7 +166,8 @@ export function InlineEditor() {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setEditing({ key: tg.key, value: tg.value });
+                setEditing({ key: tg.key, value: tg.value, md: tg.md });
+                setPreview(false);
                 setDraft(tg.value);
                 setError("");
               }}
@@ -173,17 +190,41 @@ export function InlineEditor() {
 
       {editing ? (
         <div className="ie-sheet-backdrop" onClick={() => !saving && setEditing(null)}>
-          <div className="ie-sheet" role="dialog" aria-modal onClick={(e) => e.stopPropagation()}>
+          <div
+            className={`ie-sheet${editing.md ? " ie-sheet-md" : ""}`}
+            role="dialog"
+            aria-modal
+            style={editing.md && vh ? { height: vh, maxHeight: vh } : undefined}
+            onClick={(e) => e.stopPropagation()}
+          >
             <p className="ie-key">
               {editing.key} · {locale.toUpperCase()}
+              {editing.md ? " · Markdown" : ""}
             </p>
-            <textarea
-              className="ie-text"
-              value={draft}
-              autoFocus
-              rows={Math.min(12, Math.max(3, Math.ceil(draft.length / 40)))}
-              onChange={(e) => setDraft(e.target.value)}
-            />
+            {editing.md ? (
+              <MdToolbar
+                taRef={taRef}
+                value={draft}
+                onChange={setDraft}
+                preview={preview}
+                onTogglePreview={() => setPreview((v) => !v)}
+                es={locale === "es"}
+              />
+            ) : null}
+            {editing.md && preview ? (
+              <div className="ie-preview">
+                <CopyMarkdown text={draft} />
+              </div>
+            ) : (
+              <textarea
+                ref={taRef}
+                className="ie-text"
+                value={draft}
+                autoFocus
+                rows={editing.md ? 10 : Math.min(12, Math.max(3, Math.ceil(draft.length / 40)))}
+                onChange={(e) => setDraft(e.target.value)}
+              />
+            )}
             {error ? <p className="ie-error">{error}</p> : null}
             <div className="ie-actions">
               <button type="button" className="ie-btn ie-cancel" disabled={saving} onClick={() => setEditing(null)}>

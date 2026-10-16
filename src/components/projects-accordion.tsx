@@ -1,5 +1,6 @@
 "use client";
 
+import { CopyMarkdown } from "@/components/copy-markdown";
 import Link from "next/link";
 import { CpRow } from "@/components/cp-row";
 import { GitHubIcon } from "@/components/icons/social";
@@ -58,7 +59,7 @@ export function ProjectsAccordion() {
 
                   <span className="cp-row-body min-w-0">
                     <span className="cp-row-label">{copy.title}</span>
-                    <span className="cp-row-detail">{copy.body}</span>
+                    <span className="cp-row-detail"><CopyMarkdown text={copy.body} inline pClass="" /></span>
                   </span>
 
                   <span className="cp-nav-chevron cp-row-chevron" aria-hidden>
