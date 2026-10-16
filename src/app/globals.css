@@ -3596,34 +3596,32 @@ span.md-copy { display: inline; }
 /* Revving start: idle, build-up vibration as the neon flickers on, lunge forward, spring back, power off. */
 @keyframes md-acc-neon {
   0%, 58% { background-color: transparent; box-shadow: none; transform: none; border-color: transparent; }
-  60% { transform: translateX(-1px); background-color: rgb(232 116 42 / .15); }
+  60% { transform: translateX(-1px); background-color: rgb(46 90 172 / .15); }
   62% { transform: translateX(1px); background-color: transparent; }
-  64% { transform: translateX(-2px) rotate(-.3deg); background-color: rgb(232 116 42 / .45); box-shadow: 0 0 10px 1px rgb(232 116 42 / .4); }
-  66% { transform: translateX(2px) rotate(.3deg); background-color: rgb(232 116 42 / .1); box-shadow: none; }
-  68% { transform: translateX(-3px) rotate(-.5deg); background-color: rgb(232 116 42 / .7); box-shadow: 0 0 16px 3px rgb(232 116 42 / .55); }
-  70% { transform: translateX(3px) rotate(.5deg); background-color: rgb(232 116 42 / .35); }
-  72% { transform: translateX(-4px) scale(.98); background-color: #e8742a; box-shadow: 0 0 22px 5px rgb(232 116 42 / .7); border-color: #e8742a; }
-  75% { transform: translateX(18px) scale(1.04); background-color: #e8742a; box-shadow: -18px 0 30px 6px rgb(232 116 42 / .55), 0 0 40px 10px rgb(232 116 42 / .45); border-color: #f5a26a; }
+  64% { transform: translateX(-2px) rotate(-.3deg); background-color: rgb(46 90 172 / .45); box-shadow: 0 0 10px 1px rgb(232 116 42 / .4); }
+  66% { transform: translateX(2px) rotate(.3deg); background-color: rgb(46 90 172 / .1); box-shadow: none; }
+  68% { transform: translateX(-3px) rotate(-.5deg); background-color: rgb(46 90 172 / .7); box-shadow: 0 0 16px 3px rgb(232 116 42 / .55); }
+  70% { transform: translateX(3px) rotate(.5deg); background-color: rgb(46 90 172 / .35); }
+  72% { transform: translateX(-4px) scale(.98); background-color: #2e5aac; box-shadow: 0 0 22px 5px rgb(232 116 42 / .7); border-color: #e8742a; }
+  75% { transform: translateX(18px) scale(1.04); background-color: #2e5aac; box-shadow: -18px 0 30px 6px rgb(232 116 42 / .55), 0 0 40px 10px rgb(232 116 42 / .45); border-color: #f5a26a; }
   79% { transform: translateX(-6px) scale(.99); }
   82% { transform: translateX(3px); }
   85% { transform: translateX(-1px); }
-  88% { transform: none; background-color: #e8742a; box-shadow: 0 0 24px 6px rgb(232 116 42 / .6); border-color: #e8742a; }
-  92% { background-color: rgb(232 116 42 / .55); box-shadow: 0 0 10px 2px rgb(232 116 42 / .3); }
-  93% { background-color: #e8742a; box-shadow: 0 0 18px 4px rgb(232 116 42 / .5); }
+  88% { transform: none; background-color: #2e5aac; box-shadow: 0 0 24px 6px rgb(232 116 42 / .6); border-color: #e8742a; }
+  92% { background-color: rgb(46 90 172 / .55); box-shadow: 0 0 10px 2px rgb(232 116 42 / .3); }
+  93% { background-color: #2e5aac; box-shadow: 0 0 18px 4px rgb(232 116 42 / .5); }
   100% { background-color: transparent; box-shadow: none; transform: none; border-color: transparent; }
 }
 @keyframes md-acc-neon-text {
-  0%, 63% { color: inherit; -webkit-text-stroke: 0 transparent; text-shadow: none; }
-  64%, 68% { color: #2e5aac; -webkit-text-stroke: 4px #fff; text-shadow: none; }
-  66%, 70% { color: inherit; -webkit-text-stroke: 0 transparent; }
-  72%, 93% { color: #2e5aac; -webkit-text-stroke: 4px #fff; text-shadow: 0 0 1px #fff; }
-  92% { color: #2e5aac; -webkit-text-stroke: 4px #fff; text-shadow: none; }
-  100% { color: inherit; -webkit-text-stroke: 0 transparent; text-shadow: none; }
+  0%, 63% { color: inherit; }
+  64%, 68%, 72%, 88%, 93% { color: #fff; }
+  66%, 70% { color: inherit; }
+  100% { color: inherit; }
 }
-.md-acc-hint .md-acc-title { color: inherit; paint-order: stroke fill; }
-.md-acc-hint .md-acc-chev { filter: drop-shadow(0 0 1.5px #fff); }
+
+.md-acc-hint .md-acc-title { color: inherit; }
 @media (prefers-reduced-motion: reduce) {
-  .md-acc-hint { animation: none; background-color: #e8742a; border-color: #e8742a; }
-  .md-acc-hint .md-acc-title, .md-acc-hint .md-acc-chev { animation: none; color: #2e5aac; -webkit-text-stroke: 4px #fff; }
+  .md-acc-hint { animation: none; background-color: #2e5aac; border-color: #e8742a; box-shadow: 0 0 14px 2px rgb(232 116 42 / .55); }
+  .md-acc-hint .md-acc-title, .md-acc-hint .md-acc-chev { animation: none; color: #fff; }
   .md-acc-panel, .md-acc-body, .md-acc-chev { transition: none; }
 }
