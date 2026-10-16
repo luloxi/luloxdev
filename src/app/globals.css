@@ -3690,3 +3690,4 @@ body.ie-off .ie-row-pencil { display: none; }
   background: color-mix(in oklab, var(--surface) 90%, transparent);
   border: 1px solid color-mix(in oklab, #c8102e 45%, transparent);
 }
+.ie-sheet-backdrop, .ie-sheet, .ie-text, .ie-preview, .ie-details { overscroll-behavior: contain; }

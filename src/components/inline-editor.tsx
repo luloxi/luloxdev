@@ -63,6 +63,7 @@ export function InlineEditor() {
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
 
   const byValue = useMemo(() => {
     const flat = flattenCopy(t);
@@ -164,6 +165,32 @@ export function InlineEditor() {
       document.removeEventListener("transitionend", queue, true);
     };
   }, [on, scan]);
+
+  // While the editor is open: lock the page behind it, and drive wheel/trackpad
+  // scrolling ourselves so the area under the pointer scrolls right away
+  // (no click/focus needed) and the page never scrolls instead.
+  useEffect(() => {
+    if (!editing) return;
+    const html = document.documentElement;
+    const prev = html.style.overflow;
+    html.style.overflow = "hidden";
+    const el = backdropRef.current;
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) return; // pinch zoom
+      const t = e.target as HTMLElement | null;
+      const scroller = (t?.closest("textarea, .ie-preview, .ie-details") as HTMLElement | null) ?? el?.querySelector<HTMLElement>(".ie-text, .ie-preview");
+      e.preventDefault();
+      if (!scroller) return;
+      const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? scroller.clientHeight : 1;
+      scroller.scrollTop += e.deltaY * unit;
+      scroller.scrollLeft += e.deltaX * unit;
+    };
+    el?.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      html.style.overflow = prev;
+      el?.removeEventListener("wheel", onWheel);
+    };
+  }, [editing]);
 
   // Keep the sheet above the on-screen keyboard (mobile).
   useEffect(() => {
@@ -382,7 +409,7 @@ export function InlineEditor() {
       </button>
 
       {editing ? (
-        <div className="ie-sheet-backdrop" onClick={() => !saving && setEditing(null)}>
+        <div ref={backdropRef} className="ie-sheet-backdrop" onClick={() => !saving && setEditing(null)}>
           <div
             className={`ie-sheet${editing.md ? " ie-sheet-md" : ""}`}
             role="dialog"
