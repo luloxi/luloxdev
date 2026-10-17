@@ -42,7 +42,7 @@ export function SignInPanel({ error }: { error: string | null }) {
     try {
       const result = await authClient.signIn.social({
         provider: "google",
-        callbackURL: `${origin}/rothko`,
+        callbackURL: `${origin}/blog`,
         errorCallbackURL: `${origin}/ingresar?error=oauth`,
       });
 

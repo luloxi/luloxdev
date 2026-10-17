@@ -20,23 +20,30 @@ function notFoundRewrite(request: NextRequest) {
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith("/rothko")) {
-    // Cheap cookie check only; the real check (valid session + admin email
-    // allowlist) runs in the /api/blog and /api/projects handlers.
-    if (!getSessionCookie(request)) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/ingresar";
-      url.search = "";
-      return NextResponse.redirect(url);
-    }
-    return NextResponse.next();
+  // The old admin (/rothko) is gone: articles are created and edited on /blog.
+  if (pathname === "/rothko" || pathname.startsWith("/rothko/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/blog";
+    url.search = "";
+    return NextResponse.redirect(url, 301);
+  }
+
+  if (pathname === "/blog/nuevo") {
+    // Cheap cookie check; /api/blog does the real admin check on create.
+    if (getSessionCookie(request)) return NextResponse.next();
+    const url = request.nextUrl.clone();
+    url.pathname = "/ingresar";
+    url.search = "";
+    return NextResponse.redirect(url);
   }
 
   const blog = pathname.match(/^\/blog\/([^/]+)\/?$/);
   if (blog) {
     const slug = decodeURIComponent(blog[1]);
     const post = await getPostBySlug(slug, { includeDrafts: false });
-    return post ? NextResponse.next() : notFoundRewrite(request);
+    if (post) return NextResponse.next();
+    // A signed-in admin may open a draft; the page checks the allowlist.
+    return getSessionCookie(request) ? NextResponse.next() : notFoundRewrite(request);
   }
 
   const project = pathname.match(/^\/proyectos\/([^/]+)\/?$/);

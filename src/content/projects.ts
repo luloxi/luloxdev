@@ -1,6 +1,6 @@
 /**
  * Projects structure and default copy.
- * Live overrides (status, urls, team, texts) live in D1 via /rothko.
+ * Live overrides (status, urls, team, texts) live in D1, edited in place on /proyectos.
  */
 
 export type FocusTopicId =

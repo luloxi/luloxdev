@@ -51,7 +51,7 @@ export function BlogList({ posts, error }: { posts: BlogPost[]; error?: boolean 
     <PageShell title={t.blog.title}>
       {isAdmin ? (
         <div className="mb-5 flex">
-          <Link href="/rothko/new" className="admin-pill">
+          <Link href="/blog/nuevo" prefetch={false} className="admin-pill">
             {es ? "Crear nuevo artículo" : "New article"}
           </Link>
         </div>
@@ -82,7 +82,7 @@ export function BlogList({ posts, error }: { posts: BlogPost[]; error?: boolean 
             return (
               <li key={post.slug}>
                 <Link
-                  href={draft ? `/rothko/${post.slug}` : `/blog/${post.slug}`}
+                  href={`/blog/${post.slug}`}
                   className={`cp-panel blog-card group block${draft ? " blog-card-draft" : ""}`}
                   style={{ ["--cp-accent" as string]: "var(--section-blog)" }}
                 >
@@ -91,7 +91,15 @@ export function BlogList({ posts, error }: { posts: BlogPost[]; error?: boolean 
                     <span className="cp-nav-corner cp-nav-corner-br" />
                   </span>
                   <div className="cp-panel-inner flex items-center gap-4">
-                    {post.coverImage ? (
+                    {draft ? (
+                      <span className="blog-draft-icon" title={es ? "Borrador" : "Draft"} aria-label={es ? "Borrador" : "Draft"}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5" />
+                          <path d="M14 3v5h5" />
+                          <path d="M18.4 13.6a1.9 1.9 0 0 1 2.7 2.7L16 21.4l-3.2.8.8-3.2Z" />
+                        </svg>
+                      </span>
+                    ) : post.coverImage ? (
                       <span className="blog-card-icon">
                         <Image
                           src={post.coverImage}
@@ -103,16 +111,20 @@ export function BlogList({ posts, error }: { posts: BlogPost[]; error?: boolean 
                       </span>
                     ) : null}
                     <div className="min-w-0 flex-1">
-                      <p className="font-mono text-[11px] text-[color:var(--cp-accent)]">
-                        {formatDate(post.publishedAt, locale)}
-                        {draft ? <span className="blog-draft-tag">{es ? "Borrador" : "Draft"}</span> : null}
-                      </p>
-                      <p className="cp-row-label mt-1.5 text-[0.95rem] leading-snug">
+                      {draft ? null : (
+                        <p className="font-mono text-[11px] text-[color:var(--cp-accent)]">
+                          {formatDate(post.publishedAt, locale)}
+                        </p>
+                      )}
+                      <p className={`cp-row-label text-[0.95rem] leading-snug${draft ? "" : " mt-1.5"}`}>
                         {L.title}
                       </p>
-                      <p className="cp-prose mt-2 text-[0.88rem] line-clamp-3">
-                        {L.summary}
-                      </p>
+                      {/* Drafts: only the draft icon and the title. */}
+                      {draft ? null : (
+                        <p className="cp-prose mt-2 text-[0.88rem] line-clamp-3">
+                          {L.summary}
+                        </p>
+                      )}
                     </div>
                     <span
                       className="cp-nav-chevron self-center opacity-70 group-hover:opacity-100"

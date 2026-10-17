@@ -3,7 +3,7 @@ import type { BlogPost } from "@/content/blog/types";
 import { isAdminRequest } from "@/lib/admin-request";
 import { getAllPosts, getPublishedPosts } from "@/lib/blog";
 
-// Read D1 on every request: edits in /rothko are visible immediately.
+// Read D1 on every request: edits made on the blog are visible immediately.
 export const dynamic = "force-dynamic";
 
 export default async function BlogPage() {

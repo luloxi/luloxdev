@@ -3750,3 +3750,14 @@ body.ie-off .ie-row-pencil { display: none; }
 .ie-field::placeholder { color: inherit; opacity: 0.55; }
 .ie-pill-select { appearance: none; -webkit-appearance: none; cursor: pointer; font-family: inherit; }
 .ie-pill-select option { color: #111; background: #fff; }
+.blog-draft-icon { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); }
+.blog-card-draft .cp-panel-inner { padding-top: 0.7rem; padding-bottom: 0.7rem; }
+.ie-inline-text { outline: none; cursor: text; }
+.ie-inline-text:empty::before { content: attr(aria-label); opacity: 0.45; }
+.ie-tb-wide { width: auto !important; padding: 0 8px !important; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.ie-meta { display: grid; gap: 8px; padding: 10px; border-radius: 10px; border: 1px dashed color-mix(in srgb, #c8102e 50%, transparent); font-size: 12px; }
+.ie-meta label { display: grid; gap: 3px; font-family: ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.08em; font-size: 10px; }
+.ie-meta input:not([type="checkbox"]) { min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--foreground); font-size: 15px; text-transform: none; letter-spacing: 0; font-family: inherit; }
+.ie-meta fieldset { display: flex; flex-wrap: wrap; gap: 6px 12px; border: 0; padding: 0; margin: 0; }
+.ie-meta legend { font-family: ui-monospace, monospace; text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; margin-bottom: 4px; }
+.ie-meta .ie-meta-chip { display: inline-flex; align-items: center; gap: 4px; grid: none; }

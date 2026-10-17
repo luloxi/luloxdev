@@ -17,6 +17,9 @@ import type { BlogPost } from "@/content/blog/types";
 import { localizePost } from "@/content/blog/types";
 import { site, socials } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
+import { useEditMode } from "@/components/admin-context";
+import { useBlogPostEditor } from "@/components/blog-post-edit";
+import type { ReactNode } from "react";
 
 const authorSocialIcons = {
   x: XIcon,
@@ -38,8 +41,20 @@ function formatDate(iso: string, locale: string) {
   }
 }
 
-/** One published post, rendered on the server (D1) and hydrated for the ES/EN toggle. */
+type Slots = { titleNode: ReactNode; summaryNode: ReactNode; bodyNode: ReactNode; metaPanel: ReactNode };
+
+/** One post, rendered on the server (D1). Admin edit mode edits it in place. */
 export function BlogPostView({ post }: { post: BlogPost }) {
+  const editOn = useEditMode();
+  return editOn ? <EditablePost post={post} /> : <PostLayout post={post} />;
+}
+
+function EditablePost({ post }: { post: BlogPost }) {
+  const slots = useBlogPostEditor(post);
+  return <PostLayout post={post} slots={slots} />;
+}
+
+function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
   const { t, locale } = useLocale();
   const L = localizePost(post, locale);
 
@@ -75,9 +90,11 @@ export function BlogPostView({ post }: { post: BlogPost }) {
             ) : null}
             <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--cp-accent)]">
               {formatDate(post.publishedAt, locale)}
+              {!post.published ? <span className="blog-draft-tag">{t.blog.statusDraft}</span> : null}
             </p>
-            <h1 className="blog-post-title">{L.title}</h1>
-            <p className="cp-prose">{L.summary}</p>
+            {slots ? slots.titleNode : <h1 className="blog-post-title">{L.title}</h1>}
+            {slots ? slots.summaryNode : <p className="cp-prose">{L.summary}</p>}
+            {slots?.metaPanel}
           </div>
         </header>
 
@@ -90,7 +107,7 @@ export function BlogPostView({ post }: { post: BlogPost }) {
             <span className="cp-nav-corner cp-nav-corner-br" />
           </span>
           <div className="cp-panel-inner">
-            <BlogMarkdown content={L.body} />
+            {slots ? slots.bodyNode : <BlogMarkdown content={L.body} />}
           </div>
         </div>
 
