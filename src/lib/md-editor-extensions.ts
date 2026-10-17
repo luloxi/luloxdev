@@ -8,6 +8,7 @@ import TableHeader from "@tiptap/extension-table-header";
 import TableRow from "@tiptap/extension-table-row";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "tiptap-markdown";
+import { VideoEmbed } from "@/lib/tiptap-video";
 
 export { Editor } from "@tiptap/core";
 
@@ -64,7 +65,8 @@ export function mdExtensions(opts: { blog?: boolean; classes?: MdClasses } = {})
   ];
   if (opts.blog) {
     exts.push(
-      Image.configure({ HTMLAttributes: attrs(c.img) }),
+      Image.configure({ HTMLAttributes: { ...attrs(c.img), loading: "lazy", decoding: "async" } }),
+      VideoEmbed,
       Table.configure({ resizable: false, HTMLAttributes: attrs(c.table) }),
       TableRow,
       TableHeader.configure({ HTMLAttributes: attrs(c.th) }),

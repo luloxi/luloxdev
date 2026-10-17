@@ -25,6 +25,10 @@
       "migrations_dir": "migrations"
     }
   ],
+  // Cloudflare R2: images uploaded from the blog editor (served at /media/...).
+  "r2_buckets": [
+    { "binding": "MEDIA", "bucket_name": "lulox-media" }
+  ],
   // Custom domains. lulox.com.ar is canonical (www 301s to apex in worker.ts).
   // lulox.dev + www are NOT served by this Worker: they are 301'd to lulox.com.ar by a Redirect Rule on that zone.
   "workers_dev": true,

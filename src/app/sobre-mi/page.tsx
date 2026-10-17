@@ -12,6 +12,7 @@ import {
 } from "@/components/icons/social";
 import { PageShell } from "@/components/page-shell";
 import { CopyMarkdown } from "@/components/copy-markdown";
+import { CopyText } from "@/components/copy-text";
 import { socials, tasteLinks } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 
@@ -80,13 +81,13 @@ export default function AboutPage() {
             <span className="cp-nav-corner cp-nav-corner-br" />
           </span>
           <div className="cp-panel-inner space-y-4">
-            <p className="cp-headline">{about.headline}</p>
+            <CopyText as="p" className="cp-headline" copyKey="about.headline" value={about.headline} />
             <CopyMarkdown copyKey="about.body" text={about.body} sections />
           </div>
         </div>
 
         <section>
-          <h2 className="cp-heading">{t.ui.experience}</h2>
+          <CopyText as="h2" className="cp-heading" copyKey="ui.experience" value={t.ui.experience} />
 
           <ul className="cp-list">
             {about.timeline.map((item, i) => {
@@ -119,13 +120,9 @@ export default function AboutPage() {
                       </span>
                     ) : null}
                     <div className="min-w-0 flex-1">
-                      <p className="font-mono text-[11px] text-[color:var(--cp-accent)]">
-                        {item.period}
-                      </p>
-                      <p className="cp-row-label mt-1.5 text-[0.9rem]">
-                        {item.title}
-                      </p>
-                      <p className="mt-0.5 text-sm text-muted">{item.org}</p>
+                      <CopyText as="p" className="font-mono text-[11px] text-[color:var(--cp-accent)]" copyKey={`about.timeline.${i}.period`} value={item.period} />
+                      <CopyText as="p" className="cp-row-label mt-1.5 text-[0.9rem]" copyKey={`about.timeline.${i}.title`} value={item.title} />
+                      <CopyText as="p" className="mt-0.5 text-sm text-muted" copyKey={`about.timeline.${i}.org`} value={item.org} />
                       <CopyMarkdown
                         copyKey={`about.timeline.${i}.description`}
                         text={item.description}

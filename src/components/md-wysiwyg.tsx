@@ -3,6 +3,14 @@
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { pickImageFile, uploadMedia } from "@/lib/upload-media";
+import { parseVideoUrl } from "@/lib/video-embed";
+
+/** Links: web, mail or site-relative only (no javascript:, data:, …). */
+function isSafeHref(url: string): boolean {
+  if (url.startsWith("/") && !url.startsWith("//")) return true;
+  return /^(https?:\/\/|mailto:)/i.test(url);
+}
 import { useLocale } from "@/i18n/locale-provider";
 import { mdExtensions, type MdClasses } from "@/lib/md-editor-extensions";
 
@@ -62,10 +70,11 @@ function Btn({ label, title, onClick, active, disabled, className }: { label: Re
 }
 
 /** Floating toolbar shown while an editable area is active. */
-function Toolbar({ editor, es, dirty, saving, error, onConfirm, onCancel, extraTools }: {
+function Toolbar({ editor, es, dirty, saving, error, onConfirm, onCancel, extraTools, blog }: {
   editor: Editor; es: boolean; dirty: boolean; saving: boolean; error: string;
-  onConfirm?: () => void; onCancel?: () => void; extraTools?: ReactNode;
+  onConfirm?: () => void; onCancel?: () => void; extraTools?: ReactNode; blog?: boolean;
 }) {
+  const [uploading, setUploading] = useState(false);
   const [, force] = useState(0);
   const [bottom, setBottom] = useState<number | null>(null);
   useEffect(() => {
@@ -91,10 +100,60 @@ function Toolbar({ editor, es, dirty, saving, error, onConfirm, onCancel, extraT
   const c = () => editor.chain().focus();
   const link = () => {
     const prev = (editor.getAttributes("link").href as string | undefined) ?? "https://";
-    const url = window.prompt(es ? "URL del link (vacío para quitarlo)" : "Link URL (empty to remove)", prev);
-    if (url === null) return;
-    if (!url.trim() || url.trim() === "https://") c().extendMarkRange("link").unsetLink().run();
-    else c().extendMarkRange("link").setLink({ href: url.trim() }).run();
+    const raw = window.prompt(es ? "URL del link (vacío para quitarlo)" : "Link URL (empty to remove)", prev);
+    if (raw === null) return;
+    const url = raw.trim();
+    if (!url || url === "https://") {
+      c().extendMarkRange("link").unsetLink().run();
+      return;
+    }
+    if (!isSafeHref(url)) {
+      window.alert(es ? "Solo links https://, http://, mailto: o rutas del sitio (/…)" : "Only https://, http://, mailto: links or site paths (/…)");
+      return;
+    }
+    // Nothing selected and not inside a link: insert the URL itself as the link text.
+    if (editor.state.selection.empty && !editor.isActive("link")) {
+      c().insertContent({ type: "text", text: url, marks: [{ type: "link", attrs: { href: url } }] }).run();
+      return;
+    }
+    c().extendMarkRange("link").setLink({ href: url }).run();
+  };
+  const image = async () => {
+    const raw = window.prompt(
+      es ? "URL de la imagen (https://…), o dejalo vacío y Aceptar para subir un archivo" : "Image URL (https://…), or leave empty and OK to upload a file",
+      "",
+    );
+    if (raw === null) return;
+    let src = raw.trim();
+    if (!src) {
+      const file = await pickImageFile();
+      if (!file) return;
+      setUploading(true);
+      const r = await uploadMedia(file);
+      setUploading(false);
+      if (r.error || !r.url) {
+        window.alert(es ? `No se pudo subir la imagen (${r.error})` : `Couldn't upload the image (${r.error})`);
+        return;
+      }
+      src = r.url;
+    } else if (!/^(https?:\/\/|\/)/i.test(src)) {
+      window.alert(es ? "La URL tiene que empezar con https:// o /" : "The URL must start with https:// or /");
+      return;
+    }
+    const alt = window.prompt(es ? "Texto alternativo / epígrafe (opcional)" : "Alt text / caption (optional)", "") ?? "";
+    // Block node + an empty paragraph after it, so the cursor lands below (and the
+    // next insert does not replace the selected node).
+    c().insertContent([{ type: "image", attrs: { src, alt: alt.trim() } }, { type: "paragraph" }]).run();
+  };
+  const video = () => {
+    const raw = window.prompt(es ? "URL de YouTube o Vimeo" : "YouTube or Vimeo URL", "https://");
+    if (raw === null || !raw.trim() || raw.trim() === "https://") return;
+    const v = parseVideoUrl(raw.trim());
+    if (!v) {
+      window.alert(es ? "Solo videos de YouTube o Vimeo" : "Only YouTube or Vimeo videos");
+      return;
+    }
+    c().insertContent([{ type: "videoEmbed", attrs: { src: raw.trim(), title: v.provider === "vimeo" ? "Vimeo" : "YouTube" } }, { type: "paragraph" }]).run();
   };
   return createPortal(
     <div className="ie-floatbar" role="toolbar" aria-label={es ? "Edición" : "Editing"} style={bottom !== null ? { bottom } : undefined} data-ie-toolbar="1">
@@ -104,7 +163,13 @@ function Toolbar({ editor, es, dirty, saving, error, onConfirm, onCancel, extraT
       <span className="ie-tb-sep" />
       <Btn label={<b>B</b>} title={es ? "Negrita (Ctrl+B)" : "Bold (Ctrl+B)"} active={editor.isActive("bold")} onClick={() => c().toggleBold().run()} />
       <Btn label={<i>I</i>} title={es ? "Cursiva (Ctrl+I)" : "Italic (Ctrl+I)"} active={editor.isActive("italic")} onClick={() => c().toggleItalic().run()} />
-      <Btn label="🔗" title={es ? "Link" : "Link"} active={editor.isActive("link")} onClick={link} />
+      <Btn label="🔗" title={es ? "Link: seleccioná texto y pegá la URL" : "Link: select text and paste the URL"} active={editor.isActive("link")} onClick={link} />
+      {blog ? (
+        <>
+          <Btn label={uploading ? "…" : "🖼"} title={es ? "Imagen: subir archivo o pegar URL" : "Image: upload a file or paste a URL"} disabled={uploading} onClick={() => void image()} />
+          <Btn label="▶" title={es ? "Video: pegar URL de YouTube o Vimeo" : "Video: paste a YouTube or Vimeo URL"} onClick={video} />
+        </>
+      ) : null}
       <span className="ie-tb-sep" />
       <Btn label="―" title={es ? "Separador horizontal" : "Horizontal rule"} onClick={() => c().setHorizontalRule().run()} />
       <Btn label="•" title={es ? "Lista con viñetas ( - )" : "Bulleted list ( - )"} active={editor.isActive("bulletList")} onClick={() => c().toggleBulletList().run()} />
@@ -224,6 +289,7 @@ export function MdWysiwyg({ markdown, blog, classes, className = "", mode = "inl
           onConfirm={mode === "inline" ? () => void confirm() : undefined}
           onCancel={cancel}
           extraTools={extraTools}
+          blog={blog}
         />
       ) : null}
     </div>

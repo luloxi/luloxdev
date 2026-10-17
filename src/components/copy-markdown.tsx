@@ -9,9 +9,10 @@ import { deleteSection, introBody, replaceIntro, sectionBody, splitSections, ups
 import { useLocale } from "@/i18n/locale-provider";
 import { saveCopy, useEditMode } from "@/components/admin-context";
 import { MdWysiwyg, ToolbarButton } from "@/components/md-wysiwyg";
+import { withLaugh } from "@/components/laugh-button";
 import { COPY_CLASSES } from "@/lib/md-editor-extensions";
 import { useRouter } from "next/navigation";
-import { useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
 /**
  * Site copy rendered as Markdown. No raw HTML (skipHtml), no automatic term
@@ -34,7 +35,7 @@ function makeComponents(pClass: string, inline: boolean): Components {
     h4: ({ children }) => <h4 className="md-h4">{children}</h4>,
     h5: ({ children }) => <h4 className="md-h4">{children}</h4>,
     h6: ({ children }) => <h4 className="md-h4">{children}</h4>,
-    p: ({ children }) => <P className={pClass}>{children}</P>,
+    p: ({ children }) => <P className={pClass}>{withLaugh(children)}</P>,
     hr: () => <hr className="md-hr" />,
     ul: ({ children }) => <ul className="md-ul">{children}</ul>,
     ol: ({ children }) => <ol className="md-ol">{children}</ol>,
@@ -209,13 +210,38 @@ function Accordion({ sections, pClass, raw, copyKey }: { sections: Section[]; pC
       break;
     }
   const toggle = (i: number) => setOpen((prev) => sections.map((_, j) => (j === i ? !prev[j] : (prev[j] ?? false))));
+  // While nothing is open, the first section "peeks" (opens a little, holds,
+  // closes), synced with every other rev of its header. Not in edit mode or
+  // for reduced motion.
+  const anyOpen = open.some(Boolean);
+  const [peek, setPeek] = useState(false);
+  useEffect(() => {
+    if (anyOpen || copyKey || sections.length === 0) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    let next = 0;
+    let close = 0;
+    const loop = (delay: number) => {
+      next = window.setTimeout(() => {
+        setPeek(true);
+        close = window.setTimeout(() => setPeek(false), 1700);
+        loop(10000);
+      }, delay);
+    };
+    // First lunge of the header lands at ~4.95s (1.2s delay + 75% of 5s).
+    loop(4950);
+    return () => {
+      window.clearTimeout(next);
+      window.clearTimeout(close);
+      setPeek(false);
+    };
+  }, [anyOpen, copyKey, sections.length]);
   return (
     <div className="md-acc-list">
       {sections.map((sec, i) => {
         const isOpen = open[i] ?? false;
         const id = `${base}-s${i}`;
         return (
-          <section key={id} className={`md-acc-item${isOpen ? " is-open" : ""}`}>
+          <section key={id} className={`md-acc-item${isOpen ? " is-open" : ""}${peek && i === 0 && !anyOpen ? " md-acc-peek" : ""}`}>
             {copyKey ? (
               <EditableSection
                 index={i}

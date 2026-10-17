@@ -6,6 +6,7 @@ import { MdWysiwyg, ToolbarButton } from "@/components/md-wysiwyg";
 import type { BlogPost } from "@/content/blog/types";
 import { focusTopics } from "@/content/projects";
 import { useLocale } from "@/i18n/locale-provider";
+import { pickImageFile, uploadMedia } from "@/lib/upload-media";
 
 export async function putPost(post: BlogPost): Promise<{ slug?: string; error?: string }> {
   const res = await fetch("/api/blog", {
@@ -63,8 +64,8 @@ function InlineText({ as: Tag, className, value, label, onChange, onFocus, onBlu
 
 /**
  * Admin edit mode for one post at /blog/<slug>: title, summary and body edited
- * in place for the current locale; publish/unpublish, details and delete in
- * the toolbar. The article renders like the published one.
+ * in place for the current locale, details (date, tags, slug, cover, topics)
+ * inline; publish/unpublish and delete in the toolbar. The article renders like the published one.
  */
 export function useBlogPostEditor(post: BlogPost) {
   const { t, locale } = useLocale();
@@ -75,7 +76,6 @@ export function useBlogPostEditor(post: BlogPost) {
   const [summary, setSummary] = useState(post.summary[L]);
   const [meta, setMeta] = useState<Meta>(metaOf(post));
   const [textFocus, setTextFocus] = useState(false);
-  const [showMeta, setShowMeta] = useState(false);
   const [resetKey, setResetKey] = useState(0);
   const bodyRef = useRef(post.body[L]);
   const extraDirty = title !== post.title[L] || summary !== post.summary[L] || !sameMeta(meta, metaOf(post));
@@ -122,7 +122,6 @@ export function useBlogPostEditor(post: BlogPost) {
     setTitle(post.title[L]);
     setSummary(post.summary[L]);
     setMeta(metaOf(post));
-    setShowMeta(false);
     setResetKey((k) => k + 1);
   };
 
@@ -135,27 +134,82 @@ export function useBlogPostEditor(post: BlogPost) {
       onChange={setSummary} onFocus={() => setTextFocus(true)} onBlur={() => setTextFocus(false)} />
   );
 
-  const metaPanel: ReactNode = showMeta ? (
-    <div className="ie-meta" data-ie-toolbar="1">
-      <label>Slug<input value={meta.slug} onChange={(e) => setMeta({ ...meta, slug: e.target.value })} /></label>
-      <label>{t.blog.fieldDate}<input type="date" value={meta.publishedAt} onChange={(e) => setMeta({ ...meta, publishedAt: e.target.value })} /></label>
-      <label>{t.blog.fieldCover}<input value={meta.coverImage} onChange={(e) => setMeta({ ...meta, coverImage: e.target.value })} placeholder="/projects/focus/lcp.svg" /></label>
-      <label>{t.blog.fieldTags}<input value={meta.tags} onChange={(e) => setMeta({ ...meta, tags: e.target.value })} /></label>
-      <fieldset>
-        <legend>{t.blog.fieldTopics}</legend>
-        {focusTopics.map((ft) => (
-          <label key={ft.id} className="ie-meta-chip">
-            <input
-              type="checkbox"
-              checked={meta.topics.includes(ft.id)}
-              onChange={() => setMeta({ ...meta, topics: meta.topics.includes(ft.id) ? meta.topics.filter((x) => x !== ft.id) : [...meta.topics, ft.id] })}
-            />
-            {ft.id}
-          </label>
-        ))}
-      </fieldset>
+  // Details edited in place, styled like the surrounding muted text.
+  const [coverBusy, setCoverBusy] = useState(false);
+  const changeCover = async () => {
+    const file = await pickImageFile();
+    if (!file) return;
+    setCoverBusy(true);
+    const r = await uploadMedia(file);
+    setCoverBusy(false);
+    if (r.error || !r.url) window.alert(es ? `No se pudo subir la imagen (${r.error})` : `Couldn't upload the image (${r.error})`);
+    else setMeta((m) => ({ ...m, coverImage: r.url! }));
+  };
+  const coverNode: ReactNode = (
+    <button
+      type="button"
+      className={`blog-cover blog-cover-edit${meta.coverImage ? "" : " is-empty"}`}
+      onClick={() => void changeCover()}
+      title={es ? "Cambiar imagen de portada (subir)" : "Change cover image (upload)"}
+      aria-label={es ? "Cambiar imagen de portada" : "Change cover image"}
+      disabled={coverBusy}
+    >
+      {meta.coverImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={meta.coverImage} alt="" className="blog-cover-img" />
+      ) : (
+        <span aria-hidden>{coverBusy ? "…" : "+"}</span>
+      )}
+    </button>
+  );
+  const dateNode: ReactNode = (
+    <input
+      type="date"
+      className="ie-date-inline"
+      value={meta.publishedAt}
+      onChange={(e) => setMeta({ ...meta, publishedAt: e.target.value })}
+      aria-label={t.blog.fieldDate}
+      title={t.blog.fieldDate}
+    />
+  );
+  const field = (k: "slug" | "tags" | "coverImage", label: string, placeholder: string) => (
+    <label className="ie-meta-line">
+      <span className="ie-meta-key">{label}</span>
+      <input
+        className="ie-meta-input"
+        value={meta[k]}
+        placeholder={placeholder}
+        onChange={(e) => setMeta({ ...meta, [k]: e.target.value })}
+        spellCheck={false}
+      />
+    </label>
+  );
+  const metaPanel: ReactNode = (
+    <div className="ie-meta-inline" data-ie-toolbar="1">
+      {field("tags", t.blog.fieldTags, es ? "palabras, clave" : "some, keywords")}
+      {field("slug", "slug", "mi-articulo")}
+      {field("coverImage", t.blog.fieldCover, "https://… / /media/…")}
+      <div className="ie-meta-line" role="group" aria-label={t.blog.fieldTopics}>
+        <span className="ie-meta-key">{t.blog.fieldTopics}</span>
+        <span className="ie-topic-chips">
+          {focusTopics.map((ft) => {
+            const on = meta.topics.includes(ft.id);
+            return (
+              <button
+                key={ft.id}
+                type="button"
+                className={`ie-topic-chip${on ? " is-on" : ""}`}
+                aria-pressed={on}
+                onClick={() => setMeta({ ...meta, topics: on ? meta.topics.filter((x) => x !== ft.id) : [...meta.topics, ft.id] })}
+              >
+                {ft.id}
+              </button>
+            );
+          })}
+        </span>
+      </div>
     </div>
-  ) : null;
+  );
 
   const bodyNode = (
     <MdWysiwyg
@@ -177,12 +231,11 @@ export function useBlogPostEditor(post: BlogPost) {
             title={post.published ? (es ? "Pasar a borrador" : "Back to draft") : es ? "Publicar el artículo" : "Publish the article"}
             onClick={() => void togglePublish()}
           />
-          <ToolbarButton label="⚙" title={es ? "Detalles: slug, fecha, imagen, tags, temas" : "Details: slug, date, image, tags, topics"} active={showMeta} onClick={() => setShowMeta((v) => !v)} />
           <ToolbarButton label="🗑" title={es ? "Borrar artículo" : "Delete article"} onClick={() => void del()} />
         </>
       }
     />
   );
 
-  return { titleNode, summaryNode, bodyNode, metaPanel, textFocus };
+  return { titleNode, summaryNode, bodyNode, metaPanel, coverNode, dateNode, textFocus };
 }

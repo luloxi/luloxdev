@@ -26,7 +26,7 @@ function formatDate(iso: string, locale: string) {
   }
 }
 
-type Slots = { titleNode: ReactNode; summaryNode: ReactNode; bodyNode: ReactNode; metaPanel: ReactNode };
+type Slots = { titleNode: ReactNode; summaryNode: ReactNode; bodyNode: ReactNode; metaPanel: ReactNode; coverNode: ReactNode; dateNode: ReactNode };
 
 /** One post, rendered on the server (D1). Admin edit mode edits it in place. */
 export function BlogPostView({ post }: { post: BlogPost }) {
@@ -61,7 +61,7 @@ function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
             <span className="cp-nav-corner cp-nav-corner-br" />
           </span>
           <div className="cp-panel-inner space-y-3">
-            {post.coverImage ? (
+            {slots ? slots.coverNode : post.coverImage ? (
               <div className="blog-cover">
                 <Image
                   src={post.coverImage}
@@ -74,7 +74,7 @@ function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
               </div>
             ) : null}
             <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[color:var(--cp-accent)]">
-              {formatDate(post.publishedAt, locale)}
+              {slots ? slots.dateNode : formatDate(post.publishedAt, locale)}
               {!post.published ? <span className="blog-draft-tag">{t.blog.statusDraft}</span> : null}
             </p>
             {slots ? slots.titleNode : <h1 className="blog-post-title">{L.title}</h1>}

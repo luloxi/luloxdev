@@ -31,7 +31,8 @@ export function PageShell({
 
   return (
     <div className="cp-shell mx-auto min-h-dvh w-full max-w-xl px-6 pb-16 pt-16 sm:pt-20">
-      <header className="cp-shell-header mb-10 flex items-center justify-between gap-4 pr-20 sm:pr-24">
+      {/* Back link lives in the fixed top bar, opposite the language/theme controls */}
+      <div className="cp-topbar-back" data-inline-editor="skip">
         <Link
           href={backHref}
           className="cp-back-link group shrink-0"
@@ -42,7 +43,9 @@ export function PageShell({
           </span>
           <span>{topLabel}</span>
         </Link>
-        <h1 className="cp-page-title shrink-0">
+      </div>
+      <header className="cp-shell-header mb-10 flex items-center justify-center">
+        <h1 className="cp-page-title cp-page-title-center">
           <span className="cp-page-title-text">{title}</span>
           <span className="cp-page-title-mark" aria-hidden />
         </h1>

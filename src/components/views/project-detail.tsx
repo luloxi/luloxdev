@@ -7,7 +7,8 @@ import { PageShell } from "@/components/page-shell";
 import type { PastProject, ProjectStatus } from "@/content/projects";
 import { useLocale } from "@/i18n/locale-provider";
 import { useEditMode } from "@/components/admin-context";
-import { ProjectText } from "@/components/project-text";
+import { ProjectText, saveProject } from "@/components/project-text";
+import { CopyText } from "@/components/copy-text";
 import { ProjectDetailsEdit } from "@/components/project-details-edit";
 
 const statusClass: Record<ProjectStatus, string> = {
@@ -56,9 +57,18 @@ export function ProjectDetail({ project }: { project: PastProject }) {
               className="project-detail-icon shrink-0"
             />
             <div className="min-w-0">
-              <p className="cp-headline text-[1.05rem] sm:text-[1.2rem]">
-                {copy.title}
-              </p>
+              <CopyText
+                as="p"
+                className="cp-headline text-[1.05rem] sm:text-[1.2rem]"
+                value={copy.title}
+                label={t.blog.fieldTitle}
+                onSave={(v) =>
+                  saveProject(project.id, (p) => {
+                    const L = (locale === "en" ? "en" : "es") as "es" | "en";
+                    p.copy[L] = { ...p.copy[L], title: v };
+                  })
+                }
+              />
               {editOn ? (
                 <ProjectText project={project} field="body" className="mt-1.5" pClass="cp-prose text-[0.9rem]" />
               ) : (

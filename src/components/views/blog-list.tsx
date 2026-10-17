@@ -50,11 +50,17 @@ export function BlogList({ posts, error }: { posts: BlogPost[]; error?: boolean 
   return (
     <PageShell title={t.blog.title}>
       {isAdmin ? (
-        <div className="mb-5 flex">
-          <Link href="/blog/nuevo" prefetch={false} className="admin-pill">
-            {es ? "Crear nuevo artículo" : "New article"}
-          </Link>
-        </div>
+        <Link
+          href="/blog/nuevo"
+          prefetch={false}
+          className="blog-fab"
+          title={es ? "Crear nuevo artículo" : "New article"}
+          aria-label={es ? "Crear nuevo artículo" : "New article"}
+        >
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </Link>
       ) : null}
       <div className="space-y-4">
         {error ? (

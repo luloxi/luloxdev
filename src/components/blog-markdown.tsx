@@ -1,30 +1,38 @@
 "use client";
 
-import Image from "next/image";
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { linkifyBlogTerms } from "@/lib/blog-linkify";
-
-function youtubeIdFromUrl(href: string): string | null {
-  try {
-    const u = new URL(href);
-    if (u.hostname.includes("youtu.be")) {
-      return u.pathname.slice(1) || null;
-    }
-    if (u.hostname.includes("youtube.com")) {
-      return u.searchParams.get("v");
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
+import { parseVideoUrl, VIDEO_IFRAME_ALLOW } from "@/lib/video-embed";
 
 const components: Components = {
   h2: ({ children }) => <h2 className="blog-h2">{children}</h2>,
   h3: ({ children }) => <h3 className="blog-h3">{children}</h3>,
-  p: ({ children }) => <p className="blog-p">{children}</p>,
+  // A paragraph that is only an allowlisted YouTube/Vimeo link becomes a
+  // responsive embed; the iframe src is rebuilt from the validated id.
+  p: ({ node, children }) => {
+    const kids = (node?.children ?? []).filter((c) => !(c.type === "text" && !c.value.trim()));
+    const only = kids.length === 1 && kids[0].type === "element" && kids[0].tagName === "a" ? kids[0] : null;
+    const v = only ? parseVideoUrl(String(only.properties?.href ?? "")) : null;
+    if (v && only) {
+      const title = only.children.map((c) => (c.type === "text" ? c.value : "")).join("").trim() || (v.provider === "vimeo" ? "Vimeo" : "YouTube");
+      return (
+        <div className="blog-embed">
+          <iframe
+            src={v.embedSrc}
+            title={title}
+            allow={VIDEO_IFRAME_ALLOW}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+            className="blog-embed-frame"
+          />
+        </div>
+      );
+    }
+    return <p className="blog-p">{children}</p>;
+  },
   ul: ({ children }) => <ul className="blog-ul">{children}</ul>,
   ol: ({ children }) => <ol className="blog-ol">{children}</ol>,
   li: ({ children }) => <li className="blog-li">{children}</li>,
@@ -45,23 +53,6 @@ const components: Components = {
   },
   pre: ({ children }) => <>{children}</>,
   a: ({ href, children }) => {
-    if (href) {
-      const yt = youtubeIdFromUrl(href);
-      if (yt) {
-        return (
-          <span className="blog-embed">
-            <iframe
-              src={`https://www.youtube-nocookie.com/embed/${yt}`}
-              title={typeof children === "string" ? children : "YouTube"}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              loading="lazy"
-              className="blog-embed-frame"
-            />
-          </span>
-        );
-      }
-    }
     return (
       <a
         href={href}
@@ -75,21 +66,11 @@ const components: Components = {
   },
   img: ({ src, alt }) => {
     if (!src || typeof src !== "string") return null;
-    const isLocal = src.startsWith("/");
+    if (!/^(https?:\/\/|\/)/i.test(src)) return null;
     return (
       <span className="blog-figure">
-        {isLocal ? (
-          <Image
-            src={src}
-            alt={alt ?? ""}
-            width={640}
-            height={360}
-            className="blog-img"
-          />
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={src} alt={alt ?? ""} className="blog-img" />
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt={alt ?? ""} className="blog-img" loading="lazy" decoding="async" />
         {alt ? <span className="blog-figcaption">{alt}</span> : null}
       </span>
     );
