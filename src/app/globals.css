@@ -4073,3 +4073,172 @@ body.ie-off .ie-row-pencil { display: none; }
 }
 @media (min-width: 640px) { .cp-topbar-fade { height: 104px; } }
 .cp-topbar-back { z-index: 50; }
+
+/* r7: landing micro-animations. All off under prefers-reduced-motion. */
+/* Photo breathes: a soft red glow pulsing behind the HUD frame. */
+.avatar-hud { touch-action: manipulation; -webkit-user-select: none; user-select: none; cursor: default; }
+.avatar-hud::before {
+  content: ""; position: absolute; inset: -14%; z-index: 0; pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in oklab, var(--neon-crimson, #c8102e) 55%, transparent) 0%, transparent 66%);
+  opacity: 0.38; transform: scale(0.96);
+  animation: hud-breathe 4.8s ease-in-out infinite;
+}
+:root:not(.dark) .avatar-hud::before {
+  background: radial-gradient(circle, color-mix(in oklab, #c8102e 30%, transparent) 0%, transparent 64%);
+}
+@keyframes hud-breathe {
+  0%, 100% { opacity: 0.32; transform: scale(0.95); }
+  50% { opacity: 0.78; transform: scale(1.04); }
+}
+/* LULOX: very brief glitch flicker (class toggled from JS every 6-10 s). */
+.home-title.is-glitch { animation: lulox-glitch 0.32s steps(1, end) 1; }
+@keyframes lulox-glitch {
+  0% { transform: none; }
+  12% { transform: translate(-3px, 0) skewX(-10deg); text-shadow: 3px 0 #ff2a4f, -3px 0 #22d3ee; clip-path: inset(8% 0 52% 0); }
+  26% { transform: translate(3px, 1px); text-shadow: -3px 0 #ff2a4f, 3px 0 #22d3ee; clip-path: inset(58% 0 6% 0); }
+  40% { transform: none; clip-path: none; opacity: 0.55; }
+  55% { transform: translate(-1px, 0) skewX(6deg); text-shadow: 2px 0 #ff2a4f, -2px 0 #22d3ee; clip-path: inset(30% 0 30% 0); }
+  70% { transform: translate(1px, 0); clip-path: none; opacity: 1; }
+  100% { transform: none; clip-path: none; }
+}
+/* Menu: buttons enter one by one on load (backwards fill only, so hover transforms still apply). */
+.home-sections .cp-nav-item { animation: cp-cascade 0.46s cubic-bezier(.2,.9,.3,1.15) backwards; }
+.home-sections .cp-nav-item:nth-child(1) { animation-delay: 0.12s; }
+.home-sections .cp-nav-item:nth-child(2) { animation-delay: 0.22s; }
+.home-sections .cp-nav-item:nth-child(3) { animation-delay: 0.32s; }
+.home-sections .cp-nav-item:nth-child(4) { animation-delay: 0.42s; }
+.home-sections .cp-nav-item:nth-child(5) { animation-delay: 0.52s; }
+.home-sections .cp-nav-item:nth-child(6) { animation-delay: 0.62s; }
+@keyframes cp-cascade {
+  0% { opacity: 0; transform: translateX(-18px); filter: brightness(1.6); }
+  60% { opacity: 1; filter: brightness(1.25); }
+  100% { opacity: 1; transform: none; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .avatar-hud::before { animation: none; opacity: 0.45; transform: none; }
+  .home-title.is-glitch, .home-sections .cp-nav-item { animation: none; }
+}
+
+/* r7: projects, holographic tilt (vars written by useHoloTilt). */
+.cp-row.holo {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateX(var(--holo-shift, 0px));
+  transform-style: flat;
+  will-change: transform;
+}
+.cp-row.holo:hover { --holo-shift: 3px; transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateX(var(--holo-shift)); }
+.cp-row.holo:active { --holo-shift: 1px; }
+.cp-row.holo.is-holo { transition: background 0.2s ease, transform 0.08s linear; }
+.holo-sheen {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  opacity: 0; transition: opacity 0.25s ease;
+  background:
+    radial-gradient(circle at var(--hx, 50%) var(--hy, 50%), color-mix(in oklab, #ffffff 22%, transparent) 0%, transparent 46%),
+    linear-gradient(115deg, transparent 20%, color-mix(in oklab, #22d3ee 10%, transparent) calc(var(--hx, 50%) - 10%), color-mix(in oklab, #f472b6 10%, transparent) var(--hx, 50%), color-mix(in oklab, #facc15 8%, transparent) calc(var(--hx, 50%) + 10%), transparent 80%);
+  mix-blend-mode: screen;
+}
+:root:not(.dark) .holo-sheen { mix-blend-mode: multiply; opacity: 0; }
+:root:not(.dark) .cp-row.holo.is-holo .holo-sheen { opacity: 0.55; }
+.cp-row.holo.is-holo .holo-sheen { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .cp-row.holo, .cp-row.holo:hover { transform: none; }
+  .holo-sheen { display: none; }
+}
+
+/* r7: blog article reading progress, just under the fixed top bar. */
+.read-progress {
+  position: fixed; z-index: 49; left: 0; right: 0; top: 60px; height: 2px;
+  pointer-events: none; opacity: 0; transition: opacity 0.25s ease;
+}
+.read-progress.is-on { opacity: 1; }
+.read-progress-bar {
+  height: 100%; width: 100%; transform: scaleX(0); transform-origin: left center;
+  background: linear-gradient(90deg, color-mix(in oklab, var(--section-blog) 50%, transparent), var(--section-blog));
+  box-shadow: 0 0 8px color-mix(in oklab, var(--section-blog) 60%, transparent);
+}
+@media (min-width: 640px) { .read-progress { top: 66px; } }
+@media (prefers-reduced-motion: reduce) { .read-progress { transition: none; } }
+
+/* r7: Experiencia timeline. Line between logos draws with scroll; logos light up. */
+.tl-list { position: relative; }
+.tl-list.tl-draw::before,
+.tl-list.tl-draw::after {
+  content: ""; position: absolute; z-index: 0; pointer-events: none;
+  left: calc(var(--tl-x, 0px) - 1px); top: var(--tl-top, 0px); width: 2px; height: var(--tl-h, 0px);
+}
+.tl-list.tl-draw::before { background: color-mix(in oklab, var(--foreground) 10%, transparent); }
+.tl-list.tl-draw::after {
+  background: linear-gradient(to bottom, var(--section-about), var(--section-projects));
+  box-shadow: 0 0 10px color-mix(in oklab, var(--section-about) 55%, transparent);
+  transform-origin: top center; transform: scaleY(var(--tl-p, 0));
+}
+.tl-list.tl-draw .tl-logo {
+  position: relative; z-index: 1; background: var(--background);
+  filter: grayscale(1) brightness(0.8); opacity: 0.45;
+  transition: filter 0.5s ease, opacity 0.5s ease;
+}
+.tl-list.tl-draw .tl-logo.is-lit { filter: none; opacity: 1; animation: tl-light 0.9s ease-out 1; }
+@keyframes tl-light {
+  0% { filter: brightness(1.9) drop-shadow(0 0 0 transparent); }
+  35% { filter: brightness(1.35) drop-shadow(0 0 14px color-mix(in oklab, var(--cp-accent) 80%, transparent)); }
+  100% { filter: none; }
+}
+.tl-list.tl-static .tl-logo, .tl-list.tl-static .tl-logo.is-lit { filter: none; opacity: 1; animation: none; transition: none; }
+.tl-list.tl-static::after { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .tl-list.tl-draw .tl-logo { filter: none; opacity: 1; animation: none; transition: none; }
+}
+.tl-list.tl-draw > li { position: relative; z-index: 1; }
+
+/* r7: Contacto, successful send: the container glows to max, then the form fades and collapses (JS). */
+.call-form.call-form-doom { pointer-events: none; animation: call-doom-glow 1.15s cubic-bezier(.5,0,.2,1) forwards; }
+.call-form-doom .call-form-card { animation: call-doom-shiver 1.15s linear forwards; }
+@keyframes call-doom-glow {
+  0% { border-color: color-mix(in oklab, var(--section-contact) 55%, transparent); box-shadow: 0 0 18px 2px color-mix(in oklab, var(--section-contact) 22%, transparent); }
+  45% { border-color: var(--section-contact); box-shadow: 0 0 0 3px color-mix(in oklab, var(--section-contact) 45%, transparent), inset 0 0 30px color-mix(in oklab, var(--section-contact) 30%, transparent), 0 0 44px 10px color-mix(in oklab, var(--section-contact) 60%, transparent); }
+  100% { border-color: var(--section-contact); box-shadow: 0 0 0 4px var(--section-contact), inset 0 0 80px color-mix(in oklab, var(--section-contact) 60%, transparent), 0 0 80px 26px color-mix(in oklab, var(--section-contact) 85%, transparent), 0 0 160px 50px color-mix(in oklab, var(--neon-crimson) 40%, transparent); }
+}
+@keyframes call-doom-shiver {
+  0%, 60% { transform: none; }
+  64% { transform: translate(1px, 0); }
+  68% { transform: translate(-1px, 1px); }
+  72% { transform: translate(1px, -1px); }
+  76% { transform: translate(-1px, 0); }
+  80% { transform: translate(1px, 1px); }
+  84%, 100% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .call-form.call-form-doom, .call-form-doom .call-form-card { animation: none; }
+}
+
+/* r7: Mochi pet on the Mochi project page. Layer never takes clicks; only Mochi does. */
+.mochi-layer { position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
+.mochi-pet {
+  position: absolute; left: 0; bottom: 0; width: 84px; height: 84px; padding: 0; border: 0; background: none;
+  pointer-events: auto; cursor: pointer; will-change: transform; -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.mochi-pet:focus-visible { outline: 2px dashed var(--section-projects); outline-offset: 2px; border-radius: 12px; }
+.mochi-sprite {
+  display: block; width: 100%; height: 100%; background-repeat: no-repeat; background-size: 700% 100%;
+  transform-origin: 50% 50%; filter: drop-shadow(0 3px 4px rgb(0 0 0 / 0.25));
+}
+.mochi-bubble {
+  position: fixed; z-index: 41; width: 15rem; max-width: calc(100vw - 16px); pointer-events: auto;
+  padding: 0.8rem 2.2rem 0.8rem 0.9rem; border-radius: 14px;
+  background: var(--surface, var(--background)); color: var(--foreground);
+  box-shadow: inset 0 0 0 1.5px #2a56c6, 0 10px 28px rgb(0 0 0 / 0.28);
+  font-size: 0.92rem; line-height: 1.35; animation: mochi-pop 0.22s ease-out;
+}
+.mochi-bubble p { margin: 0; }
+.mochi-bubble-close {
+  position: absolute; top: 4px; right: 4px; width: 36px; height: 36px; border: 0; border-radius: 8px;
+  background: none; color: inherit; font-size: 1.3rem; line-height: 1; cursor: pointer; opacity: 0.7;
+}
+.mochi-bubble-close:hover, .mochi-bubble-close:focus-visible { opacity: 1; background: color-mix(in oklab, var(--foreground) 10%, transparent); }
+.mochi-bubble-tail {
+  position: absolute; bottom: -7px; width: 14px; height: 14px; margin-left: -7px; transform: rotate(45deg);
+  background: inherit; box-shadow: inset -1.5px -1.5px 0 #2a56c6;
+}
+@keyframes mochi-pop { from { opacity: 0; transform: translateY(6px) scale(0.96); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .mochi-bubble { animation: none; } }

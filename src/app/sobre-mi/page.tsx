@@ -15,6 +15,7 @@ import { CopyMarkdown } from "@/components/copy-markdown";
 import { CopyText } from "@/components/copy-text";
 import { socials, tasteLinks } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
+import { useTimelineDraw } from "@/lib/use-timeline-draw";
 
 const linkedInHref =
   socials.find((s) => s.id === "linkedin")?.href ??
@@ -68,6 +69,7 @@ const platforms = [
 export default function AboutPage() {
   const { t } = useLocale();
   const about = t.about;
+  const tlRef = useTimelineDraw<HTMLUListElement>();
 
   return (
     <PageShell title={about.title}>
@@ -89,7 +91,7 @@ export default function AboutPage() {
         <section>
           <CopyText as="h2" className="cp-heading" copyKey="ui.experience" value={t.ui.experience} />
 
-          <ul className="cp-list">
+          <ul ref={tlRef} className="cp-list tl-list">
             {about.timeline.map((item, i) => {
               const logo = orgLogos[item.org];
               const accent = timelineAccents[i % timelineAccents.length];
@@ -105,7 +107,7 @@ export default function AboutPage() {
                   </span>
                   <div className="cp-panel-inner flex items-center gap-4 sm:gap-5">
                     {logo ? (
-                      <span className="inline-flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden sm:h-20 sm:w-20">
+                      <span className="tl-logo inline-flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden sm:h-20 sm:w-20">
                         {logo.type === "image" ? (
                           <Image
                             src={logo.src}

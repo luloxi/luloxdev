@@ -7,6 +7,19 @@ import { GitHubIcon } from "@/components/icons/social";
 import type { PastProject } from "@/content/projects";
 import { github } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
+import { useHoloTilt } from "@/lib/use-holo-tilt";
+import type { ComponentProps } from "react";
+
+/** Project card with the holographic tilt + sheen. */
+function HoloLink({ className, children, ...rest }: ComponentProps<typeof Link>) {
+  const ref = useHoloTilt<HTMLAnchorElement>();
+  return (
+    <Link ref={ref} className={`${className ?? ""} holo`} {...rest}>
+      {children}
+      <span className="holo-sheen" aria-hidden />
+    </Link>
+  );
+}
 
 const pastAccents = [
   "var(--section-contact)",
@@ -35,7 +48,7 @@ export function ProjectsAccordion({ projects }: { projects: PastProject[] }) {
             const accent = pastAccents[i % pastAccents.length];
             return (
               <li key={project.id}>
-                <Link
+                <HoloLink
                   href={`/proyectos/${project.id}`}
                   className="cp-row group"
                   style={{ ["--cp-accent" as string]: accent }}
@@ -66,7 +79,7 @@ export function ProjectsAccordion({ projects }: { projects: PastProject[] }) {
                     ▸
                   </span>
                   <span className="cp-nav-bar cp-row-bar" aria-hidden />
-                </Link>
+                </HoloLink>
               </li>
             );
           })}

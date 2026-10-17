@@ -11,7 +11,8 @@ import Link from "next/link";
 import { useLocale } from "@/i18n/locale-provider";
 import { useEditMode } from "@/components/admin-context";
 import { useBlogPostEditor } from "@/components/blog-post-edit";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
+import { ReadingProgress } from "@/components/reading-progress";
 
 
 function formatDate(iso: string, locale: string) {
@@ -42,6 +43,7 @@ function EditablePost({ post }: { post: BlogPost }) {
 function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
   const { t, locale } = useLocale();
   const L = localizePost(post, locale);
+  const articleRef = useRef<HTMLElement>(null);
 
   return (
     <PageShell
@@ -51,7 +53,8 @@ function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
       footerHref="/blog"
       footerLabel={t.blog.backToBlog}
     >
-      <article className="space-y-6">
+      <ReadingProgress target={articleRef} />
+      <article ref={articleRef} className="space-y-6">
         <header
           className="cp-panel"
           style={{ ["--cp-accent" as string]: "var(--section-blog)" }}

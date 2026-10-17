@@ -10,6 +10,7 @@ import { useEditMode } from "@/components/admin-context";
 import { ProjectText, saveProject } from "@/components/project-text";
 import { CopyText } from "@/components/copy-text";
 import { ProjectDetailsEdit } from "@/components/project-details-edit";
+import { MochiPet } from "@/components/mochi-pet";
 
 const statusClass: Record<ProjectStatus, string> = {
   live: "project-status-live",
@@ -39,6 +40,7 @@ export function ProjectDetail({ project }: { project: PastProject }) {
       footerHref="/proyectos"
       footerLabel={t.projects.backToProjectsCta}
     >
+      {project.id === "mochi" ? <MochiPet /> : null}
       <div className="space-y-6">
         <div
           className="cp-panel project-detail-hero"

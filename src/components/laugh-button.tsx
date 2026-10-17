@@ -7,37 +7,47 @@ export const LAUGH_SRC = "/audio/carlitox-jojojo.mp3";
 export const LAUGH_SRC_OGG = "/audio/carlitox-jojojo.ogg";
 const LAUGH_RE = /(jojojo|hohoho)/i;
 
+let laughBase: HTMLAudioElement | null = null;
+
+/** Soundboard press: a fresh clone of the laugh each time (instant restart, presses overlap). */
+export function playLaugh(onError?: () => void) {
+  if (!laughBase) {
+    const probe = document.createElement("audio");
+    const a = new Audio(probe.canPlayType('audio/ogg; codecs="opus"') ? LAUGH_SRC_OGG : LAUGH_SRC);
+    a.preload = "auto";
+    laughBase = a;
+  }
+  if (onError) laughBase.addEventListener("error", onError, { once: true });
+  const voice = laughBase.cloneNode() as HTMLAudioElement;
+  voice.play().catch(() => undefined);
+}
+
+/** Small press bounce (skipped under prefers-reduced-motion). */
+export function bounce(node: HTMLElement | null, strength = 1) {
+  const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  if (reduce || !node?.animate) return;
+  const k = (v: number) => 1 + (v - 1) * strength;
+  node.animate(
+    [
+      { transform: "scale(1)" },
+      { transform: `scale(${k(0.86)}) rotate(${-4 * strength}deg)`, offset: 0.25 },
+      { transform: `scale(${k(1.14)}) rotate(${3 * strength}deg)`, offset: 0.6 },
+      { transform: "scale(1)" },
+    ],
+    { duration: 320, easing: "cubic-bezier(.3,1.6,.5,1)" },
+  );
+}
+
 /**
  * "jojojo" in the story: a soundboard button. Every press starts the laugh
  * again right away (rapid presses overlap), with a small bounce.
  */
 export function LaughButton({ children }: { children: ReactNode }) {
-  const base = useRef<HTMLAudioElement | null>(null);
   const el = useRef<HTMLSpanElement | null>(null);
   const [missing, setMissing] = useState(false);
   const play = () => {
-    if (!base.current) {
-      const probe = document.createElement("audio");
-      const a = new Audio(probe.canPlayType('audio/ogg; codecs="opus"') ? LAUGH_SRC_OGG : LAUGH_SRC);
-      a.preload = "auto";
-      a.addEventListener("error", () => setMissing(true));
-      base.current = a;
-    }
-    // A fresh clone per press: instant restart, presses can overlap.
-    const voice = base.current.cloneNode() as HTMLAudioElement;
-    voice.play().catch(() => undefined);
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (!reduce && el.current?.animate) {
-      el.current.animate(
-        [
-          { transform: "scale(1)" },
-          { transform: "scale(0.86) rotate(-4deg)", offset: 0.25 },
-          { transform: "scale(1.14) rotate(3deg)", offset: 0.6 },
-          { transform: "scale(1)" },
-        ],
-        { duration: 320, easing: "cubic-bezier(.3,1.6,.5,1)" },
-      );
-    }
+    playLaugh(() => setMissing(true));
+    bounce(el.current);
   };
   return (
     <span

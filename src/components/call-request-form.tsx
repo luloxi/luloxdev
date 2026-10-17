@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { useLocale } from "@/i18n/locale-provider";
 import { authClient } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
@@ -72,6 +72,32 @@ function clientId() {
   return id;
 }
 
+/** Local mirror of the server cooldown, so the form stays hidden on reload. */
+const UNTIL_KEY = "lulox-contact-until";
+function readUntil(): number | null {
+  try {
+    const v = Number(localStorage.getItem(UNTIL_KEY) ?? "");
+    return Number.isFinite(v) && v > Date.now() ? v : null;
+  } catch {
+    return null;
+  }
+}
+function saveUntil(v: number) {
+  try {
+    localStorage.setItem(UNTIL_KEY, String(v));
+  } catch {}
+}
+
+/** ~2 s synthesized spooky sting played when a request goes through. */
+const STING_MP3 = "/audio/contact-sting.mp3";
+const STING_OGG = "/audio/contact-sting.ogg";
+function makeSting() {
+  const probe = document.createElement("audio");
+  const a = new Audio(probe.canPlayType('audio/ogg; codecs="opus"') ? STING_OGG : STING_MP3);
+  a.preload = "auto";
+  return a;
+}
+
 function hms(ms: number) {
   const t = Math.max(0, Math.ceil(ms / 1000));
   const p = (n: number) => String(n).padStart(2, "0");
@@ -140,6 +166,18 @@ export function CallRequestForm() {
   const [ids, setIds] = useState<{ fp: string; cid: string }>({ fp: "", cid: "" });
   const [retryAt, setRetryAt] = useState<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
+  // "form" normally; "doom" while the success flourish plays; then cooldown hides it.
+  const [phase, setPhase] = useState<"form" | "doom">("form");
+  const formRef = useRef<HTMLFormElement>(null);
+  const sting = useRef<HTMLAudioElement | null>(null);
+  useLayoutEffect(() => {
+    const u = readUntil();
+    if (u) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- event-time / mount-time sync, not render
+      setNow(Date.now());
+      setRetryAt(u);
+    }
+  }, []);
   useEffect(() => {
     let live = true;
     void (async () => {
@@ -152,7 +190,11 @@ export function CallRequestForm() {
           cache: "no-store",
         });
         const d = (await r.json()) as { retryAt?: number | null };
-        if (live && d.retryAt && d.retryAt > Date.now()) setRetryAt(d.retryAt);
+        if (live && d.retryAt && d.retryAt > Date.now()) {
+          saveUntil(d.retryAt);
+          setNow(Date.now());
+          setRetryAt(d.retryAt);
+        }
       } catch {}
     })();
     return () => {
@@ -189,7 +231,15 @@ export function CallRequestForm() {
   const len = [...message].length;
   const left = MAX - len;
 
+  const hidden = cooling && phase !== "doom";
   useEffect(() => {
+    if (hidden) {
+      // The widget node is gone with the form; render a fresh one if it comes back.
+      widgetId.current = null;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- event-time / mount-time sync, not render
+      setToken("");
+      return;
+    }
     const ts = (window as unknown as { turnstile?: TurnstileApi }).turnstile;
     if (!ts || !widgetRef.current || widgetId.current) return;
     widgetId.current = ts.render(widgetRef.current, {
@@ -198,7 +248,7 @@ export function CallRequestForm() {
       callback: (tok: string) => setToken(tok),
       "expired-callback": () => setToken(""),
     });
-  }, [tsReady]);
+  }, [tsReady, hidden]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -220,6 +270,21 @@ export function CallRequestForm() {
       setError(c.errors.captcha);
       return;
     }
+    // Unlock the sting inside the click gesture (iOS), play it later on success.
+    if (!sting.current) {
+      const a = makeSting();
+      a.muted = true;
+      a.play()
+        .then(() => {
+          a.pause();
+          a.currentTime = 0;
+          a.muted = false;
+        })
+        .catch(() => {
+          a.muted = false;
+        });
+      sting.current = a;
+    }
     setState("sending");
     setError("");
     try {
@@ -233,7 +298,11 @@ export function CallRequestForm() {
         error?: string;
         retryAt?: number;
       };
+      const success = res.ok && !!data.ok;
+      if (success) doom();
       if (data.retryAt) {
+        saveUntil(data.retryAt);
+        // eslint-disable-next-line react-hooks/purity -- event-time / mount-time sync, not render
         setNow(Date.now());
         setRetryAt(data.retryAt);
       }
@@ -259,8 +328,42 @@ export function CallRequestForm() {
     }
   }
 
+  function doom() {
+    const a = sting.current ?? makeSting();
+    a.muted = false;
+    a.currentTime = 0;
+    a.play().catch(() => undefined);
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const form = formRef.current;
+    if (reduce || !form?.animate) return; // cooldown hides it right away
+    setPhase("doom");
+    // Glow ramps to max (CSS), then the whole form fades and collapses away.
+    window.setTimeout(() => {
+      const h = form.offsetHeight;
+      form.style.overflow = "hidden";
+      const anim = form.animate(
+        [
+          { height: `${h}px`, opacity: 1, filter: "brightness(1.4)", transform: "scale(1)" },
+          { height: `${h}px`, opacity: 0.35, filter: "brightness(2) blur(1px)", transform: "scale(0.985)", offset: 0.4 },
+          { height: "0px", opacity: 0, filter: "brightness(0.6) blur(4px)", transform: "scale(0.96)" },
+        ],
+        { duration: 900, easing: "cubic-bezier(.6,0,.4,1)", fill: "forwards" },
+      );
+      anim.onfinish = () => setPhase("form");
+    }, 1150);
+  }
+
+  // Hidden while the server says this visitor can't send again yet.
+  if (hidden) return null;
+
   return (
-    <form className="call-form" onSubmit={submit} noValidate>
+    <form
+      ref={formRef}
+      className={cn("call-form", phase === "doom" && "call-form-doom")}
+      onSubmit={submit}
+      noValidate
+      aria-hidden={phase === "doom" || undefined}
+    >
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
         strategy="afterInteractive"
@@ -365,7 +468,7 @@ export function CallRequestForm() {
             {state === "sending" ? c.sending : c.send}
           </button>
         </div>
-        {cooling ? (
+        {cooling && phase !== "doom" ? (
           <p className="call-form-msg call-form-cooldown" role="status" aria-live="off">
             {c.cooldown}{" "}
             <strong className="call-form-countdown">{hms((retryAt ?? 0) - now)}</strong>
