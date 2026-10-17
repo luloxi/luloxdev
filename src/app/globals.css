@@ -4024,3 +4024,34 @@ body.ie-off .ie-row-pencil { display: none; }
 .laugh-btn.is-missing { opacity: .6; }
 @media (prefers-reduced-motion: reduce) { .laugh-btn { transition: none; } }
 .laugh-btn { user-select: none; -webkit-user-select: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+/* r5: filled buttons keep their fill while revving (the old neon keyframes
+   faded the hint button to transparent at rest, so it looked dark). */
+.md-acc-hint { animation-name: md-acc-rev; }
+.md-acc-hint .md-acc-title, .md-acc-hint .md-acc-chev { animation: none; color: var(--acc-text); }
+@keyframes md-acc-rev {
+  0%, 58% { box-shadow: 0 2px 10px rgb(var(--acc-bg) / .25); transform: none; filter: none; }
+  60% { transform: translateX(-1px); filter: brightness(1.08); }
+  62% { transform: translateX(1px); filter: none; }
+  64% { transform: translateX(-2px) rotate(-.3deg); filter: brightness(1.15); box-shadow: 0 0 10px 1px rgb(var(--acc-bg) / .45); }
+  66% { transform: translateX(2px) rotate(.3deg); filter: none; box-shadow: 0 2px 10px rgb(var(--acc-bg) / .25); }
+  68% { transform: translateX(-3px) rotate(-.5deg); filter: brightness(1.2); box-shadow: 0 0 16px 3px rgb(var(--acc-bg) / .55); }
+  70% { transform: translateX(3px) rotate(.5deg); filter: brightness(1.05); }
+  72% { transform: translateX(-4px) scale(.98); filter: brightness(1.2); box-shadow: 0 0 22px 5px rgb(var(--acc-bg) / .7); }
+  75% { transform: translateX(18px) scale(1.04); filter: brightness(1.25); box-shadow: -18px 0 30px 6px rgb(var(--acc-bg) / .55), 0 0 40px 10px rgb(var(--acc-bg) / .45); }
+  79% { transform: translateX(-6px) scale(.99); }
+  82% { transform: translateX(3px); }
+  85% { transform: translateX(-1px); }
+  88% { transform: none; filter: brightness(1.15); box-shadow: 0 0 24px 6px rgb(var(--acc-bg) / .6); }
+  92% { filter: none; box-shadow: 0 0 10px 2px rgb(var(--acc-bg) / .3); }
+  93% { filter: brightness(1.12); box-shadow: 0 0 18px 4px rgb(var(--acc-bg) / .5); }
+  100% { box-shadow: 0 2px 10px rgb(var(--acc-bg) / .25); transform: none; filter: none; }
+}
+/* First section ("Primeros pasos") uses the opposite pair of the others. */
+.md-acc-list > .md-acc-item:first-child .md-acc-btn { --acc-bg: 238 138 69; --acc-text: #24498f; }
+:root:not(.dark) .md-acc-list > .md-acc-item:first-child .md-acc-btn { --acc-bg: 36 73 143; --acc-text: #ffa860; }
+.md-acc-btn, .md-acc-btn:focus { outline: none; }
+.md-acc-btn:focus-visible { outline: 2px solid var(--acc-text); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .md-acc-hint { animation: none; }
+}
