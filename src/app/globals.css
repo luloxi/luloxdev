@@ -4242,3 +4242,23 @@ body.ie-off .ie-row-pencil { display: none; }
 }
 @keyframes mochi-pop { from { opacity: 0; transform: translateY(6px) scale(0.96); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .mochi-bubble { animation: none; } }
+
+/* r7: landing, desktop equidistant spacing. Horizontal: left edge → photo,
+   photo → title+links, block → right edge are equal (space-evenly over the
+   visual boxes; the hero's margin covers the HUD corners). Vertical: the gap
+   under the fixed top bar equals the gap above the bottom edge. */
+@media (min-width: 900px) {
+  .home-main {
+    max-width: none; width: 100%;
+    padding: 60px 0 0; /* top bar: 1rem + 44px controls */
+    justify-content: center;
+  }
+  .home-layout {
+    display: flex; flex-direction: row; align-items: center; justify-content: space-evenly;
+    gap: 0; width: 100%;
+  }
+  .home-hero { justify-content: center; margin: 0.85rem; flex: 0 0 auto; }
+  .home-copy { flex: 0 0 auto; width: clamp(20rem, 27vw, 27rem); }
+  .home-sections { max-width: none; width: 100%; }
+  .avatar-hud { width: min(26rem, 30vw, 52vh); height: min(26rem, 30vw, 52vh); }
+}
