@@ -115,7 +115,7 @@ export default async function RootLayout({
       data-ssr-locale={locale}
       suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${orbitron.variable} ${theme} h-full`}
-      style={{ colorScheme: theme }}
+      style={{ colorScheme: theme === "light" ? "only light" : "dark" }}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: PREFS_HEAD_SCRIPT }} />

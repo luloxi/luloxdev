@@ -76,7 +76,7 @@ function nl(v){v=cl(v);return v.indexOf('es')===0?'es':v.indexOf('en')===0?'en':
 function nt(v){v=cl(v);if(v==='light'||v==='dark')return v;if(v==='system'){try{return matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}catch(e){return 'dark'}}return null}
 var t=nt(gc('${THEME_COOKIE}'));
 if(t){st='cookie'}else{var lr=cl(ls('${THEME_STORAGE_KEY}'));t=nt(lr);if(t){st='legacy';if(lr==='light'||lr==='dark')sc('${THEME_COOKIE}',t)}}
-if(t){d.classList.remove('light','dark');d.classList.add(t);d.style.colorScheme=t}
+if(t){d.classList.remove('light','dark');d.classList.add(t);d.style.colorScheme=t==='light'?'only light':'dark'}
 var l=nl(gc('${LOCALE_COOKIE}'));
 if(!l){l=nl(ls('${LOCALE_STORAGE_KEY}'));if(l){st='legacy';sc('${LOCALE_COOKIE}',l);d.lang=l;
 if(l!==d.getAttribute('data-ssr-locale')&&nl(gc('${LOCALE_COOKIE}'))===l){var done=null;try{done=sessionStorage.getItem('lulox-lang-reload')}catch(e){}

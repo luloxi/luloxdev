@@ -268,6 +268,20 @@ export function CallRequestForm() {
       />
       <h2 className="cp-heading">{c.heading}</h2>
       <div className="call-form-card">
+        {/* Counter on the top-right of the message box */}
+        <div className="call-form-count-row">
+          <span
+            className={cn(
+              "call-form-count",
+              left <= 20 && "call-form-count-warn",
+              left < 0 && "call-form-count-over",
+            )}
+            aria-live="polite"
+            title={`${left}`}
+          >
+            {len}/{MAX}
+          </span>
+        </div>
         <textarea
           ref={msgRef}
           onFocus={() => clearMissing("message")}
@@ -343,17 +357,6 @@ export function CallRequestForm() {
         />
         <div ref={widgetRef} className="call-form-turnstile" />
         <div className="call-form-foot">
-          <span
-            className={cn(
-              "call-form-count",
-              left <= 20 && "call-form-count-warn",
-              left < 0 && "call-form-count-over",
-            )}
-            aria-live="polite"
-            title={`${left}`}
-          >
-            {len}/{MAX}
-          </span>
           <button
             type="submit"
             className={cn("call-form-send", blocked && "call-form-send-blocked")}

@@ -3893,3 +3893,26 @@ body.ie-off .ie-row-pencil { display: none; }
   .blog-card:not(.blog-card-draft) .min-w-0.flex-1 { padding-top: 1.35rem; }
   .blog-card .blog-card-side .cp-nav-chevron { display: none; }
 }
+/* Contacto: character counter above the message box, top-right */
+.call-form-count-row { display: flex; justify-content: flex-end; margin-bottom: -0.45rem; }
+.call-form-count-row .call-form-count { font-size: 0.8rem; font-weight: 600; color: var(--foreground); opacity: 0.7; }
+.call-form-count-row .call-form-count-warn { color: var(--section-projects); opacity: 1; }
+.call-form-count-row .call-form-count-over { color: var(--accent); opacity: 1; }
+/* Light theme opts out of browser auto-dark (Android Chrome "auto dark mode") */
+:root:not(.dark) { color-scheme: only light; }
+.dark { color-scheme: dark; }
+
+/* Theme chips: the active one is unmistakable */
+.cp-theme .cp-lang-btn:not(.cp-lang-btn-active) .cp-theme-swatch { opacity: 0.5; transform: scale(0.86); }
+.cp-theme .cp-lang-btn .cp-theme-swatch { transition: transform .2s ease, opacity .2s ease, box-shadow .2s ease; }
+.cp-theme .cp-lang-btn-active .cp-theme-swatch {
+  opacity: 1; transform: none;
+}
+/* Swatches are cut-corner clipped, so mark the active one with a bar below */
+.cp-theme .cp-lang-btn { position: relative; overflow: visible; clip-path: none; }
+.cp-theme .cp-lang-btn-active::after {
+  content: ""; position: absolute; left: 3px; right: 3px; bottom: -6px; height: 3px; border-radius: 2px;
+  background: #c8102e; box-shadow: 0 0 8px color-mix(in oklab, #c8102e 60%, transparent);
+}
+.cp-theme .cp-lang-btn-active .cp-theme-swatch-light { box-shadow: inset 0 0 0 1px color-mix(in oklab, #1d2027 25%, transparent) !important; }
+@media (prefers-reduced-motion: reduce) { .cp-theme .cp-lang-btn .cp-theme-swatch { transition: none; } }
