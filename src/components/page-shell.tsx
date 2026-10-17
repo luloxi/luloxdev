@@ -34,6 +34,8 @@ export function PageShell({
 
   return (
     <div className="cp-shell mx-auto min-h-dvh w-full max-w-xl px-6 pb-16 pt-16 sm:pt-20">
+      {/* Top bar backdrop: page colour fading out, so scrolled content slides under the bar */}
+      <div className="cp-topbar-fade" aria-hidden />
       {/* Back link lives in the fixed top bar, opposite the language/theme controls */}
       <div className="cp-topbar-back" data-inline-editor="skip">
         <Link

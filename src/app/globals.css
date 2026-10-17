@@ -4055,3 +4055,21 @@ body.ie-off .ie-row-pencil { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .md-acc-hint { animation: none; }
 }
+
+/* r6: fixed top bar backdrop. Opaque page colour at the very top, fading to
+   transparent toward the content; sits above content, below the bar controls.
+   Never intercepts clicks. */
+.cp-topbar-fade {
+  position: fixed; z-index: 45; top: 0; left: 0; right: 0; height: 92px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    var(--background) 0%,
+    var(--background) 48%,
+    color-mix(in srgb, var(--background) 80%, transparent) 64%,
+    color-mix(in srgb, var(--background) 40%, transparent) 82%,
+    transparent 100%
+  );
+}
+@media (min-width: 640px) { .cp-topbar-fade { height: 104px; } }
+.cp-topbar-back { z-index: 50; }
