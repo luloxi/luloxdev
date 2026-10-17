@@ -111,12 +111,7 @@ export function BlogList({ posts, error }: { posts: BlogPost[]; error?: boolean 
                       </span>
                     ) : null}
                     <div className="min-w-0 flex-1">
-                      {draft ? null : (
-                        <p className="font-mono text-[11px] text-[color:var(--cp-accent)]">
-                          {formatDate(post.publishedAt, locale)}
-                        </p>
-                      )}
-                      <p className={`cp-row-label blog-card-title text-[0.95rem] leading-snug${draft ? "" : " mt-1.5"}`}>
+                      <p className="cp-row-label blog-card-title text-[0.95rem] leading-snug">
                         {L.title}
                       </p>
                       {/* Drafts: only the draft icon and the title. */}
@@ -126,11 +121,12 @@ export function BlogList({ posts, error }: { posts: BlogPost[]; error?: boolean 
                         </p>
                       )}
                     </div>
-                    <span
-                      className="cp-nav-chevron self-center opacity-70 group-hover:opacity-100"
-                      aria-hidden
-                    >
-                      ▸
+                    {/* Date on the right balances the icon on the left */}
+                    <span className="blog-card-side">
+                      {draft ? null : <time className="blog-card-date" dateTime={post.publishedAt}>{formatDate(post.publishedAt, locale)}</time>}
+                      <span className="cp-nav-chevron opacity-70 group-hover:opacity-100" aria-hidden>
+                        ▸
+                      </span>
                     </span>
                   </div>
                 </Link>

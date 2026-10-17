@@ -3,7 +3,6 @@
 import type { ComponentType } from "react";
 import { CpRow } from "@/components/cp-row";
 import { CallRequestForm } from "@/components/call-request-form";
-import { EmailContact } from "@/components/email-contact";
 import {
   InstagramBrandIcon,
   LinkedInIcon,
@@ -60,10 +59,6 @@ export default function ContactPage() {
             />
           );
         })}
-      </div>
-
-      <div className="mt-6">
-        <EmailContact />
       </div>
 
       <div className="mt-8">

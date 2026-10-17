@@ -350,8 +350,9 @@ export function CallRequestForm() {
               left < 0 && "call-form-count-over",
             )}
             aria-live="polite"
+            title={`${left}`}
           >
-            {left}
+            {len}/{MAX}
           </span>
           <button
             type="submit"

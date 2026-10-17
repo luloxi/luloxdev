@@ -2,32 +2,17 @@
 
 import { CopyMarkdown } from "@/components/copy-markdown";
 import Image from "next/image";
-import { Mail } from "lucide-react";
 import { BlogMarkdown } from "@/components/blog-markdown";
 import { PageShell } from "@/components/page-shell";
 import { ResearchTopics } from "@/components/research-topics";
-import {
-  GitHubIcon,
-  InstagramIcon,
-  LinkedInIcon,
-  TelegramIcon,
-  XIcon,
-} from "@/components/icons/social";
 import type { BlogPost } from "@/content/blog/types";
 import { localizePost } from "@/content/blog/types";
-import { site, socials } from "@/content/site";
+import Link from "next/link";
 import { useLocale } from "@/i18n/locale-provider";
 import { useEditMode } from "@/components/admin-context";
 import { useBlogPostEditor } from "@/components/blog-post-edit";
 import type { ReactNode } from "react";
 
-const authorSocialIcons = {
-  x: XIcon,
-  instagram: InstagramIcon,
-  telegram: TelegramIcon,
-  linkedin: LinkedInIcon,
-  github: GitHubIcon,
-} as const;
 
 function formatDate(iso: string, locale: string) {
   try {
@@ -128,36 +113,10 @@ function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
               {t.blog.authorHeading}
             </p>
             <CopyMarkdown copyKey="blog.authorBio" text={t.blog.authorBio} />
-            <nav className="blog-author-socials" aria-label={t.ui.social}>
-              <a
-                href={`mailto:${site.email}`}
-                title={site.email}
-                aria-label={t.contact.emailLabel}
-                className="blog-author-social-link"
-              >
-                <Mail
-                  className="blog-author-social-icon"
-                  strokeWidth={1.75}
-                  aria-hidden
-                />
-              </a>
-              {socials.map((s) => {
-                const Icon = authorSocialIcons[s.id];
-                return (
-                  <a
-                    key={s.id}
-                    href={s.href}
-                    title={s.label}
-                    aria-label={s.label}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="blog-author-social-link"
-                  >
-                    <Icon className="blog-author-social-icon" />
-                  </a>
-                );
-              })}
-            </nav>
+            <Link href="/contacto" className="blog-author-contact">
+              {t.blog.authorContact}
+              <span aria-hidden>▸</span>
+            </Link>
           </div>
         </aside>
       </article>

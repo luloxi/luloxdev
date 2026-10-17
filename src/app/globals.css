@@ -25,15 +25,15 @@
   --section-contact: #7FBA00;
 }
 
-/* Light mode: Day HUD — cool pearl paper, glass panels, soft ink (not chalky white) */
+/* Light mode: clean neutral (white / cool grey), crimson accent used sparingly */
 :root:not(.dark) {
-  --background: #f8f1e4;
-  --foreground: #241213;
-  --muted: #6b4a45;
-  --border: color-mix(in oklab, #a50021 26%, transparent);
+  --background: #f6f7f9;
+  --foreground: #17191e;
+  --muted: #5a5f69;
+  --border: color-mix(in oklab, #1d2027 14%, transparent);
   --accent: #a50021;
   --accent-2: #c2410c;
-  --surface: color-mix(in oklab, #ffffff 86%, #f5dde0);
+  --surface: #ffffff;
   --neon-crimson: #c8102e;
   --neon-orange: #ea580c;
   --glow-crimson: color-mix(in oklab, #c8102e 20%, transparent);
@@ -49,7 +49,7 @@
   --section-tastes: #be123c;
   --section-contact: #4E8A00;
   /* Shared light elevation */
-  --light-ink: color-mix(in oklab, #221113 8%, transparent);
+  --light-ink: color-mix(in oklab, #1d2027 8%, transparent);
   --light-glass: color-mix(in oklab, #ffffff 78%, transparent);
 }
 
@@ -1812,6 +1812,9 @@
 /* ── Cosmic background (static — no continuous GPU animations) ─ */
 
 .cosmic-root {
+  /* Large viewport height: no band where the background ends on mobile */
+  height: 100lvh;
+  min-height: 100%;
   contain: strict;
   /* Promote one compositor layer; never animate this tree */
   transform: translateZ(0);
@@ -1883,29 +1886,9 @@
 :root:not(.dark) .cosmic-base {
   background:
     radial-gradient(
-      ellipse 85% 55% at 50% -12%,
-      color-mix(in oklab, var(--neon-crimson) 22%, transparent),
-      transparent 58%
-    ),
-    radial-gradient(
-      ellipse 50% 42% at 100% 100%,
-      color-mix(in oklab, var(--neon-orange) 14%, transparent),
-      transparent 52%
-    ),
-    radial-gradient(
-      ellipse 48% 38% at 0% 85%,
-      color-mix(in oklab, #fb7185 16%, transparent),
-      transparent 48%
-    ),
-    radial-gradient(
-      circle at 72% 28%,
-      color-mix(in oklab, #fdb5bf 12%, transparent),
-      transparent 38%
-    ),
-    radial-gradient(
-      circle at 28% 62%,
-      color-mix(in oklab, #fdba74 8%, transparent),
-      transparent 36%
+      ellipse 85% 45% at 50% -14%,
+      color-mix(in oklab, var(--neon-crimson) 7%, transparent),
+      transparent 60%
     ),
     var(--background);
 }
@@ -1928,7 +1911,7 @@
   background: radial-gradient(
     ellipse 78% 72% at 50% 42%,
     transparent 38%,
-    color-mix(in oklab, var(--background) 55%, #ecd0d4) 100%
+    color-mix(in oklab, var(--background) 70%, #e4e7ec) 100%
   );
 }
 
@@ -1956,14 +1939,9 @@
   :root:not(.dark) .cosmic-base {
     background:
       radial-gradient(
-        ellipse 90% 55% at 50% -8%,
-        color-mix(in oklab, var(--neon-crimson) 20%, transparent),
-        transparent 58%
-      ),
-      radial-gradient(
-        ellipse 70% 45% at 100% 100%,
-        color-mix(in oklab, var(--neon-orange) 12%, transparent),
-        transparent 52%
+        ellipse 90% 40% at 50% -10%,
+        color-mix(in oklab, var(--neon-crimson) 6%, transparent),
+        transparent 60%
       ),
       var(--background);
   }
@@ -3215,11 +3193,8 @@
 
 :root:not(.dark) .cosmic-base {
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.25 0 0 0 0 0.15 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    radial-gradient(ellipse 90% 60% at 50% -15%, color-mix(in oklab, #c8102e 16%, transparent), transparent 60%),
-    radial-gradient(ellipse 55% 45% at 100% 100%, color-mix(in oklab, #e8a33d 14%, transparent), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 0% 90%, color-mix(in oklab, #c8102e 9%, transparent), transparent 50%),
-    linear-gradient(180deg, #fbf6ec 0%, #f6ecdc 100%);
+    radial-gradient(ellipse 85% 45% at 50% -14%, color-mix(in oklab, #c8102e 6%, transparent), transparent 60%),
+    var(--background);
 }
 
 :root:not(.dark) .cosmic-grid {
@@ -3230,7 +3205,7 @@
   background: radial-gradient(
     ellipse 80% 75% at 50% 40%,
     transparent 45%,
-    color-mix(in oklab, #e9d6bd 70%, transparent) 100%
+    color-mix(in oklab, #e4e7ec 60%, transparent) 100%
   );
 }
 
@@ -3238,7 +3213,7 @@
 :root:not(.dark) .home-title {
   color: #b0001e;
   text-shadow:
-    0 1px 0 #fffaf0,
+    0 1px 0 #ffffff,
     2px 3px 0 color-mix(in oklab, #c8102e 18%, transparent),
     0 10px 24px color-mix(in oklab, #c8102e 22%, transparent);
 }
@@ -3258,7 +3233,7 @@
 
 :root:not(.dark) .avatar-hud-photo {
   box-shadow:
-    0 0 0 3px #fffaf0,
+    0 0 0 3px #ffffff,
     0 0 0 4px color-mix(in oklab, var(--hud) 55%, transparent),
     0 10px 24px color-mix(in oklab, #7a2e1a 22%, transparent),
     0 24px 48px color-mix(in oklab, var(--hud) 20%, transparent);
@@ -3273,8 +3248,8 @@
 :root:not(.dark) .cp-row {
   background: linear-gradient(
     135deg,
-    #fffdf8,
-    color-mix(in oklab, var(--cp-accent) 9%, #fffaf0)
+    #ffffff,
+    color-mix(in oklab, var(--cp-accent) 9%, #ffffff)
   );
   box-shadow:
     inset 0 0 0 1.5px color-mix(in oklab, var(--cp-accent) 50%, transparent),
@@ -3287,7 +3262,7 @@
   background: linear-gradient(
     135deg,
     #ffffff,
-    color-mix(in oklab, var(--cp-accent) 15%, #fffaf0)
+    color-mix(in oklab, var(--cp-accent) 15%, #ffffff)
   );
   box-shadow:
     inset 0 0 0 1.5px var(--cp-accent),
@@ -3317,8 +3292,8 @@
 :root:not(.dark) .cp-accordion {
   background: linear-gradient(
     160deg,
-    #fffdf8,
-    color-mix(in oklab, var(--cp-accent) 6%, #fdf6ea)
+    #ffffff,
+    color-mix(in oklab, var(--cp-accent) 6%, #f4f5f8)
   );
   box-shadow:
     inset 0 0 0 1px color-mix(in oklab, var(--cp-accent) 35%, transparent),
@@ -3778,7 +3753,7 @@ body.ie-off .ie-row-pencil { display: none; }
   /* Page frame: invisible margin, more room under the top bar */
   .cp-shell { padding-left: 18px !important; padding-right: 18px !important; padding-top: 5.25rem !important; }
   .cp-shell-header { margin-bottom: var(--m-gap-lg) !important; padding-right: 0 !important; align-items: flex-end !important; }
-  .cp-page-title-text { font-size: 1.52rem; letter-spacing: 0.12em; text-shadow: none; }
+  .cp-page-title-text { font-size: 1.14rem; letter-spacing: 0.14em; text-shadow: none; }
   .cp-page-title-mark { box-shadow: none; opacity: 0.7; }
   .cp-back-chevron { background: none; box-shadow: none; clip-path: none; }
 
@@ -3855,3 +3830,66 @@ body.ie-off .ie-row-pencil { display: none; }
 /* Blog titles render exactly as typed (no forced casing) */
 .blog-card-title, .blog-post-title, .blog-h2, .blog-h3 { text-transform: none !important; }
 .blog-card-title { letter-spacing: 0.03em; }
+
+/* ── Round 2 ─────────────────────────────────────────── */
+/* Blog cards: date on the right */
+.blog-card-side { display: flex; flex: 0 0 auto; flex-direction: column; align-items: flex-end; justify-content: space-between; align-self: stretch; gap: 0.5rem; text-align: right; }
+.blog-card-date { font-family: ui-monospace, monospace; font-size: 11px; line-height: 1.3; color: var(--cp-accent); white-space: nowrap; }
+.blog-card-side .cp-nav-chevron { margin-top: auto; }
+
+/* Author signature: one quiet button to /contacto */
+.blog-author-contact {
+  display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; padding: 0 1.1rem;
+  border-radius: 999px; border: 1px solid color-mix(in oklab, var(--cp-accent) 55%, transparent);
+  color: var(--cp-accent); font-family: var(--font-orbitron), var(--font-display); font-size: 0.78rem;
+  font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none;
+  transition: background .2s ease, transform .2s ease;
+}
+.blog-author-contact:hover { background: color-mix(in oklab, var(--cp-accent) 12%, transparent); transform: translateX(2px); }
+
+/* Contacto: the call request zone glows (gently animated) */
+.call-form {
+  position: relative; padding: 1.25rem; border-radius: 18px;
+  border: 1px solid color-mix(in oklab, var(--section-contact) 55%, transparent);
+  animation: call-glow 3.2s ease-in-out infinite;
+}
+@keyframes call-glow {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--section-contact) 0%, transparent), 0 0 18px 2px color-mix(in oklab, var(--section-contact) 22%, transparent); }
+  50% { box-shadow: 0 0 0 3px color-mix(in oklab, var(--section-contact) 18%, transparent), 0 0 34px 8px color-mix(in oklab, var(--section-contact) 38%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .call-form { animation: none; box-shadow: 0 0 22px 4px color-mix(in oklab, var(--section-contact) 28%, transparent); }
+}
+.call-form > .cp-heading {
+  margin-bottom: 0.9rem; font-family: var(--font-orbitron), var(--font-display);
+  font-size: 1.35rem; line-height: 1.2; letter-spacing: 0.06em; color: var(--section-contact); opacity: 1;
+}
+.call-form .call-form-card { padding: 0; background: none; box-shadow: none; border-radius: 0; }
+/* Message: a plain textarea */
+.call-form .call-form-text {
+  min-height: 7rem; padding: 0.6rem 0.7rem; font-size: 1rem; line-height: 1.5;
+  background: var(--background); border: 1px solid var(--border); border-radius: 8px;
+  font-family: inherit;
+}
+.call-form .call-form-text:focus { border-color: var(--section-contact); outline: none; }
+.call-form-count { font-variant-numeric: tabular-nums; }
+
+/* Contacto mobile: socials two per row so the form comes sooner */
+@media (max-width: 639px) {
+  .cp-list.cp-list-2col { display: grid !important; grid-template-columns: 1fr 1fr; column-gap: 14px; }
+  .cp-list.cp-list-2col > * { border-top: 0 !important; border-bottom: 1px solid var(--m-hair) !important; }
+  .cp-list-2col .cp-row { padding: 0.8rem 0 !important; min-height: 0; }
+  .cp-list-2col .cp-row-label { font-size: 0.8rem; letter-spacing: 0.06em; }
+  .cp-list-2col .cp-row-detail { font-size: 0.68rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+  .cp-list-2col .cp-row-body { min-width: 0; }
+  .cp-list-2col .cp-row-chevron { display: none; }
+  .call-form { padding: 1rem 14px; }
+  .call-form .call-form-card { padding: 0 !important; }
+}
+@media (max-width: 639px) {
+  /* Blog card: date sits top-right over a full-width title */
+  .blog-card .cp-panel-inner { position: relative; }
+  .blog-card:not(.blog-card-draft) .blog-card-side { position: absolute; top: 0; right: 0; }
+  .blog-card:not(.blog-card-draft) .min-w-0.flex-1 { padding-top: 1.35rem; }
+  .blog-card .blog-card-side .cp-nav-chevron { display: none; }
+}
