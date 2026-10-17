@@ -7,6 +7,8 @@ import { useLocale } from "@/i18n/locale-provider";
 
 type PageShellProps = {
   title: string;
+  /** Hide the section title visually (kept for screen readers), e.g. project detail. */
+  hideTitle?: boolean;
   children: ReactNode;
   /** Override top back link (default: home) */
   backHref?: string;
@@ -18,6 +20,7 @@ type PageShellProps = {
 
 export function PageShell({
   title,
+  hideTitle = false,
   children,
   backHref = "/",
   backLabel,
@@ -44,12 +47,16 @@ export function PageShell({
           <span>{topLabel}</span>
         </Link>
       </div>
-      <header className="cp-shell-header mb-10 flex items-center justify-center">
-        <h1 className="cp-page-title cp-page-title-center">
-          <span className="cp-page-title-text">{title}</span>
-          <span className="cp-page-title-mark" aria-hidden />
-        </h1>
-      </header>
+      {hideTitle ? (
+        <h1 className="sr-only">{title}</h1>
+      ) : (
+        <header className="cp-shell-header mb-10 flex items-center justify-center">
+          <h1 className="cp-page-title cp-page-title-center">
+            <span className="cp-page-title-text">{title}</span>
+            <span className="cp-page-title-mark" aria-hidden />
+          </h1>
+        </header>
+      )}
 
       <div>{children}</div>
 
