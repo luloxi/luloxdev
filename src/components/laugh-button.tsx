@@ -2,8 +2,9 @@
 
 import { Children, isValidElement, cloneElement, useRef, useState, type ReactNode, type ReactElement } from "react";
 
-/** Carlitox's laugh. Static file in /public/audio (lazy: fetched on first click). */
+/** Carlitox's laugh (sent by Luciano, silence trimmed). Fetched on first click. */
 export const LAUGH_SRC = "/audio/carlitox-jojojo.mp3";
+export const LAUGH_SRC_OGG = "/audio/carlitox-jojojo.ogg";
 const LAUGH_RE = /(jojojo|hohoho)/i;
 
 /** "jojojo" in the story: a word-styled button that plays the laugh inline. */
@@ -12,7 +13,8 @@ export function LaughButton({ children }: { children: ReactNode }) {
   const [state, setState] = useState<"idle" | "playing" | "missing">("idle");
   const play = () => {
     if (!audio.current) {
-      const a = new Audio(LAUGH_SRC);
+      const probe = document.createElement("audio");
+      const a = new Audio(probe.canPlayType('audio/ogg; codecs="opus"') ? LAUGH_SRC_OGG : LAUGH_SRC);
       a.preload = "auto";
       a.addEventListener("ended", () => setState("idle"));
       a.addEventListener("error", () => setState("missing"));
