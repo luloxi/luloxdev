@@ -92,7 +92,12 @@ export default function AboutPage() {
           <CopyText as="h2" className="cp-heading" copyKey="ui.experience" value={t.ui.experience} />
 
           <ul ref={tlRef} className="cp-list tl-list">
-            {about.timeline.map((item, i) => {
+            {/* Chronological (oldest first) so the scroll-drawn line reads forward in time.
+                Copy is stored newest-first; `i` stays the stored index so inline edits hit the right entry. */}
+            {about.timeline
+              .map((item, i) => ({ item, i }))
+              .reverse()
+              .map(({ item, i }) => {
               const logo = orgLogos[item.org];
               const accent = timelineAccents[i % timelineAccents.length];
               return (

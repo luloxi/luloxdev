@@ -4168,7 +4168,7 @@ body.ie-off .ie-row-pencil { display: none; }
 }
 .tl-list.tl-draw::before { background: color-mix(in oklab, var(--foreground) 10%, transparent); }
 .tl-list.tl-draw::after {
-  background: linear-gradient(to bottom, var(--section-about), var(--section-projects));
+  background: linear-gradient(to bottom, var(--section-projects), var(--section-about));
   box-shadow: 0 0 10px color-mix(in oklab, var(--section-about) 55%, transparent);
   transform-origin: top center; transform: scaleY(var(--tl-p, 0));
 }
