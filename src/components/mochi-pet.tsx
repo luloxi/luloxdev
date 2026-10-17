@@ -54,13 +54,15 @@ export function MochiPet() {
 
     const draw = (now: number) => {
       let rot = 0;
-      let flip = dir === -1 ? -1 : 1;
+      // Mochi's art faces left: mirror it when walking right.
+      let flip = dir === 1 ? -1 : 1;
       let tx = x;
       const ty = -y;
       if (mode === "climb" || mode === "hang") {
         // Feet against the wall, head pointing away; climbing is "forward".
         rot = wall === "right" ? -90 : 90;
-        flip = 1;
+        // Face up the wall (art faces left; rotation is applied after the mirror).
+        flip = wall === "right" ? -1 : 1;
         tx = wall === "right" ? W - S : 0;
       }
       if (mode === "fall") rot = Math.sin(now / 70) * 12;

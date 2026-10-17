@@ -4262,3 +4262,26 @@ body.ie-off .ie-row-pencil { display: none; }
   .home-sections { max-width: none; width: 100%; }
   .avatar-hud { width: min(26rem, 30vw, 52vh); height: min(26rem, 30vw, 52vh); }
 }
+
+/* r9: Contacto, proposed time. Custom selects so it always reads YYYY-MM-DD and 12-hour am/pm. */
+.call-form .call-form-row { grid-template-columns: 1fr; }
+.call-form-when-head { display: inline; }
+.call-form-tz { color: var(--section-contact); text-decoration: underline; text-underline-offset: 2px; font-weight: 700; }
+.call-form-tz:hover, .call-form-tz:focus-visible { text-decoration-thickness: 2px; }
+.call-form-when { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
+.call-form-when-date, .call-form-when-time { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--muted); }
+.call-form-sel {
+  appearance: none; -webkit-appearance: none;
+  font-family: var(--font-mono, ui-monospace, monospace); font-size: 1rem; font-variant-numeric: tabular-nums;
+  color: var(--foreground); background: var(--background);
+  border: 1px solid color-mix(in oklab, var(--section-contact) 35%, transparent); border-radius: 10px;
+  min-height: 44px; padding: 0 0.55rem; text-align: center; text-align-last: center; cursor: pointer;
+  color-scheme: inherit;
+}
+.call-form-sel.is-empty { color: var(--muted); }
+.call-form-sel option { color: var(--foreground); background: var(--background); }
+.call-form-sel:focus { outline: 2px solid var(--section-contact); outline-offset: 1px; }
+.call-form-sel-y { min-width: 4.6rem; }
+.call-form-sel-mo, .call-form-sel-d, .call-form-sel-h, .call-form-sel-mi { min-width: 3.1rem; }
+.call-form-sel-ap { min-width: 4.4rem; margin-left: 0.2rem; }
+.call-form-when-echo { font-style: normal; font-size: 0.75rem; color: var(--section-contact); font-variant-numeric: tabular-nums; }

@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextResponse } from "next/server";
 import { cooldownUntil, startCooldown } from "@/lib/contact-cooldown";
+import { WHEN_RE, formatWhen } from "@/lib/when-format";
 
 type Env = {
   CONTACT_EMAIL?: { send: (msg: unknown) => Promise<{ messageId?: string }> };
@@ -27,17 +28,7 @@ export async function GET(request: Request) {
 }
 
 const EMAIL_RE = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]{2,}$/;
-const DT_RE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/;
-
-/** "2026-10-20T15:30" -> "2026, 10, 20 03:30 PM" */
-function formatWhen(v: string) {
-  const m = DT_RE.exec(v);
-  if (!m) return null;
-  const [, y, mo, d, hh, mm] = m;
-  const h = Number(hh);
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${y}, ${mo}, ${d} ${String(h12).padStart(2, "0")}:${mm} ${h < 12 ? "AM" : "PM"}`;
-}
+const DT_RE = WHEN_RE;
 
 /** Submitted local time is America/Buenos_Aires (UTC-3, no DST). */
 function calDates(v: string, minutes = 30) {
@@ -142,10 +133,10 @@ export async function POST(request: Request) {
   const buttons = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px"><tr><td align="center"><table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td align="center" bgcolor="#C8102E" style="border-radius:8px;background:#C8102E"><a href="${esc(invite)}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;color:#FFFFFF;text-decoration:none;border-radius:8px">Agendar e invitar</a></td></tr></table></td></tr></table>`;
   const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#241213">
 <p style="font-size:17px;line-height:1.5;white-space:pre-wrap;margin:0 0 28px">${esc(message)}</p>
-<p style="font-size:40px;font-weight:700;letter-spacing:0.02em;color:#a50021;margin:0;font-variant-numeric:tabular-nums">${when}</p>
+<p style="font-size:40px;font-weight:700;letter-spacing:0.02em;color:#a50021;margin:0;font-variant-numeric:tabular-nums">${when} <span style="font-size:20px;font-weight:600">(UTC-3)</span></p>
 ${buttons}
 </div>`;
-  const text = `${message}\n\n${when}\n\nAgendar e invitar: ${invite}\n`;
+  const text = `${message}\n\n${when} (UTC-3)\n\nAgendar e invitar: ${invite}\n`;
 
   try {
     await env.CONTACT_EMAIL.send({

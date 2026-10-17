@@ -1,10 +1,11 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type RefObject } from "react";
 import { useLocale } from "@/i18n/locale-provider";
 import { authClient } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
+import { daysInMonth, formatWhen, partsToWhen, type WhenParts } from "@/lib/when-format";
 
 const SITE_KEY = "0x4AAAAAAFYS_U1JH5j5qo8w";
 const MAX = 280;
@@ -109,7 +110,9 @@ const copy = {
     heading: "Pedime una llamada",
     placeholder: "Convenceme de tener una llamada con vos",
     email: "Tu email",
-    when: "Fecha y hora propuesta (hora Argentina)",
+    when: "Fecha y hora",
+    whenTz: "Ver tu hora local y todos los husos horarios (se abre en otra pestaña)",
+    y: "Año", mo: "Mes", d: "Día", h: "Hora", mi: "Minutos", ap: "am/pm",
     google: "Usar mi email de Google",
     signedAs: "Con Google",
     required: "Este campo es obligatorio",
@@ -130,7 +133,9 @@ const copy = {
     heading: "Ask me for a call",
     placeholder: "Convince me to have a call with you",
     email: "Your email",
-    when: "Proposed date and time (Argentina time)",
+    when: "Date and time",
+    whenTz: "See your local time and every UTC offset (opens in a new tab)",
+    y: "Year", mo: "Month", d: "Day", h: "Hour", mi: "Minutes", ap: "am/pm",
     google: "Use my Google email",
     signedAs: "Via Google",
     required: "This field is required",
@@ -154,7 +159,16 @@ export function CallRequestForm() {
   const c = copy[locale === "en" ? "en" : "es"];
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
-  const [when, setWhen] = useState("");
+  const EMPTY_WHEN: WhenParts = { y: "", mo: "", d: "", h: "", mi: "", ap: "" };
+  const [whenParts, setWhenParts] = useState<WhenParts>(EMPTY_WHEN);
+  const when = partsToWhen(whenParts);
+  const setWhenPart = (k: keyof WhenParts, v: string) =>
+    setWhenParts((p) => {
+      const next = { ...p, [k]: v } as WhenParts;
+      // Keep the day valid when the month/year changes (e.g. 31 -> Feb).
+      if (next.d && Number(next.d) > daysInMonth(next.y, next.mo)) next.d = "";
+      return next;
+    });
   const [website, setWebsite] = useState("");
   const [token, setToken] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "ok" | "error">("idle");
@@ -218,7 +232,7 @@ export function CallRequestForm() {
   const [missing, setMissing] = useState<Record<string, boolean>>({});
   const msgRef = useRef<HTMLTextAreaElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
-  const whenRef = useRef<HTMLInputElement>(null);
+  const whenRef = useRef<HTMLSelectElement>(null);
   const clearMissing = (k: string) =>
     setMissing((m) => (m[k] ? { ...m, [k]: false } : m));
 
@@ -313,7 +327,7 @@ export function CallRequestForm() {
       if (res.ok && data.ok) {
         setState("ok");
         setMessage("");
-        setWhen("");
+        setWhenParts(EMPTY_WHEN);
       } else {
         setState("error");
         setError(c.errors[data.error ?? ""] ?? c.errors.generic);
@@ -433,21 +447,34 @@ export function CallRequestForm() {
             />
             {missing.email ? <em className="call-form-req">{c.required}</em> : null}
           </label>
-          <label className="call-form-field">
-            <span>{c.when}</span>
-            <input
-              ref={whenRef}
-              onFocus={() => clearMissing("when")}
-              onClick={() => clearMissing("when")}
-              aria-invalid={missing.when || undefined}
-              className={cn(missing.when && "call-form-missing")}
-              type="datetime-local"
-              required
-              value={when}
-              onChange={(e) => setWhen(e.target.value)}
+          <div className="call-form-field" role="group" aria-labelledby="call-when-label">
+            <span id="call-when-label" className="call-form-when-head">
+              {c.when}{" "}
+              <span aria-hidden>🇦🇷</span>{" "}
+              <a
+                href="https://time.is/UTC-3"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="call-form-tz"
+                title={c.whenTz}
+                aria-label={`UTC-3. ${c.whenTz}`}
+              >
+                UTC-3
+              </a>
+            </span>
+            <WhenPicker
+              parts={whenParts}
+              set={(k, v) => {
+                clearMissing("when");
+                setWhenPart(k, v);
+              }}
+              firstRef={whenRef}
+              invalid={!!missing.when}
+              labels={c}
             />
+            {when ? <em className="call-form-when-echo">{formatWhen(when)} (UTC-3)</em> : null}
             {missing.when ? <em className="call-form-req">{c.required}</em> : null}
-          </label>
+          </div>
         </div>
         <input
           className="call-form-hp"
@@ -482,5 +509,71 @@ export function CallRequestForm() {
         ) : null}
       </div>
     </form>
+  );
+}
+
+const pad2 = (n: number) => String(n).padStart(2, "0");
+
+/**
+ * Date/time picker that always reads year-month-day and 12-hour am/pm,
+ * whatever the browser's locale (native datetime inputs reorder by locale).
+ * Plain selects: on phones they open the native wheel/list, so it stays
+ * thumb-friendly.
+ */
+function WhenPicker({
+  parts,
+  set,
+  firstRef,
+  invalid,
+  labels,
+}: {
+  parts: WhenParts;
+  set: (k: keyof WhenParts, v: string) => void;
+  firstRef: RefObject<HTMLSelectElement | null>;
+  invalid: boolean;
+  labels: { y: string; mo: string; d: string; h: string; mi: string; ap: string };
+}) {
+  const [thisYear] = useState(() => new Date().getFullYear());
+  const years = [thisYear, thisYear + 1];
+  const days = daysInMonth(parts.y, parts.mo);
+  const sel = (k: keyof WhenParts, label: string, ph: string, opts: { v: string; t: string }[], ref?: RefObject<HTMLSelectElement | null>) => (
+    <select
+      ref={ref}
+      aria-label={label}
+      aria-invalid={(invalid && !parts[k]) || undefined}
+      className={cn("call-form-sel", `call-form-sel-${k}`, invalid && !parts[k] && "call-form-missing", !parts[k] && "is-empty")}
+      value={parts[k]}
+      onChange={(e) => set(k, e.target.value)}
+    >
+      <option value="" disabled>
+        {ph}
+      </option>
+      {opts.map((o) => (
+        <option key={o.v} value={o.v}>
+          {o.t}
+        </option>
+      ))}
+    </select>
+  );
+  const range = (a: number, b: number, f = pad2) => Array.from({ length: b - a + 1 }, (_, i) => ({ v: f(a + i), t: f(a + i) }));
+  return (
+    <span className="call-form-when">
+      <span className="call-form-when-date">
+        {sel("y", labels.y, labels.y === "Año" ? "AAAA" : "YYYY", years.map((y) => ({ v: String(y), t: String(y) })), firstRef)}
+        <span aria-hidden>-</span>
+        {sel("mo", labels.mo, "MM", range(1, 12))}
+        <span aria-hidden>-</span>
+        {sel("d", labels.d, "DD", range(1, days))}
+      </span>
+      <span className="call-form-when-time">
+        {sel("h", labels.h, "hh", range(1, 12, String))}
+        <span aria-hidden>:</span>
+        {sel("mi", labels.mi, "mm", ["00", "15", "30", "45"].map((m) => ({ v: m, t: m })))}
+        {sel("ap", labels.ap, "am/pm", [
+          { v: "am", t: "am" },
+          { v: "pm", t: "pm" },
+        ])}
+      </span>
+    </span>
   );
 }
