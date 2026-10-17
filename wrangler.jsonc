@@ -48,7 +48,9 @@
   // TURNSTILE_SECRET is a Worker secret (never in this file).
   "vars": {
     "CONTACT_TO": "lucianoolivabianco@gmail.com",
-    "CONTACT_FROM": "web@lulox.com.ar",
+    "CONTACT_FROM": "no-responder@lulox.com.ar",
+    // With RESEND_API_KEY set: Luciano's copy goes here and the visitor gets a confirmation.
+    "CONTACT_INBOX": "hola@lulox.com.ar",
     "TURNSTILE_SITE_KEY": "0x4AAAAAAFYS_U1JH5j5qo8w"
   },
   "observability": {

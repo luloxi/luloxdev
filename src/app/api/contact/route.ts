@@ -8,6 +8,7 @@ type Env = {
   CONTACT_RL?: { limit: (o: { key: string }) => Promise<{ success: boolean }> };
   CONTACT_TO?: string;
   CONTACT_FROM?: string;
+  CONTACT_INBOX?: string;
   TURNSTILE_SECRET?: string;
   /** Optional: when set, mail goes through Resend (lulox.com.ar is set up there: DKIM resend._domainkey, return path send.). */
   RESEND_API_KEY?: string;
@@ -128,7 +129,9 @@ export async function POST(request: Request) {
   }
 
   const to = env.CONTACT_TO ?? "lucianoolivabianco@gmail.com";
-  const from = env.CONTACT_FROM ?? "web@lulox.com.ar";
+  const from = env.CONTACT_FROM ?? "no-responder@lulox.com.ar";
+  const inbox = env.CONTACT_INBOX ?? "hola@lulox.com.ar";
+  const en = body.locale === "en";
   const dates = calDates(body.when as string);
   const invite = calUrl(email, message, dates);
   // Punzó #C8102E = favicon stroke / --neon-crimson brand token. White text 5.9:1.
@@ -143,22 +146,39 @@ ${buttons}
 
   const fromName = "Lulox";
   const subject = `Pedido de llamada de ${email} (${when} UTC-3)`;
+  // Visitor confirmation (Resend only: the Cloudflare binding can only reach the verified address).
+  const cSubject = en ? `Got your call request for ${when} (UTC-3)` : `Recibí tu pedido de llamada para el ${when} (UTC-3)`;
+  const cText = en
+    ? `Hi! I got your call request for ${when} (UTC-3, Argentina time). I'll answer you from ${inbox} soon.\n\nYour message:\n${message}\n\nLuciano (Lulox)\nhttps://lulox.com.ar\n`
+    : `¡Hola! Recibí tu pedido de llamada para el ${when} (UTC-3, hora de Argentina). Te respondo pronto desde ${inbox}.\n\nTu mensaje:\n${message}\n\nLuciano (Lulox)\nhttps://lulox.com.ar\n`;
+  const cHtml = `<!doctype html><html lang="${en ? "en" : "es"}"><head><meta charset="utf-8"><title>${esc(cSubject)}</title></head><body><div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#241213;font-size:16px;line-height:1.5">
+<p>${en ? "Hi! I got your call request for" : "¡Hola! Recibí tu pedido de llamada para el"} <strong>${when} (UTC-3)</strong>${en ? ", Argentina time. I'll answer you from" : ", hora de Argentina. Te respondo pronto desde"} ${esc(inbox)}.</p>
+<p style="color:#6b5b5c;margin:20px 0 6px">${en ? "Your message:" : "Tu mensaje:"}</p>
+<blockquote style="margin:0;padding:10px 14px;border-left:3px solid #C8102E;white-space:pre-wrap">${esc(message)}</blockquote>
+<p style="margin-top:24px">Luciano (Lulox)<br><a href="https://lulox.com.ar">lulox.com.ar</a></p>
+</div></body></html>`;
   try {
     if (env.RESEND_API_KEY) {
-      const r = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ from: `${fromName} <${from}>`, to: [to], reply_to: email, subject, html, text }),
-      });
-      if (!r.ok) throw new Error(`resend ${r.status}`);
+      const send = async (payload: Record<string, unknown>) => {
+        const r = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ from: `${fromName} <${from}>`, ...payload }),
+        });
+        if (!r.ok) throw new Error(`resend ${r.status}`);
+      };
+      await send({ to: [inbox], reply_to: email, subject, html, text });
+      // The confirmation is best effort: Luciano's copy already went out.
+      await send({ to: [email], reply_to: inbox, subject: cSubject, html: cHtml, text: cText }).catch((e) =>
+        console.error("[contact] confirmation failed", e),
+      );
     } else if (env.CONTACT_EMAIL) {
-      await env.CONTACT_EMAIL.send({
-        from: { email: from, name: fromName },
-        to,
-        replyTo: email,
-        subject,
-        html,
-        text,
+      const mail = (sender: string) =>
+        env.CONTACT_EMAIL!.send({ from: { email: sender, name: fromName }, to, replyTo: email, subject, html, text });
+      // If the binding rejects the new sender, fall back to the address it is known to accept.
+      await mail(from).catch((e) => {
+        console.error("[contact] binding rejected sender, retrying as web@", e);
+        return mail("web@lulox.com.ar");
       });
     }
   } catch (err) {
