@@ -4021,7 +4021,6 @@ body.ie-off .ie-row-pencil { display: none; }
 .laugh-btn:hover, .laugh-btn:focus-visible { filter: brightness(1.1); transform: translateY(-1px); }
 .laugh-btn:focus-visible { outline: 2px solid #c8102e; outline-offset: 2px; }
 .laugh-btn-icon { font-size: 0.75em; opacity: .85; }
-.laugh-btn.is-playing { animation: laugh-bounce .35s ease-in-out infinite alternate; }
 .laugh-btn.is-missing { opacity: .6; }
-@keyframes laugh-bounce { from { transform: translateY(0) rotate(-2deg); } to { transform: translateY(-2px) rotate(2deg); } }
-@media (prefers-reduced-motion: reduce) { .laugh-btn.is-playing { animation: none; } .laugh-btn { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .laugh-btn { transition: none; } }
+.laugh-btn { user-select: none; -webkit-user-select: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }

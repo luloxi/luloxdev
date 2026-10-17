@@ -2,37 +2,58 @@
 
 import { Children, isValidElement, cloneElement, useRef, useState, type ReactNode, type ReactElement } from "react";
 
-/** Carlitox's laugh (sent by Luciano, silence trimmed). Fetched on first click. */
+/** Carlitox's laugh (sent by Luciano, silence trimmed). Fetched on first press. */
 export const LAUGH_SRC = "/audio/carlitox-jojojo.mp3";
 export const LAUGH_SRC_OGG = "/audio/carlitox-jojojo.ogg";
 const LAUGH_RE = /(jojojo|hohoho)/i;
 
-/** "jojojo" in the story: a word-styled button that plays the laugh inline. */
+/**
+ * "jojojo" in the story: a soundboard button. Every press starts the laugh
+ * again right away (rapid presses overlap), with a small bounce.
+ */
 export function LaughButton({ children }: { children: ReactNode }) {
-  const audio = useRef<HTMLAudioElement | null>(null);
-  const [state, setState] = useState<"idle" | "playing" | "missing">("idle");
+  const base = useRef<HTMLAudioElement | null>(null);
+  const el = useRef<HTMLSpanElement | null>(null);
+  const [missing, setMissing] = useState(false);
   const play = () => {
-    if (!audio.current) {
+    if (!base.current) {
       const probe = document.createElement("audio");
       const a = new Audio(probe.canPlayType('audio/ogg; codecs="opus"') ? LAUGH_SRC_OGG : LAUGH_SRC);
       a.preload = "auto";
-      a.addEventListener("ended", () => setState("idle"));
-      a.addEventListener("error", () => setState("missing"));
-      audio.current = a;
+      a.addEventListener("error", () => setMissing(true));
+      base.current = a;
     }
-    const a = audio.current;
-    a.currentTime = 0;
-    setState("playing");
-    a.play().catch(() => setState("missing"));
+    // A fresh clone per press: instant restart, presses can overlap.
+    const voice = base.current.cloneNode() as HTMLAudioElement;
+    voice.play().catch(() => undefined);
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce && el.current?.animate) {
+      el.current.animate(
+        [
+          { transform: "scale(1)" },
+          { transform: "scale(0.86) rotate(-4deg)", offset: 0.25 },
+          { transform: "scale(1.14) rotate(3deg)", offset: 0.6 },
+          { transform: "scale(1)" },
+        ],
+        { duration: 320, easing: "cubic-bezier(.3,1.6,.5,1)" },
+      );
+    }
   };
   return (
     <span
+      ref={el}
       role="button"
       tabIndex={0}
-      className={`laugh-btn is-${state}`}
+      className={`laugh-btn${missing ? " is-missing" : ""}`}
       title="Carlitox ▶"
       aria-label={`${typeof children === "string" ? children : "jojojo"} (▶ audio)`}
-      onClick={play}
+      onPointerDown={(e) => {
+        // Fire on press (not release) so rapid taps feel instant.
+        if (e.button === 0) {
+          e.preventDefault();
+          play();
+        }
+      }}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -42,7 +63,7 @@ export function LaughButton({ children }: { children: ReactNode }) {
     >
       {children}
       <span className="laugh-btn-icon" aria-hidden>
-        {state === "playing" ? "♪" : "▸"}
+        ▸
       </span>
     </span>
   );
@@ -56,9 +77,9 @@ export function withLaugh(children: ReactNode): ReactNode {
       return child.split(LAUGH_RE).map((part, i) => (i % 2 === 1 ? <LaughButton key={i}>{part}</LaughButton> : part));
     }
     if (isValidElement(child)) {
-      const el = child as ReactElement<{ children?: ReactNode }>;
-      if (el.props.children === undefined) return child;
-      return cloneElement(el, undefined, withLaugh(el.props.children));
+      const c = child as ReactElement<{ children?: ReactNode }>;
+      if (c.props.children === undefined) return child;
+      return cloneElement(c, undefined, withLaugh(c.props.children));
     }
     return child;
   });
