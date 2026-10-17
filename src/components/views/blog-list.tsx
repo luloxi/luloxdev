@@ -116,7 +116,7 @@ export function BlogList({ posts, error }: { posts: BlogPost[]; error?: boolean 
                           {formatDate(post.publishedAt, locale)}
                         </p>
                       )}
-                      <p className={`cp-row-label text-[0.95rem] leading-snug${draft ? "" : " mt-1.5"}`}>
+                      <p className={`cp-row-label blog-card-title text-[0.95rem] leading-snug${draft ? "" : " mt-1.5"}`}>
                         {L.title}
                       </p>
                       {/* Drafts: only the draft icon and the title. */}

@@ -2744,8 +2744,7 @@
   font-family: var(--font-orbitron), var(--font-display);
   font-size: 0.95rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.03em;
   color: var(--foreground);
 }
 
@@ -3852,3 +3851,7 @@ body.ie-off .ie-row-pencil { display: none; }
   .home-hero { margin-top: auto; }
   .home-sections { margin-top: auto !important; margin-bottom: auto; padding-top: 1.5rem; }
 }
+
+/* Blog titles render exactly as typed (no forced casing) */
+.blog-card-title, .blog-post-title, .blog-h2, .blog-h3 { text-transform: none !important; }
+.blog-card-title { letter-spacing: 0.03em; }
