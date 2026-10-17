@@ -30,8 +30,8 @@ export function PageShell({
   const bottomLabel = footerLabel ?? (footerHref || backHref !== "/" ? topLabel : t.ui.backHomeCta);
 
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-xl px-6 pb-16 pt-16 sm:pt-20">
-      <header className="mb-10 flex items-center justify-between gap-4 pr-20 sm:pr-24">
+    <div className="cp-shell mx-auto min-h-dvh w-full max-w-xl px-6 pb-16 pt-16 sm:pt-20">
+      <header className="cp-shell-header mb-10 flex items-center justify-between gap-4 pr-20 sm:pr-24">
         <Link
           href={backHref}
           className="cp-back-link group shrink-0"

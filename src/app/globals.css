@@ -3761,3 +3761,94 @@ body.ie-off .ie-row-pencil { display: none; }
 .ie-meta fieldset { display: flex; flex-wrap: wrap; gap: 6px 12px; border: 0; padding: 0; margin: 0; }
 .ie-meta legend { font-family: ui-monospace, monospace; text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; margin-bottom: 4px; }
 .ie-meta .ie-meta-chip { display: inline-flex; align-items: center; gap: 4px; grid: none; }
+
+/* ———————————————————————————————————————————————
+   Timeline (Experiencia / Trayectoria): no tinted fill, any breakpoint.
+   ——————————————————————————————————————————————— */
+.tl-item { background: none; }
+
+/* ———————————————————————————————————————————————
+   Mobile: less is more. No decorative containers (cut corners, side bars,
+   fills, shadows); content runs full width with an invisible 18px margin.
+   Typography and whitespace carry the hierarchy; the accent is used sparingly.
+   Desktop is untouched.
+   ——————————————————————————————————————————————— */
+@media (max-width: 639px) {
+  :root { --m-gap: 1.25rem; --m-gap-lg: 2.25rem; --m-hair: color-mix(in oklab, var(--foreground) 10%, transparent); }
+
+  /* Page frame: invisible margin, more room under the top bar */
+  .cp-shell { padding-left: 18px !important; padding-right: 18px !important; padding-top: 5.25rem !important; }
+  .cp-shell-header { margin-bottom: var(--m-gap-lg) !important; padding-right: 0 !important; align-items: flex-end !important; }
+  .cp-page-title-text { font-size: 1.52rem; letter-spacing: 0.12em; text-shadow: none; }
+  .cp-page-title-mark { box-shadow: none; opacity: 0.7; }
+  .cp-back-chevron { background: none; box-shadow: none; clip-path: none; }
+
+  /* Strip every decorative container */
+  .cp-shell .cp-nav-frame, .cp-shell .cp-nav-corner { display: none !important; }
+  .cp-panel, .cp-panel:has(.md-acc), .tl-item, .project-meta-row, .cp-row, .cp-accordion,
+  .blog-card, .cp-back-footer, .call-form-card, .github-card, .cp-email {
+    clip-path: none !important; background: none !important; box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  .cp-panel:has(.md-acc)::after { display: none; }
+  .cp-panel { padding: 0 !important; }
+  .cp-panel-inner { padding: 0; }
+  .blog-card:hover, .cp-row:hover, .cp-accordion:hover { background: none !important; }
+
+  /* Rhythm: one spacing scale, hairlines only where they separate items */
+  .cp-shell section:not(.md-acc-item) + section:not(.md-acc-item), .cp-shell .space-y-6 > * + * { margin-top: var(--m-gap-lg) !important; }
+  .cp-shell .cp-nav-bar, .cp-shell .cp-nav-scan { display: none !important; }
+  .cp-shell .cp-nav-chevron { opacity: 0.45; }
+  .cp-heading { margin-bottom: 0.5rem; letter-spacing: 0.2em; opacity: 0.85; }
+  .cp-list { gap: 0 !important; }
+  .cp-list > li, .cp-list > * { border-top: 1px solid var(--m-hair); }
+  .cp-list > li:first-child, .cp-list > *:first-child { border-top: 0; }
+  .tl-item { padding: var(--m-gap) 0 !important; }
+  .cp-list > li:first-child.tl-item { padding-top: 0.25rem !important; }
+  .cp-row { padding: 0.95rem 0 !important; border-bottom: 1px solid var(--m-hair); transition: opacity .2s ease, transform .2s ease; }
+  .cp-row:active, .blog-card:active { opacity: 0.6; transform: translateX(2px); }
+  .cp-list > .cp-row, .cp-list > * > .cp-row { border-bottom: 0; }
+
+  ul.space-y-3 > li + li { margin-top: 0 !important; }
+  ul.space-y-3 > li + li .blog-card { border-top: 1px solid var(--m-hair); }
+  .blog-card { padding: var(--m-gap) 0 !important; transition: opacity .2s ease, transform .2s ease; }
+  .blog-card-draft { padding: 0.8rem 0 !important; }
+
+  .project-meta { gap: 0 !important; }
+  .project-meta-row { padding: 0.8rem 0 !important; border-top: 1px solid var(--m-hair); grid-template-columns: 6.5rem 1fr; }
+  .project-meta-row:first-child { border-top: 0; }
+
+  .cp-accordion { padding: 0.95rem 0 !important; border-top: 1px solid var(--m-hair) !important; }
+
+  /* Sobre mí accordion: hairlines, no fills (revving animation unchanged) */
+  .md-acc-item { border-color: var(--m-hair); }
+  /* Lunge (18px) fits inside the 18px margin: scale grows leftward */
+  .md-acc-btn { transform-origin: right center; }
+
+  /* Back-to footer becomes a quiet text link */
+  .cp-back-footer { min-height: 3rem; padding: 0.75rem 0 !important; border-top: 1px solid var(--m-hair); justify-content: flex-start; }
+  .call-form-card { padding: 0 !important; }
+  .cp-email { padding: 0.95rem 0 !important; border-bottom: 1px solid var(--m-hair); }
+
+  /* Small delights */
+  .cp-shell a, .cp-shell button { -webkit-tap-highlight-color: transparent; }
+  @media (prefers-reduced-motion: reduce) {
+    .cp-row, .blog-card { transition: none; }
+    .cp-row:active, .blog-card:active { transform: none; }
+  }
+}
+
+/* Landing, mobile/tablet: three equal gaps (top bar → photo, LULOX → links,
+   links → bottom). Free space is split by auto margins; each gap keeps a
+   minimum, and short screens scroll instead of clipping. */
+@media (max-width: 899px) {
+  .home-root { overflow-y: auto !important; overflow-x: hidden; }
+  .home-main {
+    flex: 1 0 auto; min-height: 100%; justify-content: flex-start; overflow: visible;
+    padding: 3.5rem 18px 0; /* clears the fixed top bar (56px) */
+  }
+  .home-layout { flex: 1 0 auto; max-height: none; padding-block: 1.5rem; }
+  .home-copy { display: contents; }
+  .home-hero { margin-top: auto; }
+  .home-sections { margin-top: auto !important; margin-bottom: auto; padding-top: 1.5rem; }
+}

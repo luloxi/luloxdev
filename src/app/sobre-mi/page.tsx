@@ -95,7 +95,7 @@ export default function AboutPage() {
               return (
                 <li
                   key={item.title + item.org}
-                  className="cp-panel"
+                  className="cp-panel tl-item"
                   style={{ ["--cp-accent" as string]: accent }}
                 >
                   <span className="cp-nav-frame" aria-hidden>

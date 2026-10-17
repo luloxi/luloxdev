@@ -12,7 +12,7 @@ import { site } from "@/content/site";
  */
 export default function HomePage() {
   return (
-    <div className="fixed inset-0 z-10 flex flex-col overflow-hidden">
+    <div className="home-root fixed inset-0 z-10 flex flex-col overflow-hidden">
       <main className="home-main">
         <div className="home-layout">
           <div className="home-hero">
