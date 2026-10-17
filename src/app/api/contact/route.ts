@@ -9,6 +9,8 @@ type Env = {
   CONTACT_TO?: string;
   CONTACT_FROM?: string;
   TURNSTILE_SECRET?: string;
+  /** Optional: when set, mail goes through Resend (lulox.com.ar is set up there: DKIM resend._domainkey, return path send.). */
+  RESEND_API_KEY?: string;
   BETTER_AUTH_SECRET?: string;
 };
 
@@ -43,7 +45,7 @@ function calDates(v: string, minutes = 30) {
 function calUrl(email: string, details: string, dates: string) {
   const q = new URLSearchParams({
     action: "TEMPLATE",
-    text: `Llamada con ${email}`,
+    text: `Lulox | Llamada con ${email}`,
     dates,
     ctz: "America/Buenos_Aires",
     details,
@@ -121,7 +123,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "captcha" }, { status: 400 });
   }
 
-  if (!env.CONTACT_EMAIL) {
+  if (!env.CONTACT_EMAIL && !env.RESEND_API_KEY) {
     return NextResponse.json({ error: "not_configured" }, { status: 503 });
   }
 
@@ -131,22 +133,34 @@ export async function POST(request: Request) {
   const invite = calUrl(email, message, dates);
   // Punzó #C8102E = favicon stroke / --neon-crimson brand token. White text 5.9:1.
   const buttons = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px"><tr><td align="center"><table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td align="center" bgcolor="#C8102E" style="border-radius:8px;background:#C8102E"><a href="${esc(invite)}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;color:#FFFFFF;text-decoration:none;border-radius:8px">Agendar e invitar</a></td></tr></table></td></tr></table>`;
-  const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#241213">
+  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Pedido de llamada</title></head><body><div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#241213">
 <p style="font-size:17px;line-height:1.5;white-space:pre-wrap;margin:0 0 28px">${esc(message)}</p>
 <p style="font-size:40px;font-weight:700;letter-spacing:0.02em;color:#a50021;margin:0;font-variant-numeric:tabular-nums">${when} <span style="font-size:20px;font-weight:600">(UTC-3)</span></p>
 ${buttons}
-</div>`;
-  const text = `${message}\n\n${when} (UTC-3)\n\nAgendar e invitar: ${invite}\n`;
+<p style="font-size:12px;color:#6b5b5c;margin-top:28px">Enviado desde el formulario de contacto de lulox.com.ar. Respondé este email para contestarle a ${esc(email)}.</p>
+</div></body></html>`;
+  const text = `${message}\n\n${when} (UTC-3)\n\nAgendar e invitar: ${invite}\n\n--\nEnviado desde el formulario de contacto de lulox.com.ar. Respondé este email para contestarle a ${email}.\n`;
 
+  const fromName = "Lulox";
+  const subject = `Pedido de llamada de ${email} (${when} UTC-3)`;
   try {
-    await env.CONTACT_EMAIL.send({
-      from: { email: from, name: "Lulox Web" },
-      to,
-      replyTo: email,
-      subject: `Contacto en Lulox Web de ${email}`,
-      html,
-      text,
-    });
+    if (env.RESEND_API_KEY) {
+      const r = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ from: `${fromName} <${from}>`, to: [to], reply_to: email, subject, html, text }),
+      });
+      if (!r.ok) throw new Error(`resend ${r.status}`);
+    } else if (env.CONTACT_EMAIL) {
+      await env.CONTACT_EMAIL.send({
+        from: { email: from, name: fromName },
+        to,
+        replyTo: email,
+        subject,
+        html,
+        text,
+      });
+    }
   } catch (err) {
     console.error("[contact] send failed", err);
     return NextResponse.json({ error: "send_failed" }, { status: 502 });
