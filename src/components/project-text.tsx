@@ -29,31 +29,46 @@ export function ProjectText({ project, field, className = "", pClass = "cp-prose
       classes={classes}
       className={`md-copy ${className}`.trim()}
       onSave={async (md) => {
-        const res = await fetch("/api/projects");
-        if (!res.ok) return res.status === 401 ? "session" : String(res.status);
-        const { projects } = (await res.json()) as { projects: PastProject[] };
-        const p = projects.find((x) => x.id === project.id);
-        if (!p) return "not_found";
-        const nextCopy = { es: { ...p.copy.es }, en: { ...p.copy.en } };
-        if (field === "body") nextCopy[L] = { ...nextCopy[L], body: md.trim() };
-        else nextCopy[L] = { ...nextCopy[L], paragraphs: md.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean) };
-        const put = await fetch("/api/projects", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: p.id,
-            status: p.status,
-            liveUrl: p.liveUrl ?? "",
-            github: p.github ?? "",
-            team: p.team ?? [],
-            disabledReason: { es: p.disabledReason?.es ?? "", en: p.disabledReason?.en ?? "" },
-            copy: nextCopy,
-          }),
+        const err = await saveProject(project.id, (p) => {
+          if (field === "body") p.copy[L] = { ...p.copy[L], body: md.trim() };
+          else p.copy[L] = { ...p.copy[L], paragraphs: md.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean) };
         });
-        if (!put.ok) return put.status === 401 ? "session" : String(put.status);
+        if (err) return err;
         router.refresh();
         return null;
       }}
     />
   );
+}
+
+/**
+ * Read the current merged project from /api/projects, apply a change, and PUT
+ * the whole record back (admin-only). Returns an error code or null.
+ */
+export async function saveProject(id: string, mutate: (p: PastProject) => void): Promise<string | null> {
+  const res = await fetch("/api/projects");
+  if (!res.ok) return res.status === 401 ? "session" : String(res.status);
+  const { projects } = (await res.json()) as { projects: PastProject[] };
+  const found = projects.find((x) => x.id === id);
+  if (!found) return "not_found";
+  const p: PastProject = structuredClone(found);
+  p.copy = { es: { ...p.copy.es }, en: { ...p.copy.en } };
+  p.disabledReason = { es: p.disabledReason?.es ?? "", en: p.disabledReason?.en ?? "" };
+  mutate(p);
+  const put = await fetch("/api/projects", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      id: p.id,
+      status: p.status,
+      liveUrl: p.liveUrl ?? "",
+      github: p.github ?? "",
+      team: p.team ?? [],
+      disabledReason: p.disabledReason,
+      copy: p.copy,
+    }),
+  });
+  if (put.ok) return null;
+  const data = (await put.json().catch(() => ({}))) as { error?: string };
+  return put.status === 401 ? "session" : (data.error ?? String(put.status));
 }

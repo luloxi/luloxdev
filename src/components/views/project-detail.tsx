@@ -8,6 +8,7 @@ import type { PastProject, ProjectStatus } from "@/content/projects";
 import { useLocale } from "@/i18n/locale-provider";
 import { useEditMode } from "@/components/admin-context";
 import { ProjectText } from "@/components/project-text";
+import { ProjectDetailsEdit } from "@/components/project-details-edit";
 
 const statusClass: Record<ProjectStatus, string> = {
   live: "project-status-live",
@@ -89,7 +90,9 @@ export function ProjectDetail({ project }: { project: PastProject }) {
           </div>
         </div>
 
-        <div className="relative">
+        {editOn ? (
+          <ProjectDetailsEdit project={project} />
+        ) : (
         <dl className="project-meta">
           <div className="project-meta-row">
             <dt>{t.projects.metaTeam}</dt>
@@ -136,7 +139,7 @@ export function ProjectDetail({ project }: { project: PastProject }) {
             </div>
           ) : null}
         </dl>
-        </div>
+        )}
 
         <div className="!mt-4 space-y-2 sm:!mt-6">
           {project.liveUrl ? (
