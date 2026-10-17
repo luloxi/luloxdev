@@ -6,7 +6,8 @@ import { GitHubIcon } from "@/components/icons/social";
 import { PageShell } from "@/components/page-shell";
 import type { PastProject, ProjectStatus } from "@/content/projects";
 import { useLocale } from "@/i18n/locale-provider";
-import { InflowPencil, requestCopyEdit, useIsAdmin, type ProjectField } from "@/components/admin-context";
+import { useEditMode } from "@/components/admin-context";
+import { ProjectText } from "@/components/project-text";
 
 const statusClass: Record<ProjectStatus, string> = {
   live: "project-status-live",
@@ -17,13 +18,7 @@ const statusClass: Record<ProjectStatus, string> = {
 /** Project detail, rendered on the server with D1 overrides already merged. */
 export function ProjectDetail({ project }: { project: PastProject }) {
   const { t, locale } = useLocale();
-  const admin = useIsAdmin();
-  const pencil = (field: ProjectField, label: string) =>
-    admin ? (
-      <span className="ie-row-pencil">
-        <InflowPencil label={label} onClick={() => requestCopyEdit({ project: { id: project.id, field } })} />
-      </span>
-    ) : null;
+  const editOn = useEditMode();
 
   const copy = project.copy[locale] ?? project.copy.es;
   const statusLabel =
@@ -41,7 +36,7 @@ export function ProjectDetail({ project }: { project: PastProject }) {
       footerHref="/proyectos"
       footerLabel={t.projects.backToProjectsCta}
     >
-      <div className="space-y-6" data-copy-inflow="1">
+      <div className="space-y-6">
         <div
           className="cp-panel project-detail-hero"
           style={{ ["--cp-accent" as string]: "var(--section-projects)" }}
@@ -50,7 +45,6 @@ export function ProjectDetail({ project }: { project: PastProject }) {
             <span className="cp-nav-corner cp-nav-corner-tl" />
             <span className="cp-nav-corner cp-nav-corner-br" />
           </span>
-          {pencil("summary", "Edit title and summary")}
           <div className="cp-panel-inner flex items-center gap-4 sm:gap-5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -64,7 +58,11 @@ export function ProjectDetail({ project }: { project: PastProject }) {
               <p className="cp-headline text-[1.05rem] sm:text-[1.2rem]">
                 {copy.title}
               </p>
-              <CopyMarkdown text={copy.body} className="mt-1.5" pClass="cp-prose text-[0.9rem]" />
+              {editOn ? (
+                <ProjectText project={project} field="body" className="mt-1.5" pClass="cp-prose text-[0.9rem]" />
+              ) : (
+                <CopyMarkdown text={copy.body} className="mt-1.5" pClass="cp-prose text-[0.9rem]" />
+              )}
               <span
                 className={`project-status-pill mt-3 ${statusClass[project.status]}`}
               >
@@ -82,16 +80,16 @@ export function ProjectDetail({ project }: { project: PastProject }) {
             <span className="cp-nav-corner cp-nav-corner-tl" />
             <span className="cp-nav-corner cp-nav-corner-br" />
           </span>
-          {pencil("paragraphs", "Edit description")}
           <div className="cp-panel-inner space-y-3">
-            {copy.paragraphs.map((p) => (
-              <CopyMarkdown key={p.slice(0, 48)} text={p} />
-            ))}
+            {editOn ? (
+              <ProjectText project={project} field="paragraphs" />
+            ) : (
+              copy.paragraphs.map((p) => <CopyMarkdown key={p.slice(0, 48)} text={p} />)
+            )}
           </div>
         </div>
 
         <div className="relative">
-        {pencil("details", "Edit details")}
         <dl className="project-meta">
           <div className="project-meta-row">
             <dt>{t.projects.metaTeam}</dt>

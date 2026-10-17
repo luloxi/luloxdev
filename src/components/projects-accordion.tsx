@@ -5,7 +5,6 @@ import Link from "next/link";
 import { CpRow } from "@/components/cp-row";
 import { GitHubIcon } from "@/components/icons/social";
 import type { PastProject } from "@/content/projects";
-import { InflowPencil, requestCopyEdit, useIsAdmin } from "@/components/admin-context";
 import { github } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 
@@ -17,7 +16,6 @@ const pastAccents = [
 
 export function ProjectsAccordion({ projects }: { projects: PastProject[] }) {
   const { t, locale } = useLocale();
-  const admin = useIsAdmin();
   return (
     <div className="space-y-10">
       {/* Code: GitHub CTA + past projects underneath */}
@@ -36,7 +34,7 @@ export function ProjectsAccordion({ projects }: { projects: PastProject[] }) {
             const copy = project.copy[locale] ?? project.copy.es;
             const accent = pastAccents[i % pastAccents.length];
             return (
-              <li key={project.id} className="relative" data-copy-inflow="1">
+              <li key={project.id}>
                 <Link
                   href={`/proyectos/${project.id}`}
                   className="cp-row group"
@@ -69,14 +67,6 @@ export function ProjectsAccordion({ projects }: { projects: PastProject[] }) {
                   </span>
                   <span className="cp-nav-bar cp-row-bar" aria-hidden />
                 </Link>
-                {admin ? (
-                  <span className="ie-row-pencil">
-                    <InflowPencil
-                      label={`Edit ${project.id}`}
-                      onClick={() => requestCopyEdit({ project: { id: project.id, field: "summary" } })}
-                    />
-                  </span>
-                ) : null}
               </li>
             );
           })}

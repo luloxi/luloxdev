@@ -1,14 +1,17 @@
 "use client";
 
-import { useId, useState } from "react";
 
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
-import { splitSections } from "@/lib/md-sections";
+import { deleteSection, introBody, replaceIntro, sectionBody, splitSections, upsertSection } from "@/lib/md-sections";
 import { useLocale } from "@/i18n/locale-provider";
-import { InflowPencil, requestCopyEdit, useIsAdmin } from "@/components/admin-context";
+import { saveCopy, useEditMode } from "@/components/admin-context";
+import { MdWysiwyg, ToolbarButton } from "@/components/md-wysiwyg";
+import { COPY_CLASSES } from "@/lib/md-editor-extensions";
+import { useRouter } from "next/navigation";
+import { useId, useMemo, useRef, useState, type ReactNode } from "react";
 
 /**
  * Site copy rendered as Markdown. No raw HTML (skipHtml), no automatic term
@@ -70,6 +73,7 @@ export function CopyMarkdown({
   sections = false,
 }: {
   text: string;
+  /** site_copy key: when set, the admin can edit this block in place (edit mode). */
   copyKey?: string;
   className?: string;
   pClass?: string;
@@ -78,22 +82,41 @@ export function CopyMarkdown({
   /** Each "## " section becomes a collapsible accordion (intro stays visible). */
   sections?: boolean;
 }) {
+  const editOn = useEditMode() && Boolean(copyKey) && !inline;
+  const { locale } = useLocale();
   if (sections && !inline) {
-    const parts = toSections(prep(text));
+    const raw = text.replace(/\r\n?/g, "\n");
+    const parts = toSections(prep(raw));
     if (parts.sections.length > 0) {
       return (
         <div className={`md-copy md-acc ${className}`.trim()}>
-          {parts.intro.trim() ? (
-            <IntroBlock text={parts.intro} pClass={pClass} copyKey={copyKey} />
+          {editOn ? (
+            <EditableBlock
+              markdown={prep(introBody(raw))}
+              pClass={pClass}
+              save={(md) => saveCopy(copyKey!, locale, replaceIntro(raw, md))}
+            />
+          ) : parts.intro.trim() ? (
+            <MdBlock text={parts.intro} pClass={pClass} />
           ) : null}
-          <Accordion sections={parts.sections} pClass={pClass} copyKey={copyKey} />
+          <Accordion sections={parts.sections} pClass={pClass} raw={raw} copyKey={editOn ? copyKey : undefined} />
         </div>
       );
     }
   }
+  if (editOn) {
+    return (
+      <EditableBlock
+        markdown={prep(text)}
+        pClass={pClass}
+        className={className}
+        save={(md) => saveCopy(copyKey!, locale, md)}
+      />
+    );
+  }
   const Wrap = inline ? "span" : "div";
   return (
-    <Wrap data-copy-key={copyKey} data-copy-md={copyKey ? "1" : undefined} className={`md-copy ${className}`.trim()}>
+    <Wrap className={`md-copy ${className}`.trim()}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkBreaks]}
         skipHtml
@@ -104,6 +127,50 @@ export function CopyMarkdown({
         {prep(text)}
       </ReactMarkdown>
     </Wrap>
+  );
+}
+
+/** In-place editor that looks like the published block; saves the current locale. */
+function EditableBlock({
+  markdown,
+  pClass,
+  className = "",
+  save,
+  extraDirty,
+  forceActive,
+  onCancelExtra,
+  extraTools,
+  bodyFallback,
+}: {
+  markdown: string;
+  pClass: string;
+  className?: string;
+  /** Receives the edited Markdown and stores it for the current locale. */
+  save: (md: string) => Promise<string | null>;
+  extraDirty?: boolean;
+  forceActive?: boolean;
+  onCancelExtra?: () => void;
+  extraTools?: ReactNode;
+  /** Markdown to save when only something else changed (keeps the body text byte-identical). */
+  bodyFallback?: string;
+}) {
+  const router = useRouter();
+  const classes = useMemo(() => ({ ...COPY_CLASSES, p: pClass }), [pClass]);
+  return (
+    <MdWysiwyg
+      markdown={markdown}
+      classes={classes}
+      className={`md-copy ${className}`.trim()}
+      extraDirty={extraDirty}
+      forceActive={forceActive}
+      onCancelExtra={onCancelExtra}
+      extraTools={extraTools}
+      onSave={async (md, bodyDirty) => {
+        const err = await save(bodyDirty || bodyFallback === undefined ? md : bodyFallback);
+        if (!err) router.refresh();
+        return err;
+      }}
+    />
   );
 }
 
@@ -128,67 +195,173 @@ function toSections(md: string): { intro: string; sections: Section[] } {
   };
 }
 
-function IntroBlock({ text, pClass, copyKey }: { text: string; pClass: string; copyKey?: string }) {
-  const admin = useIsAdmin() && Boolean(copyKey);
-  return (
-    <div className={admin ? "md-intro-admin" : undefined} data-copy-inflow={copyKey ? "1" : undefined}>
-      <MdBlock text={text} pClass={pClass} />
-      {admin ? (
-        <InflowPencil label="Edit intro" onClick={() => requestCopyEdit({ key: copyKey!, section: "intro", md: true })} />
-      ) : null}
-    </div>
-  );
-}
-
-function Accordion({ sections, pClass, copyKey }: { sections: Section[]; pClass: string; copyKey?: string }) {
+function Accordion({ sections, pClass, raw, copyKey }: { sections: Section[]; pClass: string; raw: string; copyKey?: string }) {
   const base = useId();
-  const admin = useIsAdmin() && Boolean(copyKey);
-  const { locale } = useLocale();
   const [open, setOpen] = useState<boolean[]>(() => sections.map(() => false));
   let last = -1;
-  open.forEach((o, i) => { if (o) last = i; });
+  open.forEach((o, i) => {
+    if (o) last = i;
+  });
   let hint = -1;
-  for (let i = last + 1; i < sections.length; i++) if (!open[i]) { hint = i; break; }
+  for (let i = last + 1; i < sections.length; i++)
+    if (!open[i]) {
+      hint = i;
+      break;
+    }
+  const toggle = (i: number) => setOpen((prev) => sections.map((_, j) => (j === i ? !prev[j] : (prev[j] ?? false))));
   return (
-    <div className="md-acc-list" data-copy-inflow={copyKey ? "1" : undefined}>
+    <div className="md-acc-list">
       {sections.map((sec, i) => {
         const isOpen = open[i] ?? false;
         const id = `${base}-s${i}`;
         return (
           <section key={id} className={`md-acc-item${isOpen ? " is-open" : ""}`}>
-            <h2 className={`md-acc-h${admin ? " md-acc-h-admin" : ""}`}>
-              <button
-                type="button"
-                id={`${id}-btn`}
-                className={`md-acc-btn${hint === i ? " md-acc-hint" : ""}`}
-                aria-expanded={isOpen}
-                aria-controls={`${id}-panel`}
-                onClick={() => setOpen((prev) => prev.map((v, j) => (j === i ? !v : v)))}
-              >
-                <span className="md-acc-title">{sec.title}</span>
-                <svg className="md-acc-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </button>
-              {admin ? (
-                <InflowPencil label={`Edit section ${i + 1}`} onClick={() => requestCopyEdit({ key: copyKey!, section: i, md: true })} />
-              ) : null}
-            </h2>
-            <div id={`${id}-panel`} role="region" aria-labelledby={`${id}-btn`} className="md-acc-panel" inert={!isOpen}>
-              <div className="md-acc-inner">
-                <div className="md-acc-body">
-                  <MdBlock text={sec.body} pClass={pClass} />
+            {copyKey ? (
+              <EditableSection
+                index={i}
+                raw={raw}
+                copyKey={copyKey}
+                pClass={pClass}
+                title={sec.title}
+                isOpen={isOpen}
+                hint={hint === i}
+                panelId={`${id}-panel`}
+                onToggle={() => toggle(i)}
+                onAdded={() => setOpen((prev) => [...sections.map((_, j) => prev[j] ?? false), true])}
+              />
+            ) : (
+              <>
+                <h2 className="md-acc-h">
+                  <button
+                    type="button"
+                    id={`${id}-btn`}
+                    className={`md-acc-btn${hint === i ? " md-acc-hint" : ""}`}
+                    aria-expanded={isOpen}
+                    aria-controls={`${id}-panel`}
+                    onClick={() => toggle(i)}
+                  >
+                    <span className="md-acc-title">{sec.title}</span>
+                    <Chevron />
+                  </button>
+                </h2>
+                <div id={`${id}-panel`} role="region" aria-labelledby={`${id}-btn`} className="md-acc-panel" inert={!isOpen}>
+                  <div className="md-acc-inner">
+                    <div className="md-acc-body">
+                      <MdBlock text={sec.body} pClass={pClass} />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
           </section>
         );
       })}
-      {admin ? (
-        <button type="button" className="ie-add-section" onClick={() => requestCopyEdit({ key: copyKey!, section: "new", md: true })}>
-          {locale === "es" ? "+ sección" : "+ section"}
-        </button>
-      ) : null}
     </div>
+  );
+}
+
+function Chevron() {
+  return (
+    <svg className="md-acc-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+/** Edit mode: title editable in place, body edited in place, same look as published. */
+function EditableSection({ index, raw, copyKey, pClass, title, isOpen, hint, panelId, onToggle, onAdded }: {
+  index: number; raw: string; copyKey: string; pClass: string; title: string; isOpen: boolean; hint: boolean;
+  panelId: string; onToggle: () => void; onAdded: () => void;
+}) {
+  const { locale } = useLocale();
+  const router = useRouter();
+  const es = locale === "es";
+  const titleRef = useRef<HTMLSpanElement>(null);
+  const [titleDraft, setTitleDraft] = useState(title);
+  const [titleFocus, setTitleFocus] = useState(false);
+  const split = splitSections(raw);
+  const rawSec = split.sections[index];
+  const body = rawSec ? sectionBody(rawSec) : "";
+  const resetTitle = () => {
+    setTitleDraft(title);
+    if (titleRef.current) titleRef.current.textContent = title;
+  };
+  const add = async () => {
+    const t = window.prompt(es ? "Título de la nueva sección" : "New section title", es ? "Nueva sección" : "New section");
+    if (!t?.trim()) return;
+    const err = await saveCopy(copyKey, locale, upsertSection(raw, Number.MAX_SAFE_INTEGER, t, es ? "Texto de la sección." : "Section text."));
+    if (err) window.alert(es ? `No se pudo agregar (${err})` : `Couldn't add (${err})`);
+    else {
+      onAdded();
+      router.refresh();
+    }
+  };
+  const del = async () => {
+    if (!window.confirm(es ? `¿Borrar la sección "${title}"? No se puede deshacer.` : `Delete section "${title}"? This can't be undone.`)) return;
+    const err = await saveCopy(copyKey, locale, deleteSection(raw, index));
+    if (err) window.alert(es ? `No se pudo borrar (${err})` : `Couldn't delete (${err})`);
+    else router.refresh();
+  };
+  return (
+    <>
+      <h2 className="md-acc-h">
+        <div className={`md-acc-btn md-acc-btn-edit${hint ? " md-acc-hint" : ""}`}>
+          <span
+            ref={titleRef}
+            className="md-acc-title md-acc-title-edit"
+            contentEditable
+            suppressContentEditableWarning
+            role="textbox"
+            aria-label={es ? "Título de la sección" : "Section title"}
+            spellCheck
+            onFocus={() => setTitleFocus(true)}
+            onBlur={(e) => {
+              if ((e.relatedTarget as HTMLElement | null)?.closest?.("[data-ie-toolbar]")) return;
+              setTitleFocus(false);
+            }}
+            onInput={(e) => setTitleDraft((e.currentTarget.textContent ?? "").replace(/\s+/g, " "))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                e.currentTarget.blur();
+              }
+            }}
+          >
+            {title}
+          </span>
+          <button
+            type="button"
+            className="md-acc-chev-btn"
+            aria-expanded={isOpen}
+            aria-controls={panelId}
+            aria-label={isOpen ? (es ? "Cerrar sección" : "Collapse section") : es ? "Abrir sección" : "Expand section"}
+            onClick={onToggle}
+          >
+            <Chevron />
+          </button>
+        </div>
+      </h2>
+      <div id={panelId} role="region" className="md-acc-panel" inert={!isOpen}>
+        <div className="md-acc-inner">
+          <div className="md-acc-body">
+            <EditableBlock
+              markdown={prep(body)}
+              pClass={pClass}
+              bodyFallback={body}
+              extraDirty={titleDraft.trim() !== title.trim()}
+              forceActive={titleFocus}
+              onCancelExtra={resetTitle}
+              save={(md) => saveCopy(copyKey, locale, upsertSection(raw, index, titleDraft.trim() || title, md))}
+              extraTools={
+                <>
+                  <ToolbarButton label="+§" title={es ? "Agregar sección al final" : "Add section at the end"} onClick={() => void add()} />
+                  <ToolbarButton label="🗑" title={es ? "Borrar esta sección" : "Delete this section"} onClick={() => void del()} />
+                </>
+              }
+            />
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

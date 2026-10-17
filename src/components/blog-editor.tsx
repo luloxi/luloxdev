@@ -1,5 +1,6 @@
 "use client";
 
+import { MdWysiwyg } from "@/components/md-wysiwyg";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { BlogPost } from "@/content/blog/types";
@@ -159,15 +160,11 @@ export function BlogEditor({ initial, isNew }: Props) {
         </div>
         <div className="blog-field">
           <label className="blog-label" htmlFor="body-es">
-            {t.blog.fieldBody} (Markdown)
+            {t.blog.fieldBody}
           </label>
-          <textarea
-            id="body-es"
-            className="blog-textarea blog-textarea-lg"
-            rows={16}
-            value={bodyEs}
-            onChange={(e) => setBodyEs(e.target.value)}
-          />
+          <div id="body-es" className="blog-wysiwyg">
+            <MdWysiwyg markdown={initial?.body.es ?? ""} blog mode="field" className="blog-md" onChange={setBodyEs} />
+          </div>
         </div>
       </fieldset>
 
@@ -198,15 +195,11 @@ export function BlogEditor({ initial, isNew }: Props) {
         </div>
         <div className="blog-field">
           <label className="blog-label" htmlFor="body-en">
-            {t.blog.fieldBody} (Markdown)
+            {t.blog.fieldBody}
           </label>
-          <textarea
-            id="body-en"
-            className="blog-textarea blog-textarea-lg"
-            rows={16}
-            value={bodyEn}
-            onChange={(e) => setBodyEn(e.target.value)}
-          />
+          <div id="body-en" className="blog-wysiwyg">
+            <MdWysiwyg markdown={initial?.body.en ?? ""} blog mode="field" className="blog-md" onChange={setBodyEn} />
+          </div>
         </div>
       </fieldset>
 
