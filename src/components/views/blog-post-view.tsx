@@ -47,6 +47,7 @@ function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
 
   return (
     <PageShell
+      reading
       title={t.blog.title}
       backHref="/blog"
       backLabel={t.blog.title}

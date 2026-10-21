@@ -33,6 +33,7 @@ export function ProjectDetail({ project }: { project: PastProject }) {
 
   return (
     <PageShell
+      reading
       title={copy.title}
       hideTitle
       backHref="/proyectos"
