@@ -15,8 +15,11 @@ import { CopyMarkdown } from "@/components/copy-markdown";
 import { CopyText } from "@/components/copy-text";
 import { socials, tasteLinks } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
-import { useTimelineDraw } from "@/lib/use-timeline-draw";
-import { splitSections } from "@/lib/md-sections";
+import { insertSection, splitSections } from "@/lib/md-sections";
+import { insertJob, insertStory, jobsAfterStory, parseLayout, serializeLayout, type LayoutItem } from "@/lib/page-layout";
+import { saveCopy, useEditMode } from "@/components/admin-context";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const linkedInHref =
   socials.find((s) => s.id === "linkedin")?.href ??
@@ -24,7 +27,7 @@ const linkedInHref =
 
 type OrgLogo =
   | { type: "icon"; Icon: ComponentType<{ className?: string }> }
-  | { type: "image"; src: string; alt: string };
+  | { type: "image"; src: string; alt: string; light?: boolean };
 
 const orgLogos: Record<string, OrgLogo> = {
   "Input Output Global": {
@@ -33,6 +36,7 @@ const orgLogos: Record<string, OrgLogo> = {
     alt: "Input Output Global",
   },
   BuidlGuidl: { type: "icon", Icon: BuidlGuidlIcon },
+  FEDUN: { type: "image", src: "/orgs/fedun.png", alt: "FEDUN", light: true },
 };
 
 const timelineAccents = [
@@ -70,15 +74,15 @@ const platforms = [
 export default function AboutPage() {
   const { t } = useLocale();
   const about = t.about;
-  const tlRef = useTimelineDraw<HTMLDivElement>();
-  const jobsBySection = mapJobsToSections(about.body, about.timeline);
+  const storyCount = splitSections(about.body.replace(/\r\n?/g, "\n")).sections.length;
+  const layout = parseLayout(about.layout, storyCount, about.timeline.length);
+  const jobsBySection = jobsAfterStory(layout);
 
   return (
     <PageShell title={about.title}>
       <div className="space-y-8">
         <div
-          ref={tlRef}
-          className="cp-panel tl-list about-story"
+          className="cp-panel about-story"
           style={{ ["--cp-accent" as string]: "var(--section-about)" }}
         >
           <span className="cp-nav-frame" aria-hidden>
@@ -91,11 +95,15 @@ export default function AboutPage() {
               copyKey="about.body"
               text={about.body}
               sections
-              afterSection={(si) => {
-                const jobs = jobsBySection.get(si);
-                if (!jobs) return null;
-                return jobs.map(({ item, i }) => <JobCard key={item.title + item.org} item={item} i={i} label={t.ui.experience} />);
-              }}
+              afterSection={(si) => (
+                <>
+                  {(jobsBySection.get(si) ?? []).map((i) => {
+                    const item = about.timeline[i];
+                    return item ? <JobCard key={`job-${i}`} item={item} i={i} label={t.ui.experience} /> : null;
+                  })}
+                  <AddSlot after={si} body={about.body} timeline={about.timeline} layout={layout} />
+                </>
+              )}
             />
           </div>
         </div>
@@ -134,36 +142,52 @@ export default function AboutPage() {
 
 type Job = { period: string; title: string; org: string; description: string };
 
-/** Org name -> words that identify it in the story. */
-const orgKeys: Record<string, string[]> = {
-  "Input Output Global": ["input output", "iohk", "iog"],
-  BuidlGuidl: ["buidlguidl", "scaffold-eth"],
-};
+const addLabels = {
+  es: { add: "Agregar", story: "Relato", job: "Experiencia laboral", newStory: "Nuevo relato", newStoryBody: "Escribí acá.", period: "Fecha - Fecha", role: "Puesto", org: "Empresa", desc: "Descripción.", error: "No se pudo guardar" },
+  en: { add: "Add", story: "Story", job: "Work experience", newStory: "New story", newStoryBody: "Write here.", period: "Date - Date", role: "Role", org: "Company", desc: "Description.", error: "Could not save" },
+} as const;
 
-/**
- * Weave each job into the story: it goes right after the first "## " section
- * that names the company (fallback: the section mentioning its start year,
- * then the last section). Jobs keep chronological order (oldest first).
- * `i` stays the stored index so inline edits hit the right entry.
- */
-function mapJobsToSections(body: string, timeline: readonly Job[]) {
-  const secs = splitSections(body.replace(/\r\n?/g, "\n")).sections.map((x) => `${x.title}\n${x.lines.join("\n")}`.toLowerCase());
-  const out = new Map<number, { item: Job; i: number }[]>();
-  if (secs.length === 0) return out;
-  timeline
-    .map((item, i) => ({ item, i }))
-    .reverse()
-    .forEach((job) => {
-      const keys = orgKeys[job.item.org] ?? [job.item.org.toLowerCase()];
-      let at = secs.findIndex((s) => keys.some((k) => new RegExp("\\b" + k + "\\b").test(s)));
-      if (at < 0) {
-        const year = job.item.period.match(/(19|20)\d\d/)?.[0];
-        if (year) at = secs.findIndex((s) => s.includes(year));
+/** Admin-only "+" between items: add a story section or a job card right here. */
+function AddSlot({ after, body, timeline, layout }: { after: number; body: string; timeline: readonly Job[]; layout: LayoutItem[] }) {
+  const edit = useEditMode();
+  const { locale } = useLocale();
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  if (!edit) return null;
+  const L = addLabels[locale === "en" ? "en" : "es"];
+  const run = async (kind: "story" | "job") => {
+    setBusy(true);
+    let err: string | null = null;
+    if (kind === "story") {
+      err = await saveCopy("about.body", locale, insertSection(body, after + 1, L.newStory, L.newStoryBody));
+      if (!err) err = await saveCopy("about.layout", locale, serializeLayout(insertStory(layout, after)));
+    } else {
+      const n = timeline.length;
+      const fields = [["period", L.period], ["title", L.role], ["org", L.org], ["description", L.desc]] as const;
+      for (const [f, v] of fields) {
+        if (!err) err = await saveCopy(`about.timeline.${n}.${f}`, locale, v);
       }
-      if (at < 0) at = secs.length - 1;
-      out.set(at, [...(out.get(at) ?? []), job]);
-    });
-  return out;
+      if (!err) err = await saveCopy("about.layout", locale, serializeLayout(insertJob(layout, after, n)));
+    }
+    setBusy(false);
+    setOpen(false);
+    if (err) window.alert(`${L.error}: ${err}`);
+    router.refresh();
+  };
+  return (
+    <div className="story-add">
+      {open ? (
+        <div className="story-add-menu" role="group" aria-label={L.add}>
+          <button type="button" disabled={busy} onClick={() => run("story")}>{L.story}</button>
+          <button type="button" disabled={busy} onClick={() => run("job")}>{L.job}</button>
+          <button type="button" disabled={busy} aria-label="×" onClick={() => setOpen(false)}>×</button>
+        </div>
+      ) : (
+        <button type="button" className="story-add-btn" aria-label={L.add} title={L.add} onClick={() => setOpen(true)}>+</button>
+      )}
+    </div>
+  );
 }
 
 function JobCard({ item, i, label }: { item: Job; i: number; label: string }) {
@@ -172,9 +196,9 @@ function JobCard({ item, i, label }: { item: Job; i: number; label: string }) {
   return (
     <aside className="job-card tl-item" style={{ ["--cp-accent" as string]: accent }} aria-label={`${label}: ${item.org}`}>
       {logo ? (
-        <span className="tl-logo job-logo inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden sm:h-16 sm:w-16">
+        <span className={`tl-logo job-logo${logo.type === "image" && logo.light ? " job-logo-light" : ""} inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden sm:h-16 sm:w-16`}>
           {logo.type === "image" ? (
-            <Image src={logo.src} alt={logo.alt} width={64} height={64} className="h-full w-full object-cover" />
+            <Image src={logo.src} alt={logo.alt} width={64} height={64} className={`h-full w-full ${logo.light ? "object-contain" : "object-cover"}`} />
           ) : (
             <logo.Icon className="h-12 w-12 text-foreground sm:h-14 sm:w-14" />
           )}

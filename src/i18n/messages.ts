@@ -47,7 +47,19 @@ export const messages = {
           description:
             "Desarrollo de aplicaciones web3 con Scaffold-ETH 2 y Solidity para el ecosistema Ethereum como bien público.",
         },
+        {
+          period: "Ago 2015 - Feb 2020",
+          title: "Community Manager",
+          org: "FEDUN",
+          description:
+            "Multimedia y marketing digital para prensa: web (LAMP, Moodle, WordPress, SEO, accesibilidad ARIA), redes sociales, fotografía y video de eventos, newsletters con Mailchimp.",
+        },
       ],
+      /**
+       * Page order: one list mixing story sections ("story:N" = Nth "## " section of body)
+       * and records ("job:N" = timeline[N]). Story order follows the body; this places the jobs.
+       */
+      layout: "story:0,story:1,job:2,story:2,job:1,story:3,job:0,story:4,story:5",
       linkedInCta: "Ver mi LinkedIn",
     },
     projects: {
@@ -262,7 +274,19 @@ export const messages = {
           description:
             "Development of web3 applications with Scaffold-ETH 2 and Solidity for the Ethereum ecosystem as a public good.",
         },
+        {
+          period: "Aug 2015 - Feb 2020",
+          title: "Community Manager",
+          org: "FEDUN",
+          description:
+            "Multimedia and digital marketing for the press office: web (LAMP, Moodle, WordPress, SEO, ARIA accessibility), social media, event photography and video, Mailchimp newsletters.",
+        },
       ],
+      /**
+       * Page order: one list mixing story sections ("story:N" = Nth "## " section of body)
+       * and records ("job:N" = timeline[N]). Story order follows the body; this places the jobs.
+       */
+      layout: "story:0,story:1,job:2,story:2,job:1,story:3,job:0,story:4,story:5",
       linkedInCta: "View my LinkedIn",
     },
     projects: {

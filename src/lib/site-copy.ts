@@ -1,3 +1,4 @@
+import { isGrowableListKey } from "@/i18n/copy-overrides";
 import { cache } from "react";
 import { messages } from "@/i18n/messages";
 import { flattenCopy, type CopyOverrides } from "@/i18n/copy-overrides";
@@ -10,7 +11,9 @@ const known: Record<Locale, Record<string, string>> = {
 };
 
 export function isKnownCopyKey(key: string, locale: string): locale is Locale {
-  return (locale === "es" || locale === "en") && key in known[locale];
+  if (locale !== "es" && locale !== "en") return false;
+  if (key in known[locale]) return true;
+  return isGrowableListKey(key, known[locale]);
 }
 
 /** D1 site_copy rows that differ from the code defaults (code is the fallback). */

@@ -240,6 +240,7 @@ function Accordion({ sections, pClass, raw, copyKey, afterSection }: { sections:
   }, [anyOpen, copyKey, sections.length]);
   return (
     <div className="md-acc-list">
+      {afterSection?.(-1, { title: "", body: "" })}
       {sections.map((sec, i) => {
         const isOpen = open[i] ?? false;
         const id = `${base}-s${i}`;

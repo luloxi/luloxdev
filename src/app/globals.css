@@ -4157,12 +4157,13 @@ body.ie-off .ie-row-pencil { display: none; }
 .about-story .md-acc-list { position: relative; }
 .job-card {
   position: relative; z-index: 1; display: flex; align-items: center; gap: 0.9rem;
-  margin: 0.75rem 0; box-sizing: border-box; width: 100%; padding: 0.85rem 1rem;
+  margin: 0; box-sizing: border-box; width: 100%; padding: 0.85rem 1rem;
   border-radius: 16px; border: 1.5px dashed color-mix(in oklab, var(--cp-accent) 70%, transparent);
   border-left: 5px solid var(--cp-accent);
   background: color-mix(in oklab, var(--cp-accent) 8%, transparent);
 }
 .job-logo { border-radius: 12px; background: var(--background); }
+.job-logo.job-logo-light { background: #fff; padding: 4px; }
 .job-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .job-tag {
   font-family: var(--font-orbitron), var(--font-display); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.12em;
@@ -4189,3 +4190,17 @@ body.ie-off .ie-row-pencil { display: none; }
 :root:not(.dark) .cp-accordion { background: color-mix(in oklab, var(--cp-accent) 7%, transparent); }
 :root:not(.dark) .cp-back-chevron { background: none; box-shadow: none; }
 :root:not(.dark) .cp-panel:has(.md-acc) { background: none; }
+
+/* r13: admin-only "+" between Sobre mí items (story / job). */
+.story-add { display: flex; justify-content: center; }
+.story-add-btn {
+  width: 1.9rem; height: 1.9rem; border-radius: 999px; border: 1.5px dashed var(--section-about);
+  color: var(--section-about); background: transparent; font-weight: 800; line-height: 1; cursor: pointer; opacity: .7;
+}
+.story-add-btn:hover, .story-add-btn:focus-visible { opacity: 1; background: color-mix(in oklab, var(--section-about) 12%, transparent); }
+.story-add-menu { display: flex; gap: .4rem; flex-wrap: wrap; justify-content: center; }
+.story-add-menu button {
+  padding: .35rem .8rem; border-radius: 999px; border: 1.5px solid var(--section-about);
+  color: var(--section-about); background: transparent; font-size: .82rem; font-weight: 700; cursor: pointer;
+}
+.story-add-menu button:hover { background: color-mix(in oklab, var(--section-about) 14%, transparent); }

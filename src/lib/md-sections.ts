@@ -95,3 +95,17 @@ export function deleteSection(md: string, i: number): string {
 export function introBody(md: string): string {
   return parts(splitSections(md).intro).core;
 }
+
+/** Insert a new section so it becomes section `at` (0-based); later sections shift down. */
+export function insertSection(md: string, at: number, title: string, body: string): string {
+  const split = splitSections(md);
+  const n = split.sections.length;
+  if (at >= n) return upsertSection(md, n, title, body);
+  const t = cleanTitle(title);
+  if (!t) throw new Error("empty_title");
+  const at0 = Math.max(0, at);
+  const prev = at0 > 0 ? split.sections[at0 - 1].lines : split.intro;
+  if (prev.length && prev[prev.length - 1].trim() !== "") prev.push("");
+  split.sections.splice(at0, 0, { heading: `## ${t}`, title: t, lines: bodyLines(body, false) });
+  return joinSections(split);
+}
