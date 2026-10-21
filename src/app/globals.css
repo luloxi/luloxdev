@@ -4209,3 +4209,11 @@ body.ie-off .ie-row-pencil { display: none; }
 :root:not(.dark) .job-card[data-brand-accent] .job-period { color: color-mix(in oklab, var(--cp-accent) 72%, #000); }
 :root:not(.dark) .job-card[data-brand-accent] .job-tag { background: color-mix(in oklab, var(--cp-accent) 80%, #000); color: #fff; }
 .dark .job-card[data-brand-accent] .job-period { color: color-mix(in oklab, var(--cp-accent) 85%, #fff); }
+
+/* r15: Sobre mí story floats: no panel behind it in either theme. */
+.cp-panel.about-story, :root:not(.dark) .cp-panel.about-story {
+  background: none !important; box-shadow: none !important; border: 0 !important;
+  clip-path: none !important; padding: 0 !important; border-radius: 0 !important;
+}
+.cp-panel.about-story::before, .cp-panel.about-story::after { display: none !important; }
+.cp-panel.about-story > .cp-nav-frame { display: none !important; }
