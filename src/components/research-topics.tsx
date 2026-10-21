@@ -30,7 +30,7 @@ export function ResearchTopics({ ids }: { ids?: string[] }) {
   if (topics.length === 0) return null;
 
   return (
-      <section>
+      <section className="research-topics">
         <h2 className="cp-heading">{t.projects.focusHeading}</h2>
 
         <div className="focus-topic-grid mt-4">

@@ -70,9 +70,17 @@ function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
                 <Image
                   src={post.coverImage}
                   alt=""
-                  width={120}
-                  height={120}
+                  width={1600}
+                  height={1600}
+                  sizes="(max-width: 640px) 100vw, 820px"
                   className="blog-cover-img"
+                  data-shape="square"
+                  onLoad={(e) => {
+                    const img = e.currentTarget;
+                    if (!img.naturalWidth || !img.naturalHeight) return;
+                    const r = img.naturalWidth / img.naturalHeight;
+                    img.dataset.shape = r > 1.25 ? "wide" : r < 0.8 ? "tall" : "square";
+                  }}
                   priority
                 />
               </div>

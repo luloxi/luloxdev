@@ -4230,3 +4230,33 @@ body.ie-off .ie-row-pencil { display: none; }
 .cp-shell-reading .cp-panel > .cp-nav-frame { display: none !important; }
 .cp-shell-reading .cp-panel-inner { padding: 0 !important; }
 .cp-shell-reading .cp-prose { max-width: none; }
+
+/* r17: reading pages. Cover sized by natural aspect (data-shape set onLoad). */
+.cp-shell-reading .blog-cover { justify-content: center; }
+.cp-shell-reading .blog-cover-img { width: auto; height: 280px; max-width: 100%; object-fit: contain; border-radius: 10px; }
+.cp-shell-reading .blog-cover-img[data-shape="wide"] { width: calc(100% - 1.5rem); height: auto; max-height: 520px; object-fit: cover; }
+@media (min-width: 640px) { .cp-shell-reading .blog-cover-img:not([data-shape="wide"]) { height: 360px; } }
+
+/* r17: "Tecnologías mencionadas" stands out (intentional container exception). */
+.cp-shell-reading .research-topics {
+  padding: 1.25rem 1.25rem 1.4rem; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(0,164,239,.10), rgba(255,138,30,.08));
+  border: 1px solid rgba(0,164,239,.35);
+  box-shadow: 0 0 0 1px rgba(255,138,30,.10) inset, 0 8px 28px -12px rgba(0,164,239,.45);
+}
+:root:not(.dark) .cp-shell-reading .research-topics {
+  background: linear-gradient(135deg, #e3f6ff, #fff1e3);
+  border-color: rgba(0,120,200,.35);
+  box-shadow: 0 10px 30px -14px rgba(0,120,200,.45);
+}
+
+/* r17: section dividers: cyan with glow. */
+.blog-hr, .md-copy .md-hr {
+  border: 0 !important; height: 2px !important; margin: 2rem 0 !important;
+  background: linear-gradient(90deg, transparent, #00d4ff 15%, #00d4ff 85%, transparent) !important;
+  box-shadow: 0 0 10px rgba(0,212,255,.75), 0 0 22px rgba(0,212,255,.4);
+}
+:root:not(.dark) .blog-hr, :root:not(.dark) .md-copy .md-hr {
+  background: linear-gradient(90deg, transparent, #0090c8 15%, #0090c8 85%, transparent) !important;
+  box-shadow: 0 0 8px rgba(0,144,200,.55), 0 0 18px rgba(0,180,240,.35);
+}
