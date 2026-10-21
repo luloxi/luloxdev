@@ -212,6 +212,8 @@ export const messages = {
       emailLabel: "Email",
       copy: "Copiar",
       copied: "Copiado",
+      callTitle: "Agendá una videollamada",
+      callSub: "Para hablar en serio, boludeces no.",
     },
   },
   en: {
@@ -425,6 +427,8 @@ export const messages = {
       emailLabel: "Email",
       copy: "Copy",
       copied: "Copied",
+      callTitle: "Book a video call",
+      callSub: "For serious talk, no nonsense.",
     },
   },
 } as const;

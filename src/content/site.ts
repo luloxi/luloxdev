@@ -59,3 +59,7 @@ export const tasteLinks = {
 } as const;
 
 
+
+/** Google Calendar appointment page for booking a video call (replaces the old contact form). */
+export const CALL_BOOKING_URL =
+  "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1jSxgl0-oPfAWoQnH03B_5FFL1sVYkEgZqB0vcekH6lY1OmDl5lQ-BUuMCXjJa-ihuiqDXTjwl";

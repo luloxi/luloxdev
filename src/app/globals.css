@@ -3306,122 +3306,8 @@
 }
 
 /* ── Contact: tweet-style call request form ── */
-.call-form-card {
-  position: relative;
-  display: grid;
-  gap: 0.85rem;
-  padding: 1rem;
-  border-radius: 14px;
-  background: color-mix(in oklab, var(--surface) 92%, transparent);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in oklab, var(--section-contact) 40%, transparent),
-    0 12px 30px color-mix(in oklab, var(--section-contact) 12%, transparent);
-}
-.call-form-text {
-  width: 100%;
-  resize: vertical;
-  min-height: 6rem;
-  background: transparent;
-  border: 0;
-  outline: none;
-  color: var(--foreground);
-  font-size: 1.15rem;
-  line-height: 1.45;
-}
-.call-form-text::placeholder { color: var(--muted); }
-.call-form-row { display: grid; gap: 0.75rem; }
-@media (min-width: 640px) { .call-form-row { grid-template-columns: 1fr 1fr; } }
-.call-form-field { display: grid; gap: 0.3rem; font-size: 0.75rem; color: var(--muted); font-family: var(--font-mono, ui-monospace, monospace); }
-.call-form-field input {
-  font-family: inherit;
-  font-size: 0.95rem;
-  color: var(--foreground);
-  background: color-mix(in oklab, var(--background) 70%, transparent);
-  border: 1px solid color-mix(in oklab, var(--section-contact) 35%, transparent);
-  border-radius: 10px;
-  padding: 0.55rem 0.7rem;
-  color-scheme: inherit;
-}
-.call-form-field input:focus { outline: 2px solid var(--section-contact); outline-offset: 1px; }
-.call-form-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
-.call-form-foot {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.9rem;
-  border-top: 1px solid color-mix(in oklab, var(--section-contact) 25%, transparent);
-  padding-top: 0.75rem;
-}
-.call-form-count { font-family: ui-monospace, monospace; font-size: 0.85rem; color: var(--muted); }
-.call-form-count-warn { color: var(--section-projects); }
-.call-form-count-over { color: var(--accent); font-weight: 700; }
-.call-form-send {
-  border-radius: 999px;
-  padding: 0.55rem 1.35rem;
-  font-weight: 700;
-  color: #fff;
-  background: var(--section-contact);
-  box-shadow: 0 6px 18px color-mix(in oklab, var(--section-contact) 35%, transparent);
-  transition: transform 0.15s ease, filter 0.15s ease;
-}
-.call-form-send:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
-.call-form-send:disabled { opacity: 0.5; cursor: not-allowed; }
-.call-form-msg { font-size: 0.9rem; margin: 0; }
-.call-form-ok { color: var(--section-contact); }
-.call-form-err { color: var(--accent); }
-.dark .call-form-send { color: #0e0607; }
-.call-form-email-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
-.call-form-google { font-size: 0.72rem; color: var(--section-blog); text-decoration: underline; text-underline-offset: 2px; }
-.call-form-google-on { font-style: normal; font-size: 0.72rem; color: var(--section-contact); }
 
 /* Required-field highlight: electric cyan, contrasts with punzó in both themes */
-@keyframes call-form-pulse {
-  0%, 100% { box-shadow: 0 0 0 2px #00e5ff, 0 0 8px 2px color-mix(in oklab, #00e5ff 55%, transparent); }
-  50% { box-shadow: 0 0 0 3px #00e5ff, 0 0 22px 6px color-mix(in oklab, #00e5ff 75%, transparent); }
-}
-.call-form-missing {
-  border-radius: 10px;
-  outline: none;
-  animation: call-form-pulse 1.1s ease-in-out infinite;
-}
-.call-form-req {
-  font-style: normal;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #008fa3;
-  margin: 0;
-}
-.dark .call-form-req { color: #00e5ff; }
-@media (prefers-reduced-motion: reduce) {
-  .call-form-missing {
-    animation: none;
-    box-shadow: 0 0 0 3px #00e5ff, 0 0 12px 3px color-mix(in oklab, #00e5ff 60%, transparent);
-  }
-}
-
-@keyframes call-form-shake {
-  0%, 100% { transform: translateX(0); }
-  15%, 45%, 75% { transform: translateX(-6px); }
-  30%, 60%, 90% { transform: translateX(6px); }
-}
-.call-form-send.call-form-send-blocked,
-.call-form-send.call-form-send-blocked:disabled {
-  background: #e0001b;
-  color: #fff;
-  opacity: 1;
-  box-shadow: 0 6px 18px color-mix(in oklab, #e0001b 45%, transparent);
-  animation: call-form-shake 0.5s ease-in-out 2;
-}
-@media (prefers-reduced-motion: reduce) {
-  .call-form-send.call-form-send-blocked { animation: none; }
-}
-.call-form-cooldown { color: var(--muted); }
-.call-form-countdown {
-  font-family: ui-monospace, monospace;
-  font-size: 1.05rem;
-  color: var(--section-contact);
-  font-variant-numeric: tabular-nums;
-}
 
 /* ── Admin inline editor (only rendered for the admin) ── */
 .ie-root { position: absolute; top: 0; left: 0; width: 0; height: 0; z-index: 60; }
@@ -3759,8 +3645,7 @@ body.ie-off .ie-row-pencil { display: none; }
 
   /* Strip every decorative container */
   .cp-shell .cp-nav-frame, .cp-shell .cp-nav-corner { display: none !important; }
-  .cp-panel, .cp-panel:has(.md-acc), .tl-item, .project-meta-row, .cp-row, .cp-accordion,
-  .blog-card, .cp-back-footer, .call-form-card, .github-card, .cp-email {
+  .cp-panel, .cp-panel:has(.md-acc), .tl-item, .project-meta-row, .cp-row, .cp-accordion, .blog-card, .cp-back-footer, .github-card, .cp-email {
     clip-path: none !important; background: none !important; box-shadow: none !important;
     border-radius: 0 !important;
   }
@@ -3801,7 +3686,6 @@ body.ie-off .ie-row-pencil { display: none; }
 
   /* Back-to footer becomes a quiet text link */
   .cp-back-footer { min-height: 3rem; padding: 0.75rem 0 !important; border-top: 1px solid var(--m-hair); justify-content: flex-start; }
-  .call-form-card { padding: 0 !important; }
   .cp-email { padding: 0.95rem 0 !important; border-bottom: 1px solid var(--m-hair); }
 
   /* Small delights */
@@ -3847,34 +3731,8 @@ body.ie-off .ie-row-pencil { display: none; }
 }
 .blog-author-contact:hover { background: color-mix(in oklab, var(--cp-accent) 12%, transparent); transform: translateX(2px); }
 
-/* Contacto: the call request zone glows (gently animated) */
-.call-form {
-  position: relative; padding: 1.25rem; border-radius: 18px;
-  border: 1px solid color-mix(in oklab, var(--section-contact) 55%, transparent);
-  animation: call-glow 3.2s ease-in-out infinite;
-}
-@keyframes call-glow {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--section-contact) 0%, transparent), 0 0 18px 2px color-mix(in oklab, var(--section-contact) 22%, transparent); }
-  50% { box-shadow: 0 0 0 3px color-mix(in oklab, var(--section-contact) 18%, transparent), 0 0 34px 8px color-mix(in oklab, var(--section-contact) 38%, transparent); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .call-form { animation: none; box-shadow: 0 0 22px 4px color-mix(in oklab, var(--section-contact) 28%, transparent); }
-}
-.call-form > .cp-heading {
-  margin-bottom: 0.9rem; font-family: var(--font-orbitron), var(--font-display);
-  font-size: 1.35rem; line-height: 1.2; letter-spacing: 0.06em; color: var(--section-contact); opacity: 1;
-}
-.call-form .call-form-card { padding: 0; background: none; box-shadow: none; border-radius: 0; }
-/* Message: a plain textarea */
-.call-form .call-form-text {
-  min-height: 7rem; padding: 0.6rem 0.7rem; font-size: 1rem; line-height: 1.5;
-  background: var(--background); border: 1px solid var(--border); border-radius: 8px;
-  font-family: inherit;
-}
-.call-form .call-form-text:focus { border-color: var(--section-contact); outline: none; }
-.call-form-count { font-variant-numeric: tabular-nums; }
 
-/* Contacto mobile: socials two per row so the form comes sooner */
+/* Contacto mobile: socials two per row so the call CTA comes sooner */
 @media (max-width: 639px) {
   .cp-list.cp-list-2col { display: grid !important; grid-template-columns: 1fr 1fr; column-gap: 14px; }
   .cp-list.cp-list-2col > * { border-top: 0 !important; border-bottom: 1px solid var(--m-hair) !important; }
@@ -3883,8 +3741,6 @@ body.ie-off .ie-row-pencil { display: none; }
   .cp-list-2col .cp-row-detail { font-size: 0.68rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
   .cp-list-2col .cp-row-body { min-width: 0; }
   .cp-list-2col .cp-row-chevron { display: none; }
-  .call-form { padding: 1rem 14px; }
-  .call-form .call-form-card { padding: 0 !important; }
 }
 @media (max-width: 639px) {
   /* Blog card: date sits top-right over a full-width title */
@@ -3894,10 +3750,6 @@ body.ie-off .ie-row-pencil { display: none; }
   .blog-card .blog-card-side .cp-nav-chevron { display: none; }
 }
 /* Contacto: character counter above the message box, top-right */
-.call-form-count-row { display: flex; justify-content: flex-end; margin-bottom: -0.45rem; }
-.call-form-count-row .call-form-count { font-size: 0.8rem; font-weight: 600; color: var(--foreground); opacity: 0.7; }
-.call-form-count-row .call-form-count-warn { color: var(--section-projects); opacity: 1; }
-.call-form-count-row .call-form-count-over { color: var(--accent); opacity: 1; }
 /* Light theme opts out of browser auto-dark (Android Chrome "auto dark mode") */
 :root:not(.dark) { color-scheme: only light; }
 .dark { color-scheme: dark; }
@@ -4191,25 +4043,6 @@ body.ie-off .ie-row-pencil { display: none; }
 .tl-list.tl-draw > li { position: relative; z-index: 1; }
 
 /* r7: Contacto, successful send: the container glows to max, then the form fades and collapses (JS). */
-.call-form.call-form-doom { pointer-events: none; animation: call-doom-glow 1.15s cubic-bezier(.5,0,.2,1) forwards; }
-.call-form-doom .call-form-card { animation: call-doom-shiver 1.15s linear forwards; }
-@keyframes call-doom-glow {
-  0% { border-color: color-mix(in oklab, var(--section-contact) 55%, transparent); box-shadow: 0 0 18px 2px color-mix(in oklab, var(--section-contact) 22%, transparent); }
-  45% { border-color: var(--section-contact); box-shadow: 0 0 0 3px color-mix(in oklab, var(--section-contact) 45%, transparent), inset 0 0 30px color-mix(in oklab, var(--section-contact) 30%, transparent), 0 0 44px 10px color-mix(in oklab, var(--section-contact) 60%, transparent); }
-  100% { border-color: var(--section-contact); box-shadow: 0 0 0 4px var(--section-contact), inset 0 0 80px color-mix(in oklab, var(--section-contact) 60%, transparent), 0 0 80px 26px color-mix(in oklab, var(--section-contact) 85%, transparent), 0 0 160px 50px color-mix(in oklab, var(--neon-crimson) 40%, transparent); }
-}
-@keyframes call-doom-shiver {
-  0%, 60% { transform: none; }
-  64% { transform: translate(1px, 0); }
-  68% { transform: translate(-1px, 1px); }
-  72% { transform: translate(1px, -1px); }
-  76% { transform: translate(-1px, 0); }
-  80% { transform: translate(1px, 1px); }
-  84%, 100% { transform: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .call-form.call-form-doom, .call-form-doom .call-form-card { animation: none; }
-}
 
 /* r7: Mochi pet on the Mochi project page. Layer never takes clicks; only Mochi does. */
 .mochi-layer { position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
@@ -4264,24 +4097,50 @@ body.ie-off .ie-row-pencil { display: none; }
 }
 
 /* r9: Contacto, proposed time. Custom selects so it always reads YYYY-MM-DD and 12-hour am/pm. */
-.call-form .call-form-row { grid-template-columns: 1fr; }
-.call-form-when-head { display: inline; }
-.call-form-tz { color: var(--section-contact); text-decoration: underline; text-underline-offset: 2px; font-weight: 700; }
-.call-form-tz:hover, .call-form-tz:focus-visible { text-decoration-thickness: 2px; }
-.call-form-when { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
-.call-form-when-date, .call-form-when-time { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--muted); }
-.call-form-sel {
-  appearance: none; -webkit-appearance: none;
-  font-family: var(--font-mono, ui-monospace, monospace); font-size: 1rem; font-variant-numeric: tabular-nums;
-  color: var(--foreground); background: var(--background);
-  border: 1px solid color-mix(in oklab, var(--section-contact) 35%, transparent); border-radius: 10px;
-  min-height: 44px; padding: 0 0.55rem; text-align: center; text-align-last: center; cursor: pointer;
-  color-scheme: inherit;
+
+/* Contacto: "Agendá una videollamada" CTA, Sobre mí palette (Nick orange + Judy blue) */
+@keyframes call-cta-rev {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(255 168 96 / .0), 0 0 22px 4px rgb(255 168 96 / .28); }
+  50% { box-shadow: 0 0 0 3px rgb(255 168 96 / .22), 0 0 38px 10px rgb(255 168 96 / .42); }
 }
-.call-form-sel.is-empty { color: var(--muted); }
-.call-form-sel option { color: var(--foreground); background: var(--background); }
-.call-form-sel:focus { outline: 2px solid var(--section-contact); outline-offset: 1px; }
-.call-form-sel-y { min-width: 4.6rem; }
-.call-form-sel-mo, .call-form-sel-d, .call-form-sel-h, .call-form-sel-mi { min-width: 3.1rem; }
-.call-form-sel-ap { min-width: 4.4rem; margin-left: 0.2rem; }
-.call-form-when-echo { font-style: normal; font-size: 0.75rem; color: var(--section-contact); font-variant-numeric: tabular-nums; }
+@keyframes call-cta-sheen { 0%, 70% { transform: translateX(-120%) skewX(-20deg); } 100% { transform: translateX(260%) skewX(-20deg); } }
+.call-cta {
+  position: relative; overflow: hidden; isolation: isolate;
+  display: flex; align-items: center; gap: 1rem; width: 100%; box-sizing: border-box;
+  margin-top: 2rem; padding: 1.15rem 1.35rem; border-radius: 20px; text-decoration: none;
+  background: linear-gradient(135deg, #24498f 0%, #1b3870 100%); color: #ffa860;
+  border: 2px solid #ffa860;
+  animation: call-cta-rev 2.6s ease-in-out infinite;
+  transition: transform .2s ease, filter .2s ease;
+}
+.call-cta::after {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 40%; z-index: -1; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / .16), transparent);
+  animation: call-cta-sheen 4.5s ease-in-out infinite;
+}
+.call-cta:hover, .call-cta:focus-visible { transform: translateY(-2px) scale(1.01); filter: brightness(1.08); }
+.call-cta:focus-visible { outline: 3px solid #ffa860; outline-offset: 3px; }
+.call-cta-icon {
+  flex: none; display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 999px;
+  background: #ffa860; color: #24498f;
+}
+.call-cta-icon svg { width: 1.6rem; height: 1.6rem; }
+.call-cta-text { display: grid; gap: 0.2rem; min-width: 0; flex: 1; }
+.call-cta-title {
+  font-family: var(--font-orbitron), var(--font-display); font-weight: 800; letter-spacing: 0.04em;
+  font-size: clamp(1.05rem, 4.2vw, 1.4rem); line-height: 1.15;
+}
+.call-cta-sub { font-size: 0.88rem; opacity: 0.92; color: #ffd2ad; }
+.call-cta-arrow { flex: none; font-size: 1.5rem; font-weight: 800; transition: transform .2s ease; }
+.call-cta:hover .call-cta-arrow { transform: translateX(4px); }
+:root:not(.dark) .call-cta {
+  background: linear-gradient(135deg, #ffa860 0%, #ee8a45 100%); color: #142b5c; border-color: #24498f;
+}
+:root:not(.dark) .call-cta-icon { background: #24498f; color: #ffa860; }
+:root:not(.dark) .call-cta-sub { color: #24498f; }
+:root:not(.dark) .call-cta:focus-visible { outline-color: #24498f; }
+@media (prefers-reduced-motion: reduce) {
+  .call-cta, .call-cta::after, .call-cta-arrow { animation: none; transition: none; }
+  .call-cta { box-shadow: 0 0 26px 6px rgb(255 168 96 / .32); }
+  .call-cta:hover, .call-cta:focus-visible { transform: none; }
+}

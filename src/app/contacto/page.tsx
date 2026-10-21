@@ -2,7 +2,6 @@
 
 import type { ComponentType } from "react";
 import { CpRow } from "@/components/cp-row";
-import { CallRequestForm } from "@/components/call-request-form";
 import {
   InstagramBrandIcon,
   LinkedInIcon,
@@ -10,7 +9,7 @@ import {
   XIcon,
 } from "@/components/icons/social";
 import { PageShell } from "@/components/page-shell";
-import { contactSocials } from "@/content/site";
+import { CALL_BOOKING_URL, contactSocials } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 
 const socialIcons: Record<
@@ -61,9 +60,25 @@ export default function ContactPage() {
         })}
       </div>
 
-      <div className="mt-8">
-        <CallRequestForm />
-      </div>
+      <a
+        className="call-cta"
+        href={CALL_BOOKING_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-testid="call-cta"
+      >
+        <span className="call-cta-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2.5" y="6" width="13" height="12" rx="2.5" />
+            <path d="M15.5 10.5 21.5 7v10l-6-3.5" />
+          </svg>
+        </span>
+        <span className="call-cta-text">
+          <span className="call-cta-title">{t.contact.callTitle}</span>
+          <span className="call-cta-sub">{t.contact.callSub}</span>
+        </span>
+        <span className="call-cta-arrow" aria-hidden="true">→</span>
+      </a>
     </PageShell>
   );
 }
