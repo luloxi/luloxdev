@@ -12,7 +12,7 @@ import { MdWysiwyg, ToolbarButton } from "@/components/md-wysiwyg";
 import { withLaugh } from "@/components/laugh-button";
 import { COPY_CLASSES } from "@/lib/md-editor-extensions";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
 /**
  * Site copy rendered as Markdown. No raw HTML (skipHtml), no automatic term
@@ -72,6 +72,7 @@ export function CopyMarkdown({
   pClass = "cp-prose",
   inline = false,
   sections = false,
+  afterSection,
 }: {
   text: string;
   /** site_copy key: when set, the admin can edit this block in place (edit mode). */
@@ -82,6 +83,8 @@ export function CopyMarkdown({
   inline?: boolean;
   /** Each "## " section becomes a collapsible accordion (intro stays visible). */
   sections?: boolean;
+  /** Rendered right after section i (e.g. job cards woven into the story). */
+  afterSection?: (i: number, sec: { title: string; body: string }) => ReactNode;
 }) {
   const editOn = useEditMode() && Boolean(copyKey) && !inline;
   const { locale } = useLocale();
@@ -100,7 +103,7 @@ export function CopyMarkdown({
           ) : parts.intro.trim() ? (
             <MdBlock text={parts.intro} pClass={pClass} />
           ) : null}
-          <Accordion sections={parts.sections} pClass={pClass} raw={raw} copyKey={editOn ? copyKey : undefined} />
+          <Accordion sections={parts.sections} pClass={pClass} raw={raw} copyKey={editOn ? copyKey : undefined} afterSection={afterSection} />
         </div>
       );
     }
@@ -196,7 +199,7 @@ function toSections(md: string): { intro: string; sections: Section[] } {
   };
 }
 
-function Accordion({ sections, pClass, raw, copyKey }: { sections: Section[]; pClass: string; raw: string; copyKey?: string }) {
+function Accordion({ sections, pClass, raw, copyKey, afterSection }: { sections: Section[]; pClass: string; raw: string; copyKey?: string; afterSection?: (i: number, sec: { title: string; body: string }) => ReactNode }) {
   const base = useId();
   const [open, setOpen] = useState<boolean[]>(() => sections.map(() => false));
   let last = -1;
@@ -241,7 +244,8 @@ function Accordion({ sections, pClass, raw, copyKey }: { sections: Section[]; pC
         const isOpen = open[i] ?? false;
         const id = `${base}-s${i}`;
         return (
-          <section key={id} className={`md-acc-item${isOpen ? " is-open" : ""}${peek && i === 0 && !anyOpen ? " md-acc-peek" : ""}`}>
+          <Fragment key={id}>
+          <section className={`md-acc-item${isOpen ? " is-open" : ""}${peek && i === 0 && !anyOpen ? " md-acc-peek" : ""}`}>
             {copyKey ? (
               <EditableSection
                 index={i}
@@ -280,6 +284,8 @@ function Accordion({ sections, pClass, raw, copyKey }: { sections: Section[]; pC
               </>
             )}
           </section>
+          {afterSection?.(i, { title: sec.title, body: sec.body })}
+          </Fragment>
         );
       })}
     </div>

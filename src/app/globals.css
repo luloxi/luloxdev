@@ -4134,13 +4134,43 @@ body.ie-off .ie-row-pencil { display: none; }
 .call-cta-arrow { flex: none; font-size: 1.5rem; font-weight: 800; transition: transform .2s ease; }
 .call-cta:hover .call-cta-arrow { transform: translateX(4px); }
 :root:not(.dark) .call-cta {
-  background: linear-gradient(135deg, #ffa860 0%, #ee8a45 100%); color: #142b5c; border-color: #24498f;
+  background: linear-gradient(135deg, #e69756 0%, #d67c3e 100%); color: #00313a; border-color: #0099b3;
+  animation-name: call-cta-rev-cyan;
 }
-:root:not(.dark) .call-cta-icon { background: #24498f; color: #ffa860; }
-:root:not(.dark) .call-cta-sub { color: #24498f; }
-:root:not(.dark) .call-cta:focus-visible { outline-color: #24498f; }
+@keyframes call-cta-rev-cyan {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(0 200 230 / .0), 0 0 22px 4px rgb(0 200 230 / .32); }
+  50% { box-shadow: 0 0 0 3px rgb(0 200 230 / .26), 0 0 38px 10px rgb(0 200 230 / .48); }
+}
+:root:not(.dark) .call-cta-icon { background: #00313a; color: #e69756; }
+:root:not(.dark) .call-cta-sub { color: #00313a; }
+:root:not(.dark) .call-cta:focus-visible { outline-color: #0099b3; }
 @media (prefers-reduced-motion: reduce) {
   .call-cta, .call-cta::after, .call-cta-arrow { animation: none; transition: none; }
   .call-cta { box-shadow: 0 0 26px 6px rgb(255 168 96 / .32); }
   .call-cta:hover, .call-cta:focus-visible { transform: none; }
+  :root:not(.dark) .call-cta { animation: none; box-shadow: 0 0 26px 6px rgb(0 200 230 / .36); }
+}
+
+/* r11: Sobre mí, job cards woven into the story between accordions.
+   Rounded "ticket" with a dashed accent edge, so they read as milestones, not as buttons. */
+.about-story .md-acc-list { position: relative; }
+.job-card {
+  position: relative; z-index: 1; display: flex; align-items: flex-start; gap: 0.9rem;
+  margin: 0.75rem 0 0.75rem 0.5rem; padding: 0.85rem 1rem;
+  border-radius: 16px; border: 1.5px dashed color-mix(in oklab, var(--cp-accent) 70%, transparent);
+  border-left: 5px solid var(--cp-accent);
+  background: color-mix(in oklab, var(--cp-accent) 8%, transparent);
+}
+.job-logo { border-radius: 12px; background: var(--background); }
+.job-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.job-tag {
+  font-family: var(--font-orbitron), var(--font-display); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 0.1rem 0.5rem; border-radius: 999px;
+  background: var(--cp-accent); color: var(--background);
+}
+.job-period { font-family: var(--font-mono, monospace); font-size: 0.72rem; color: var(--cp-accent); }
+.job-org { margin-top: 0.3rem; font-weight: 800; font-size: 1.02rem; line-height: 1.2; }
+.job-role { font-size: 0.86rem; opacity: 0.8; }
+@media (max-width: 640px) {
+  .cp-shell .job-card { margin-left: 0; border-radius: 14px !important; background: color-mix(in oklab, var(--cp-accent) 8%, transparent) !important; }
 }
