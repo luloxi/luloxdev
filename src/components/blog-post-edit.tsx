@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState, type ReactNode } from "react";
 import { MdWysiwyg, ToolbarButton } from "@/components/md-wysiwyg";
+import { SectionReorder } from "@/components/section-reorder";
+import { joinSections, moveItem, splitSections } from "@/lib/article-sections";
 import type { BlogPost } from "@/content/blog/types";
 import { focusTopics } from "@/content/projects";
 import { useLocale } from "@/i18n/locale-provider";
@@ -78,7 +80,25 @@ export function useBlogPostEditor(post: BlogPost) {
   const [textFocus, setTextFocus] = useState(false);
   const [resetKey, setResetKey] = useState(0);
   const bodyRef = useRef(post.body[L]);
-  const extraDirty = title !== post.title[L] || summary !== post.summary[L] || !sameMeta(meta, metaOf(post));
+  // Bodies after section reorders (both languages move together when they line up).
+  const [bodies, setBodies] = useState(post.body);
+  const [reorderNote, setReorderNote] = useState("");
+  const [liveBody, setLiveBody] = useState(post.body[L]);
+  const O = (L === "es" ? "en" : "es") as "es" | "en";
+  const moveSection = (from: number, to: number) => {
+    const cur = splitSections(bodyRef.current);
+    const nextL = joinSections(moveItem(cur, from, to));
+    const other = splitSections(bodies[O] ?? "");
+    const sync = other.length === cur.length;
+    setBodies({ ...bodies, [L]: nextL, ...(sync ? { [O]: joinSections(moveItem(other, from, to)) } : {}) });
+    setReorderNote(sync || !(bodies[O] ?? "").trim() ? "" : es
+      ? "La versión en inglés tiene otra cantidad de secciones: reordenala por separado."
+      : "The Spanish version has a different number of sections: reorder it separately.");
+    bodyRef.current = nextL;
+    setLiveBody(nextL);
+  };
+  const reordered = bodies.es !== post.body.es || bodies.en !== post.body.en;
+  const extraDirty = reordered || title !== post.title[L] || summary !== post.summary[L] || !sameMeta(meta, metaOf(post));
 
   const build = (bodyMd: string, published = post.published): BlogPost => ({
     ...post,
@@ -90,7 +110,7 @@ export function useBlogPostEditor(post: BlogPost) {
     published,
     title: { ...post.title, [L]: title || post.title[L] },
     summary: { ...post.summary, [L]: summary },
-    body: { ...post.body, [L]: bodyMd },
+    body: { ...bodies, [L]: bodyMd },
   });
 
   const commit = async (next: BlogPost): Promise<string | null> => {
@@ -122,6 +142,10 @@ export function useBlogPostEditor(post: BlogPost) {
     setTitle(post.title[L]);
     setSummary(post.summary[L]);
     setMeta(metaOf(post));
+    setBodies(post.body);
+    bodyRef.current = post.body[L];
+    setLiveBody(post.body[L]);
+    setReorderNote("");
     setResetKey((k) => k + 1);
   };
 
@@ -212,8 +236,10 @@ export function useBlogPostEditor(post: BlogPost) {
   );
 
   const bodyNode = (
+    <>
+    <SectionReorder sections={splitSections(liveBody)} onMove={moveSection} es={es} note={reorderNote} />
     <MdWysiwyg
-      markdown={post.body[L]}
+      markdown={bodies[L]}
       blog
       className="blog-md"
       forceActive
@@ -221,8 +247,9 @@ export function useBlogPostEditor(post: BlogPost) {
       onCancelExtra={cancelExtra}
       onChange={(md) => {
         bodyRef.current = md;
+        setLiveBody(md);
       }}
-      onSave={(md, bodyDirty) => commit(build(bodyDirty ? md : post.body[L]))}
+      onSave={(md, bodyDirty) => commit(build(bodyDirty ? md : bodies[L]))}
       extraTools={
         <>
           <ToolbarButton
@@ -235,6 +262,7 @@ export function useBlogPostEditor(post: BlogPost) {
         </>
       }
     />
+    </>
   );
 
   return { titleNode, summaryNode, bodyNode, metaPanel, coverNode, dateNode, textFocus };
