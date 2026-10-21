@@ -4175,3 +4175,17 @@ body.ie-off .ie-row-pencil { display: none; }
 @media (max-width: 640px) {
   .cp-shell .job-card { margin-left: 0; margin-right: 0; border-radius: 14px !important; background: color-mix(in oklab, var(--cp-accent) 8%, transparent) !important; }
 }
+
+/* r12: light theme mirrors dark's container structure. No light-only drop shadows,
+   panel fills or chevron boxes; buttons keep their own fills. */
+:root:not(.dark) .cp-panel,
+:root:not(.dark) .cp-accordion,
+:root:not(.dark) .cp-nav-item,
+:root:not(.dark) .cp-row,
+:root:not(.dark) .cp-back-footer,
+:root:not(.dark) .project-meta-row,
+:root:not(.dark) .cp-page-title-mark { box-shadow: none; }
+:root:not(.dark) .cp-panel,
+:root:not(.dark) .cp-accordion { background: color-mix(in oklab, var(--cp-accent) 7%, transparent); }
+:root:not(.dark) .cp-back-chevron { background: none; box-shadow: none; }
+:root:not(.dark) .cp-panel:has(.md-acc) { background: none; }
