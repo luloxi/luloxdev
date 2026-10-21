@@ -4204,3 +4204,8 @@ body.ie-off .ie-row-pencil { display: none; }
   color: var(--section-about); background: transparent; font-size: .82rem; font-weight: 700; cursor: pointer;
 }
 .story-add-menu button:hover { background: color-mix(in oklab, var(--section-about) 14%, transparent); }
+
+/* r13: job accents can be any brand color; keep small text legible on white. */
+:root:not(.dark) .job-card[data-brand-accent] .job-period { color: color-mix(in oklab, var(--cp-accent) 72%, #000); }
+:root:not(.dark) .job-card[data-brand-accent] .job-tag { background: color-mix(in oklab, var(--cp-accent) 80%, #000); color: #fff; }
+.dark .job-card[data-brand-accent] .job-period { color: color-mix(in oklab, var(--cp-accent) 85%, #fff); }

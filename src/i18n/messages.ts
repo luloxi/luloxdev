@@ -37,6 +37,7 @@ export const messages = {
           period: "Jul 2025 - Presente",
           title: "Research & Development",
           org: "Input Output Global",
+          accent: "#e71b00",
           description:
             "Investigación económica y técnica en blockchain, finanzas y AI. Desarrollo de automatizaciones, agentes y webapps.",
         },
@@ -44,6 +45,7 @@ export const messages = {
           period: "Abr 2023 - May 2024",
           title: "Fullstack Web3 developer",
           org: "BuidlGuidl",
+          accent: "",
           description:
             "Desarrollo de aplicaciones web3 con Scaffold-ETH 2 y Solidity para el ecosistema Ethereum como bien público.",
         },
@@ -51,6 +53,7 @@ export const messages = {
           period: "Ago 2015 - Feb 2020",
           title: "Community Manager",
           org: "FEDUN",
+          accent: "#009c4e",
           description:
             "Multimedia y marketing digital para prensa: web (LAMP, Moodle, WordPress, SEO, accesibilidad ARIA), redes sociales, fotografía y video de eventos, newsletters con Mailchimp.",
         },
@@ -264,6 +267,7 @@ export const messages = {
           period: "Jul 2025 - Present",
           title: "Research & Development",
           org: "Input Output Global",
+          accent: "#e71b00",
           description:
             "Economic and technical research on blockchain, finance, and AI. Development of automations, agents, and webapps.",
         },
@@ -271,6 +275,7 @@ export const messages = {
           period: "Apr 2023 - May 2024",
           title: "Fullstack Web3 developer",
           org: "BuidlGuidl",
+          accent: "",
           description:
             "Development of web3 applications with Scaffold-ETH 2 and Solidity for the Ethereum ecosystem as a public good.",
         },
@@ -278,6 +283,7 @@ export const messages = {
           period: "Aug 2015 - Feb 2020",
           title: "Community Manager",
           org: "FEDUN",
+          accent: "#009c4e",
           description:
             "Multimedia and digital marketing for the press office: web (LAMP, Moodle, WordPress, SEO, ARIA accessibility), social media, event photography and video, Mailchimp newsletters.",
         },

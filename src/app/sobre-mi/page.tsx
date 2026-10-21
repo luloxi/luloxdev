@@ -140,7 +140,8 @@ export default function AboutPage() {
   );
 }
 
-type Job = { period: string; title: string; org: string; description: string };
+/** accent: optional CSS color for the card ("" = theme palette). */
+type Job = { period: string; title: string; org: string; description: string; accent?: string };
 
 const addLabels = {
   es: { add: "Agregar", story: "Relato", job: "Experiencia laboral", newStory: "Nuevo relato", newStoryBody: "Escribí acá.", period: "Fecha - Fecha", role: "Puesto", org: "Empresa", desc: "Descripción.", error: "No se pudo guardar" },
@@ -192,9 +193,9 @@ function AddSlot({ after, body, timeline, layout }: { after: number; body: strin
 
 function JobCard({ item, i, label }: { item: Job; i: number; label: string }) {
   const logo = orgLogos[item.org];
-  const accent = timelineAccents[i % timelineAccents.length];
+  const accent = /^#[0-9a-f]{3,8}$/i.test(item.accent ?? "") ? item.accent! : timelineAccents[i % timelineAccents.length];
   return (
-    <aside className="job-card tl-item" style={{ ["--cp-accent" as string]: accent }} aria-label={`${label}: ${item.org}`}>
+    <aside className="job-card tl-item" data-brand-accent={accent === item.accent ? "" : undefined} style={{ ["--cp-accent" as string]: accent }} aria-label={`${label}: ${item.org}`}>
       {logo ? (
         <span className={`tl-logo job-logo${logo.type === "image" && logo.light ? " job-logo-light" : ""} inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden sm:h-16 sm:w-16`}>
           {logo.type === "image" ? (
