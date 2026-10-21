@@ -4134,7 +4134,7 @@ body.ie-off .ie-row-pencil { display: none; }
 .call-cta-arrow { flex: none; font-size: 1.5rem; font-weight: 800; transition: transform .2s ease; }
 .call-cta:hover .call-cta-arrow { transform: translateX(4px); }
 :root:not(.dark) .call-cta {
-  background: linear-gradient(135deg, #e69756 0%, #d67c3e 100%); color: #004d5c; border-color: #0099b3;
+  background: linear-gradient(135deg, #ecb180 0%, #e09d6e 100%); color: #004d5c; border-color: #0099b3;
   text-shadow: 0 1px 0 rgb(255 255 255 / .28);
   animation-name: call-cta-rev-cyan;
 }
