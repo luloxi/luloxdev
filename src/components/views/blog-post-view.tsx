@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useLocale } from "@/i18n/locale-provider";
 import { useEditMode } from "@/components/admin-context";
 import { useBlogPostEditor } from "@/components/blog-post-edit";
-import { useRef, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { ReadingProgress } from "@/components/reading-progress";
 
 
@@ -44,6 +44,7 @@ function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
   const { t, locale } = useLocale();
   const L = localizePost(post, locale);
   const articleRef = useRef<HTMLElement>(null);
+  const [coverShape, setCoverShape] = useState<"square" | "wide" | "tall">("square");
 
   return (
     <PageShell
@@ -74,12 +75,12 @@ function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
                   height={1600}
                   sizes="(max-width: 640px) 100vw, 820px"
                   className="blog-cover-img"
-                  data-shape="square"
+                  data-shape={coverShape}
                   onLoad={(e) => {
                     const img = e.currentTarget;
                     if (!img.naturalWidth || !img.naturalHeight) return;
                     const r = img.naturalWidth / img.naturalHeight;
-                    img.dataset.shape = r > 1.25 ? "wide" : r < 0.8 ? "tall" : "square";
+                    setCoverShape(r > 1.25 ? "wide" : r < 0.8 ? "tall" : "square");
                   }}
                   priority
                 />
