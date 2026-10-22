@@ -124,3 +124,17 @@ test("Turnstile: no secret configured → 503; siteverify down → 403", async (
   assert.equal((await handleHireContact(ok, { ...env, fetch: down }, "x")).status, 403);
   assert.equal(sent.length, 0);
 });
+
+test("default calculator quote is recomputed server-side to the same totals", async () => {
+  for (const [b, total] of [
+    [{ mode: "project", hours: 4, complexity: "low", onSite: false, days: 1, extra: false, total: 9999 }, "US$ 40"],
+    [{ mode: "hourly", hours: 2, complexity: "low", onSite: false, days: 1, extra: false }, "US$ 20"],
+  ] as const) {
+    const { env, sent } = mkEnv({ resend: true });
+    assert.equal((await handleHireContact({ ...ok, budget: b }, env, "x")).status, 200);
+    const text = String((sent[0] as { m: { text: string } }).m.text);
+    assert.match(text, new RegExp(`Total estimado: ${total.replace("$", "\\$")}\\n`));
+    assert.match(text, /Presencial: no/);
+    assert.match(text, /Condiciones especiales: no/);
+  }
+});

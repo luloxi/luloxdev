@@ -114,9 +114,9 @@ function useCountUp(value: number) {
 export function HireCalculator() {
   const { locale } = useLocale();
   const c = copy[locale === "en" ? "en" : "es"];
-  const [mode, setMode] = useState<Mode>("project");
-  const [hours, setHours] = useState(PRICING.sizes.m);
-  const [complexity, setComplexity] = useState<Complexity>("medium");
+  const [mode, setMode] = useState<Mode>(PRICING.defaults.mode);
+  const [hours, setHours] = useState(PRICING.defaults[PRICING.defaults.mode].hours);
+  const [complexity, setComplexity] = useState<Complexity>(PRICING.defaults.project.complexity);
   const [onSite, setOnSite] = useState(false);
   const [days, setDays] = useState(1);
   const [extra, setExtra] = useState(false);
@@ -128,7 +128,7 @@ export function HireCalculator() {
 
   const switchMode = (m: Mode) => {
     setMode(m);
-    setHours(m === "project" ? PRICING.sizes.m : 4);
+    setHours(PRICING.defaults[m].hours);
   };
 
   return (
@@ -138,7 +138,7 @@ export function HireCalculator() {
       <fieldset className="hire-field">
         <legend className="hire-label">{c.mode}</legend>
         <div className="hire-seg" role="radiogroup" aria-label={c.mode}>
-          {(["project", "hourly"] as Mode[]).map((m) => (
+          {(["hourly", "project"] as Mode[]).map((m) => (
             <button key={m} type="button" role="radio" aria-checked={mode === m} className="hire-seg-btn" onClick={() => switchMode(m)}>
               {c.modes[m]}
             </button>

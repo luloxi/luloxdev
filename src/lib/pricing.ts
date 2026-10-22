@@ -16,6 +16,13 @@ export const PRICING = {
   extra: 100,
   /** Project size presets in hours (research, build, testing, polish, feedback, fixes, delivery). */
   sizes: { s: 10, m: 20, l: 40 },
+  /** Calculator starting values: a low, friendly first price. No on-site, no extras. */
+  defaults: {
+    /** Mode the calculator opens in (shown first, on the left). */
+    mode: "hourly" as Mode,
+    project: { hours: 4, complexity: "low" as Complexity },
+    hourly: { hours: 2 },
+  },
   maxProjectHours: 40,
   maxHourlyHours: 6,
   maxOnSiteDays: 10,

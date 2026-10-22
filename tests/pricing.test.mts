@@ -38,3 +38,14 @@ test("project on-site: days × (25 + 25), not discounted", () => {
   assert.equal(r.lines.find((l) => l.id === "travel")?.days, 3);
   assert.equal(estimate({ mode: "project", hours: 10, complexity: "low", extra: false, onSite: true, onSiteDays: 99 }).total, 100 + 500);
 });
+
+test("calculator defaults: low, friendly first price, nothing extra selected", () => {
+  const { mode, project, hourly } = PRICING.defaults;
+  assert.equal(mode, "hourly");
+  assert.deepEqual(project, { hours: 4, complexity: "low" });
+  assert.equal(hourly.hours, 2);
+  const p = estimate({ mode: "project", hours: project.hours, complexity: project.complexity, extra: false, onSite: false });
+  assert.equal(p.total, 40); // 4h × US$10, no discount, no on-site, no extras
+  assert.deepEqual(p.lines.map((l) => l.id), ["work"]);
+  assert.equal(estimate({ mode: "hourly", hours: hourly.hours, complexity: project.complexity, extra: false, onSite: false }).total, 20);
+});

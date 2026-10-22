@@ -4281,7 +4281,7 @@ body.ie-off .ie-row-pencil { display: none; }
 .sec-reorder-note { margin: .5rem 0 0; font-size: .75rem; opacity: .75; }
 
 /* r19: Contratar / Hire me calculator. Nick orange (#ff8a1e) × Judy cyan (#00d4ff). */
-.hire { --o: #ff8a1e; --cy: #00d4ff; --ink: var(--foreground); display: grid; gap: 1.4rem; }
+.hire { --o: #ff8a1e; --cy: #00d4ff; --ink: var(--foreground); display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.4rem; }
 :root:not(.dark) .hire { --o: #d9640a; --cy: #0090b0; }
 .hire-intro { color: var(--muted); font-size: .95rem; line-height: 1.6; margin: 0; }
 .hire-field { border: 0; padding: 0; margin: 0; display: grid; gap: .6rem; min-width: 0; }
