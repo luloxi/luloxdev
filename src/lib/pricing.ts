@@ -1,6 +1,6 @@
 /**
  * Lulox's pricing method (public, no client data). Edit the numbers here.
- *  - Per project: (hours × hourly rate by complexity) + extra
+ *  - Per project: (hours × complexity rate) + extra
  *  - Per hour / on-site: (hours × rate) + on-site surcharge + travel + extra
  */
 export type Complexity = "low" | "medium" | "high";
