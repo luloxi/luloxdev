@@ -4339,7 +4339,9 @@ body.ie-off .ie-row-pencil { display: none; }
 .hire-formula { margin: .4rem 0 0; font-size: .75rem; color: var(--muted); }
 .hire-formula code { color: var(--cy); }
 /* Home nav: odd last tile spans both columns. */
-@media (min-width: 640px) { .cp-nav > .cp-nav-item:last-child:nth-child(odd) { grid-column: 1 / -1; } }
+/* r21: Contratar leads the menu: full row, double gap below, subtle violet glow. */
+.cp-nav > .cp-nav-item[data-section="hire"] { grid-column: 1 / -1; margin-bottom: 0.4rem;
+  box-shadow: 0 0 18px -4px color-mix(in srgb, var(--section-hire) 55%, transparent), 0 0 34px -10px color-mix(in srgb, var(--section-hire) 45%, transparent); }
 @media (prefers-reduced-motion: reduce) { .hire *, .hire-cx-card { transition: none !important; } }
 
 /* r21: on-site days stepper (project mode). */

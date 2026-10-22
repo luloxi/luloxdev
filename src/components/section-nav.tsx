@@ -31,6 +31,7 @@ export function SectionNav() {
             key={s.href}
             href={s.href}
             className="cp-nav-item group"
+            data-section={s.id}
             style={{ ["--cp-accent" as string]: accent }}
           >
             <span className="cp-nav-frame" aria-hidden>
