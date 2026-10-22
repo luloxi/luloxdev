@@ -4439,3 +4439,18 @@ body.ie-off .ie-row-pencil { display: none; }
 :root:not(.dark) .hire-act-contact { background: #004d5c; color: #ecb180; border-color: #ecb180; }
 :root:not(.dark) .hire-act-call:focus-visible, :root:not(.dark) .hire-act-contact:focus-visible { outline-color: #004d5c; }
 @media (prefers-reduced-motion: reduce) { .hire-act { transition: none; } .hire-act:hover, .hire-act:focus-visible { transform: none; } }
+/* r27: form sits right under Escribime on mobile; after the three buttons on desktop. */
+.hire-ctas > .hire-form-panel { grid-column: 1 / -1; }
+@media (min-width: 640px) { .hire-ctas > .hire-form-panel { order: 4; } }
+.hire-form-field input, .hire-form-field textarea, .hire-form-status, .hire-form-send { scroll-margin-top: 72px; scroll-margin-bottom: 16px; }
+.hire-form-status:empty { display: none; }
+.hire-ctas > .hire-form-panel { transition: grid-template-rows .4s ease, opacity .3s ease; }
+.hire-ctas > .hire-form-panel > .hire-form { padding-top: 4px; }
+.hire-ctas > .hire-form-panel:not([data-open="true"]) > .hire-form { padding-top: 0; }
+@media (prefers-reduced-motion: reduce) { .hire-ctas > .hire-form-panel { transition: none; } }
+.hire-ctas > .hire-form-panel { align-self: start; }
+/* Row gaps via margins so the collapsed panel adds no space. */
+.hire-ctas { row-gap: 0; column-gap: 1rem; }
+.hire-ctas > .hire-act:not(:first-child) { margin-top: 1rem; }
+.hire-ctas > .hire-form-panel[data-open="true"] > .hire-form { padding-top: 1rem; }
+@media (min-width: 640px) { .hire-ctas > .hire-act:not(:first-child) { margin-top: 0; } }

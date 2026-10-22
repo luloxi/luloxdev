@@ -246,6 +246,18 @@ export function HireCalculator() {
           {c.write}
           <span className="hire-btn-rainbow" aria-hidden />
         </button>
+        <HireForm
+          open={formOpen}
+          c={c}
+          budget={{ mode, hours: Math.min(hours, maxH), complexity, onSite, days, extra }}
+          rows={[
+            [c.mode, c.modes[mode]],
+            [c.hours, `${Math.min(hours, maxH)}h · ${c.cx[complexity][0]} (US$ ${PRICING.rates[complexity]}${c.perHour})`],
+            [c.onSite, onSite ? (mode === "project" ? `${c.form.yes}, ${days} ${c.dayUnit[days === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
+            [c.extra, extra ? c.form.yes : c.form.no],
+            [c.total, money(r.total)],
+          ]}
+        />
         <a className="hire-act hire-act-call" href={CALL_BOOKING_URL} target="_blank" rel="noopener noreferrer" data-testid="hire-call-cta">
           {c.cta}
         </a>
@@ -254,18 +266,6 @@ export function HireCalculator() {
         </Link>
       </div>
 
-      <HireForm
-        open={formOpen}
-        c={c}
-        budget={{ mode, hours: Math.min(hours, maxH), complexity, onSite, days, extra }}
-        rows={[
-          [c.mode, c.modes[mode]],
-          [c.hours, `${Math.min(hours, maxH)}h · ${c.cx[complexity][0]} (US$ ${PRICING.rates[complexity]}${c.perHour})`],
-          [c.onSite, onSite ? (mode === "project" ? `${c.form.yes}, ${days} ${c.dayUnit[days === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
-          [c.extra, extra ? c.form.yes : c.form.no],
-          [c.total, money(r.total)],
-        ]}
-      />
     </div>
   );
 }
@@ -286,8 +286,46 @@ type Copy = (typeof copy)["es"];
 
 function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: Record<string, unknown>; rows: [string, string][] }) {
   const first = useRef<HTMLInputElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const status = useRef<HTMLParagraphElement>(null);
+  // Mobile: reveal first, then focus. Focusing a field that is still collapsed/below the fold
+  // opens the keyboard over nothing. Wait for the expand transition (instant with reduced motion),
+  // scroll the field to the top of the visual viewport, focus, and re-align once the keyboard resizes it.
   useEffect(() => {
-    if (open) first.current?.focus({ preventScroll: true });
+    if (!open) return;
+    const el = first.current;
+    const pn = panel.current;
+    if (!el || !pn) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const vv = window.visualViewport;
+    let done = false;
+    const align = () => el.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+    const onResize = () => {
+      if (document.activeElement === el) align();
+    };
+    const reveal = () => {
+      if (done) return;
+      done = true;
+      align();
+      el.focus({ preventScroll: true });
+      vv?.addEventListener("resize", onResize);
+    };
+    const onEnd = (e: TransitionEvent) => {
+      if (e.target === pn && e.propertyName === "grid-template-rows") reveal();
+    };
+    let t = 0;
+    if (reduce) reveal();
+    else {
+      pn.addEventListener("transitionend", onEnd);
+      t = window.setTimeout(reveal, 500);
+    }
+    const stop = window.setTimeout(() => vv?.removeEventListener("resize", onResize), 1500);
+    return () => {
+      pn.removeEventListener("transitionend", onEnd);
+      window.clearTimeout(t);
+      window.clearTimeout(stop);
+      vv?.removeEventListener("resize", onResize);
+    };
   }, [open]);
   const f = c.form;
   const [name, setName] = useState("");
@@ -297,6 +335,9 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
   const [state, setState] = useState<"idle" | "sending" | "ok" | "error">("idle");
   const [err, setErr] = useState("");
   const left = 280 - [...message].length;
+
+  const reveal = () =>
+    requestAnimationFrame(() => status.current?.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -311,35 +352,38 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
       const j = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
       if (res.ok && j.ok) {
         setState("ok");
+        reveal();
         setMessage("");
       } else {
         setState("error");
         setErr(f.err[j.error ?? ""] ?? f.err.default);
+        reveal();
       }
     } catch {
       setState("error");
       setErr(f.err.default);
+      reveal();
     }
   };
 
   return (
-    <div id="hire-form-panel" className="hire-form-panel" data-open={open} inert={!open}>
+    <div ref={panel} id="hire-form-panel" className="hire-form-panel" data-open={open} inert={!open}>
     <form className="hire-form" onSubmit={submit} data-testid="hire-form">
       <div className="hire-form-row">
         <label className="hire-form-field">
           <span>{f.name}</span>
-          <input ref={first} required maxLength={80} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
+          <input ref={first} required maxLength={80} autoComplete="name" autoCapitalize="words" enterKeyHint="next" value={name} onChange={(e) => setName(e.target.value)} />
         </label>
         <label className="hire-form-field">
           <span>{f.email}</span>
-          <input required type="email" maxLength={254} autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input required type="email" inputMode="email" autoCapitalize="none" spellCheck={false} enterKeyHint="next" maxLength={254} autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         </label>
       </div>
       <label className="hire-form-field">
         <span className="hire-form-msg-label">
           {f.message} <output className={`hire-form-count${left < 0 ? " is-over" : left <= 20 ? " is-low" : ""}`} aria-live="polite">{left}</output>
         </span>
-        <textarea required rows={4} placeholder={f.ph} value={message} onChange={(e) => setMessage(e.target.value)} />
+        <textarea required rows={4} enterKeyHint="send" placeholder={f.ph} value={message} onChange={(e) => setMessage(e.target.value)} />
       </label>
       <label className="hire-hp" aria-hidden="true">
         Website <input tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
@@ -359,7 +403,7 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
         <button type="submit" className="hire-form-send" disabled={state === "sending" || left < 0}>
           {state === "sending" ? f.sending : f.send}
         </button>
-        <p className="hire-form-status" role="status">{state === "ok" ? f.ok : state === "error" ? err : ""}</p>
+        <p ref={status} className="hire-form-status" role="status">{state === "ok" ? f.ok : state === "error" ? err : ""}</p>
       </div>
     </form>
     </div>

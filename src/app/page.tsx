@@ -114,7 +114,7 @@ export default function HomePage() {
           </div>
         </div>
       </main>
-      <a className="home-steal" href="https://github.com/luloxi/luloxdev" target="_blank" rel="noopener noreferrer">
+      <a className="home-steal" href="https://github.com/luloxi/steal-this-portfolio" target="_blank" rel="noopener noreferrer">
         <GitHubIcon className="home-steal-icon" />
         Steal this portfolio!
       </a>
