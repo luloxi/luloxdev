@@ -74,17 +74,6 @@ export default function HomePage() {
                 laugh();
               }}
             >
-              <span className="avatar-hud-frame" aria-hidden>
-                <span className="avatar-hud-corner avatar-hud-corner-tl" />
-                <span className="avatar-hud-corner avatar-hud-corner-tr" />
-                <span className="avatar-hud-corner avatar-hud-corner-bl" />
-                <span className="avatar-hud-corner avatar-hud-corner-br" />
-                <span className="avatar-hud-tick avatar-hud-tick-t" />
-                <span className="avatar-hud-tick avatar-hud-tick-b" />
-                <span className="avatar-hud-tick avatar-hud-tick-l" />
-                <span className="avatar-hud-tick avatar-hud-tick-r" />
-              </span>
-
               <div className="avatar-hud-photo">
                 <Image
                   src={site.heroPhoto}
