@@ -4355,20 +4355,12 @@ body.ie-off .ie-row-pencil { display: none; }
 .hire-ctas { display: grid; gap: .75rem; grid-template-columns: 1fr; align-items: stretch; }
 @media (min-width: 640px) { .hire-ctas { grid-template-columns: 2fr 1fr; } }
 .hire-ctas .call-cta { margin: 0; height: 100%; }
-.hire-cta-alt { position: relative; display: grid; align-content: center; gap: .2rem; padding: .9rem 2.6rem .9rem 1.1rem; border-radius: 14px;
-  border: 1px solid color-mix(in srgb, var(--cy, #00d4ff) 50%, transparent); color: var(--foreground); transition: transform .2s, box-shadow .2s, border-color .2s; }
-.hire-cta-alt:hover, .hire-cta-alt:focus-visible { transform: translateY(-2px); border-color: var(--cy, #00d4ff); box-shadow: 0 0 20px -6px var(--cy, #00d4ff); }
-.hire-cta-alt:focus-visible { outline: 2px solid var(--cy, #00d4ff); outline-offset: 3px; }
-.hire-cta-alt-title { font-weight: 800; font-size: 1.05rem; color: var(--cy, #00d4ff); }
-.hire-cta-alt-sub { font-size: .82rem; color: var(--muted); }
-.hire-cta-alt .call-cta-arrow { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--cy, #00d4ff); }
 
 /* /contratar: formula on its own line, never split */
 .hire-formula code { display: block; white-space: nowrap; overflow-x: auto; margin-top: .15rem; scrollbar-width: none; }
 
 /* /contratar contact form (no box: same look in light and dark) */
-.hire-form { display: grid; gap: .9rem; margin-top: 1.6rem; }
-.hire-form-title { margin: 0; font-size: inherit; }
+.hire-form { display: grid; gap: .9rem; padding: 1.2rem 4px 4px; margin: 0 -4px; }
 .hire-form-row { display: grid; gap: .9rem; grid-template-columns: 1fr 1fr; }
 @media (max-width: 640px) { .hire-form-row { grid-template-columns: 1fr; } }
 .hire-form-field { display: grid; gap: .35rem; font-size: .85rem; color: var(--muted); }
@@ -4402,3 +4394,20 @@ body.ie-off .ie-row-pencil { display: none; }
 :root:not(.dark) .cp-nav > .cp-nav-item[data-section="hire"] { --snot: #3FD400; }
 @keyframes snot-pulse { 50% { box-shadow: 0 0 18px -4px color-mix(in srgb, var(--section-hire) 55%, transparent), 0 0 34px 0 color-mix(in srgb, var(--snot) 85%, transparent), 0 0 64px -4px color-mix(in srgb, var(--snot) 55%, transparent); } }
 @media (prefers-reduced-motion: reduce) { .cp-nav > .cp-nav-item[data-section="hire"] { animation: none; } }
+
+/* r24: "Escribime" = video-call button with colors inverted; toggles the form panel. */
+.hire-write { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.15rem 1.35rem; border-radius: 20px; cursor: pointer;
+  background: #ffa860; color: #24498f; border: 2px solid #24498f; font: inherit; text-align: left; transition: transform .2s ease, filter .2s ease; }
+.hire-write:hover, .hire-write:focus-visible { transform: translateY(-2px) scale(1.01); filter: brightness(1.05); }
+.hire-write:focus-visible { outline: 3px solid #ffa860; outline-offset: 3px; }
+.hire-write .call-cta-arrow { transition: transform .3s ease; }
+.hire-write[aria-expanded="true"] .call-cta-arrow { transform: rotate(180deg); }
+:root:not(.dark) .hire-write { background: #004d5c; color: #ecb180; border-color: #ecb180; }
+:root:not(.dark) .hire-write:focus-visible { outline-color: #004d5c; }
+.hire-form-panel { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .4s ease, opacity .3s ease; }
+.hire-form-panel > .hire-form { overflow: hidden; min-height: 0; }
+.hire-form-panel[data-open="true"] { grid-template-rows: 1fr; opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .hire-form-panel, .hire-write, .hire-write .call-cta-arrow { transition: none; } .hire-write:hover, .hire-write:focus-visible { transform: none; } }
+.hire-form-panel > .hire-form { transition: padding .4s ease; }
+.hire-form-panel:not([data-open="true"]) > .hire-form { padding-block: 0; }
+@media (prefers-reduced-motion: reduce) { .hire-form-panel > .hire-form { transition: none; } }

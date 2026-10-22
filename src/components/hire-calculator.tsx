@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CALL_BOOKING_URL } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
@@ -43,8 +42,8 @@ const copy = {
     fProject: "(horas × valor por complejidad) + extra",
     fHourly: "(horas × valor por complejidad) + presencial + viático + extra",
     cta: "Agendar una videollamada",
-    contact: "Contacto",
-    form: { title: "Escribime", name: "Nombre", email: "Tu email", message: "Mensaje", ph: "Contame qué necesitás…", budget: "Presupuesto que se envía", send: "Enviar", sending: "Enviando…", ok: "¡Listo! Te respondo a tu email.", err: { invalid_name: "Falta tu nombre.", invalid_email: "Revisá el email.", invalid_message: "El mensaje debe tener entre 1 y 280 caracteres.", rate_limited: "Demasiados envíos. Probá en un rato.", default: "No se pudo enviar. Probá de nuevo." } as Record<string, string>, yes: "sí", no: "no" },
+    write: "Escribime",
+    form: { name: "Nombre", email: "Tu email", message: "Mensaje", ph: "Contame qué necesitás…", budget: "Presupuesto que se envía", send: "Enviar", sending: "Enviando…", ok: "¡Listo! Te respondo a tu email.", err: { invalid_name: "Falta tu nombre.", invalid_email: "Revisá el email.", invalid_message: "El mensaje debe tener entre 1 y 280 caracteres.", rate_limited: "Demasiados envíos. Probá en un rato.", default: "No se pudo enviar. Probá de nuevo." } as Record<string, string>, yes: "sí", no: "no" },
   },
   en: {
     intro: "Your quote in seconds.",
@@ -82,8 +81,8 @@ const copy = {
     fProject: "(hours × rate by complexity) + extra",
     fHourly: "(hours × rate by complexity) + on-site + travel + extra",
     cta: "Book a video call",
-    contact: "Contact",
-    form: { title: "Write to me", name: "Name", email: "Your email", message: "Message", ph: "Tell me what you need…", budget: "Quote that will be sent", send: "Send", sending: "Sending…", ok: "Done! I'll reply to your email.", err: { invalid_name: "Your name is missing.", invalid_email: "Check the email.", invalid_message: "Message must be 1–280 characters.", rate_limited: "Too many sends. Try again later.", default: "Couldn't send. Try again." } as Record<string, string>, yes: "yes", no: "no" },
+    write: "Write me",
+    form: { name: "Name", email: "Your email", message: "Message", ph: "Tell me what you need…", budget: "Quote that will be sent", send: "Send", sending: "Sending…", ok: "Done! I'll reply to your email.", err: { invalid_name: "Your name is missing.", invalid_email: "Check the email.", invalid_message: "Message must be 1–280 characters.", rate_limited: "Too many sends. Try again later.", default: "Couldn't send. Try again." } as Record<string, string>, yes: "yes", no: "no" },
   },
 };
 
@@ -118,6 +117,7 @@ export function HireCalculator() {
   const [onSite, setOnSite] = useState(false);
   const [days, setDays] = useState(1);
   const [extra, setExtra] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
 
   const r = estimate({ mode, hours, complexity, extra, onSite, onSiteDays: days });
   const total = useCountUp(r.total);
@@ -238,18 +238,6 @@ export function HireCalculator() {
         </p>
       </section>
 
-      <HireForm
-        c={c}
-        budget={{ mode, hours: Math.min(hours, maxH), complexity, onSite, days, extra }}
-        rows={[
-          [c.mode, c.modes[mode]],
-          [c.hours, `${Math.min(hours, maxH)}h · ${c.cx[complexity][0]} (US$ ${PRICING.rates[complexity]}${c.perHour})`],
-          [c.onSite, onSite ? (mode === "project" ? `${c.form.yes}, ${days} ${c.dayUnit[days === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
-          [c.extra, extra ? c.form.yes : c.form.no],
-          [c.total, money(r.total)],
-        ]}
-      />
-
       <div className="hire-ctas">
       <a className="call-cta" href={CALL_BOOKING_URL} target="_blank" rel="noopener noreferrer" data-testid="hire-call-cta">
         <span className="call-cta-icon" aria-hidden="true">
@@ -263,11 +251,24 @@ export function HireCalculator() {
         </span>
         <span className="call-cta-arrow" aria-hidden="true">→</span>
       </a>
-        <Link className="hire-cta-alt" href="/contacto">
-          <span className="hire-cta-alt-title">{c.contact}</span>
-          <span className="call-cta-arrow" aria-hidden="true">→</span>
-        </Link>
+        <button type="button" className="hire-write" aria-expanded={formOpen} aria-controls="hire-form-panel" onClick={() => setFormOpen((o) => !o)} data-testid="hire-write">
+          <span className="call-cta-title">{c.write}</span>
+          <span className="call-cta-arrow" aria-hidden="true">↓</span>
+        </button>
       </div>
+
+      <HireForm
+        open={formOpen}
+        c={c}
+        budget={{ mode, hours: Math.min(hours, maxH), complexity, onSite, days, extra }}
+        rows={[
+          [c.mode, c.modes[mode]],
+          [c.hours, `${Math.min(hours, maxH)}h · ${c.cx[complexity][0]} (US$ ${PRICING.rates[complexity]}${c.perHour})`],
+          [c.onSite, onSite ? (mode === "project" ? `${c.form.yes}, ${days} ${c.dayUnit[days === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
+          [c.extra, extra ? c.form.yes : c.form.no],
+          [c.total, money(r.total)],
+        ]}
+      />
     </div>
   );
 }
@@ -286,7 +287,11 @@ function Toggle({ on, set, label, sub, disabled }: { on: boolean; set: (v: boole
 
 type Copy = (typeof copy)["es"];
 
-function HireForm({ c, budget, rows }: { c: Copy; budget: Record<string, unknown>; rows: [string, string][] }) {
+function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: Record<string, unknown>; rows: [string, string][] }) {
+  const first = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (open) first.current?.focus({ preventScroll: true });
+  }, [open]);
   const f = c.form;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -321,12 +326,12 @@ function HireForm({ c, budget, rows }: { c: Copy; budget: Record<string, unknown
   };
 
   return (
+    <div id="hire-form-panel" className="hire-form-panel" data-open={open} inert={!open}>
     <form className="hire-form" onSubmit={submit} data-testid="hire-form">
-      <h2 className="hire-label hire-form-title">{f.title}</h2>
       <div className="hire-form-row">
         <label className="hire-form-field">
           <span>{f.name}</span>
-          <input required maxLength={80} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
+          <input ref={first} required maxLength={80} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
         </label>
         <label className="hire-form-field">
           <span>{f.email}</span>
@@ -360,5 +365,6 @@ function HireForm({ c, budget, rows }: { c: Copy; budget: Record<string, unknown
         <p className="hire-form-status" role="status">{state === "ok" ? f.ok : state === "error" ? err : ""}</p>
       </div>
     </form>
+    </div>
   );
 }
