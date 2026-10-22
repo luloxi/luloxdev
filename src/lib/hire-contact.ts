@@ -1,4 +1,7 @@
 import { estimate, PRICING, type Complexity, type Mode } from "./pricing";
+import { MAX_MESSAGE } from "./hire-limits";
+
+export { MAX_MESSAGE };
 
 /**
  * /contratar contact form: validates the submission, recomputes the budget
@@ -19,7 +22,6 @@ export type HireEnv = {
   fetch?: typeof fetch;
 };
 
-export const MAX_MESSAGE = 280;
 const EMAIL_RE = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]{2,}$/;
 const MODES: Mode[] = ["project", "hourly"];
 const CX: Complexity[] = ["low", "medium", "high"];
@@ -86,7 +88,7 @@ export async function handleHireContact(raw: unknown, env: HireEnv, ip: string):
   if (!raw || typeof raw !== "object") return { status: 400, body: { error: "invalid_json" } };
   const body = raw as Record<string, unknown>;
   // Honeypot: bots fill hidden fields. Pretend success, send nothing.
-  if (typeof body.website === "string" && body.website.trim() !== "") return { status: 200, body: { ok: true } };
+  for (const hp of [body.website, body.hire_hp]) if (typeof hp === "string" && hp.trim() !== "") return { status: 200, body: { ok: true } };
 
   const name = typeof body.name === "string" ? oneLine(body.name).slice(0, 80) : "";
   const email = typeof body.email === "string" ? body.email.trim() : "";
@@ -149,4 +151,23 @@ export async function handleHireContact(raw: unknown, env: HireEnv, ip: string):
     return { status: 502, body: { error: "send_failed" } };
   }
   return { status: 200, body: { ok: true } };
+}
+
+/**
+ * Native <form method="post"> fallback (no fetch): maps urlencoded/multipart fields to the JSON
+ * shape. Turnstile injects its token as `cf-turnstile-response`; it is still verified server-side.
+ */
+export function bodyFromForm(entries: Iterable<[string, unknown]>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  const budget: Record<string, unknown> = {};
+  for (const [k, raw] of entries) {
+    if (typeof raw !== "string") continue;
+    if (k.startsWith("budget.")) {
+      const key = k.slice(7);
+      budget[key] = raw === "true" ? true : raw === "false" ? false : /^\d+$/.test(raw) ? Number(raw) : raw;
+    } else if (k === "cf-turnstile-response") out.turnstileToken = raw;
+    else if (["name", "email", "message", "hire_hp", "turnstileToken"].includes(k)) out[k] = raw;
+  }
+  out.budget = budget;
+  return out;
 }

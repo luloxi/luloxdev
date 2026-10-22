@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CALL_BOOKING_URL, site } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
+import { MagicHr } from "@/components/magic-hr";
 import { estimate, PRICING, type Complexity, type Mode } from "@/lib/pricing";
+import { MAX_MESSAGE } from "@/lib/hire-limits";
 
 const copy = {
   es: {
@@ -45,7 +47,7 @@ const copy = {
     cta: "Videollamada",
     write: "Escribime",
     contact: "Contacto",
-    form: { name: "Nombre", email: "Tu email", message: "Mensaje", ph: "Contame qué necesitás…", budget: "Presupuesto que se envía", send: "Enviar", sending: "Enviando…", ok: "¡Listo! Te respondo a tu email.", err: { invalid_name: "Falta tu nombre.", invalid_email: "Revisá el email.", invalid_message: "El mensaje debe tener entre 1 y 280 caracteres.", rate_limited: "Demasiados envíos. Probá en un rato.", captcha_failed: "Falta la verificación anti-bots. Esperá el tilde y probá de nuevo.", default: "No se pudo enviar. Probá de nuevo." } as Record<string, string>, yes: "sí", no: "no" },
+    form: { name: "Nombre", email: "Tu email", message: "Mensaje", ph: "Contame qué necesitás…", budget: "Presupuesto que se envía", send: "Enviar", sending: "Enviando…", limit: "Llegaste al límite de 280 caracteres.", agents: "Formulario de contacto: nombre, email y mensaje (hasta 280 caracteres). Para enviarlo hay que pasar la verificación de Cloudflare Turnstile.", trimmed: "Tu texto era más largo: lo recorté a 280 caracteres.", ok: "¡Listo! Te respondo a tu email.", err: { invalid_name: "Falta tu nombre.", invalid_email: "Revisá el email.", invalid_message: "El mensaje debe tener entre 1 y 280 caracteres.", rate_limited: "Demasiados envíos. Probá en un rato.", captcha_failed: "Falta la verificación anti-bots. Esperá el tilde y probá de nuevo.", default: "No se pudo enviar. Probá de nuevo." } as Record<string, string>, yes: "sí", no: "no" },
   },
   en: {
     intro: "Your quote in seconds.",
@@ -85,7 +87,7 @@ const copy = {
     cta: "Video call",
     write: "Write me",
     contact: "Contact",
-    form: { name: "Name", email: "Your email", message: "Message", ph: "Tell me what you need…", budget: "Quote that will be sent", send: "Send", sending: "Sending…", ok: "Done! I'll reply to your email.", err: { invalid_name: "Your name is missing.", invalid_email: "Check the email.", invalid_message: "Message must be 1–280 characters.", rate_limited: "Too many sends. Try again later.", captcha_failed: "Anti-bot check missing. Wait for the checkmark and try again.", default: "Couldn't send. Try again." } as Record<string, string>, yes: "yes", no: "no" },
+    form: { name: "Name", email: "Your email", message: "Message", ph: "Tell me what you need…", budget: "Quote that will be sent", send: "Send", sending: "Sending…", limit: "You reached the 280-character limit.", agents: "Contact form: name, email and message (up to 280 characters). Sending it requires passing the Cloudflare Turnstile check.", trimmed: "Your text was longer: I trimmed it to 280 characters.", ok: "Done! I'll reply to your email.", err: { invalid_name: "Your name is missing.", invalid_email: "Check the email.", invalid_message: "Message must be 1–280 characters.", rate_limited: "Too many sends. Try again later.", captcha_failed: "Anti-bot check missing. Wait for the checkmark and try again.", default: "Couldn't send. Try again." } as Record<string, string>, yes: "yes", no: "no" },
   },
 };
 
@@ -122,6 +124,12 @@ export function HireCalculator() {
   const [extra, setExtra] = useState(false);
   const [extraDays, setExtraDays] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
+  // Result of a native (no-fetch) form post comes back as ?contacto=…: reopen the form to show it.
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has("contacto")) return;
+    const id = requestAnimationFrame(() => setFormOpen(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   const r = estimate({ mode, hours, complexity, extra, onSite, onSiteDays: days, extraDays });
   const total = useCountUp(r.total);
@@ -343,8 +351,42 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
   const [website, setWebsite] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "ok" | "error">("idle");
   const [err, setErr] = useState("");
+  const [trimmed, setTrimmed] = useState(false);
+  useEffect(() => {
+    const res = new URLSearchParams(window.location.search).get("contacto");
+    if (!res) return;
+    const id = requestAnimationFrame(() => {
+      if (res === "ok") setState("ok");
+      else { setState("error"); setErr(f.err[res] ?? f.err.default); }
+    });
+    return () => cancelAnimationFrame(id);
+  }, [f]);
   const { box: tsBox, token, reset: resetTs } = useTurnstile(open);
-  const left = 280 - [...message].length;
+  const used = [...message].length;
+  const left = Math.max(0, MAX_MESSAGE - used);
+  const atLimit = used >= MAX_MESSAGE;
+  // Hard limit in characters (code points, same as the server): typing or pasting past it gets cut.
+  const onMessage = (v: string) => {
+    const chars = [...v];
+    // Keep the "trimmed" warning while still at the limit; clear it once they delete something.
+    setTrimmed((prev) => (chars.length > MAX_MESSAGE ? true : chars.length < MAX_MESSAGE ? false : prev));
+    setMessage(chars.length > MAX_MESSAGE ? chars.slice(0, MAX_MESSAGE).join("") : v);
+  };
+  // maxLength cuts pastes silently before onChange; detect it here to show the warning.
+  const onPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const t = e.currentTarget;
+    const incoming = [...e.clipboardData.getData("text")].length;
+    const kept = [...t.value].length - [...t.value.slice(t.selectionStart, t.selectionEnd)].length;
+    if (kept + incoming > MAX_MESSAGE) setTrimmed(true);
+  };
+  // Mobile: keep the focused field (and the limit alert under it) above the on-screen keyboard.
+  const keepVisible = (e: React.FocusEvent<HTMLElement>) => {
+    const el = e.currentTarget;
+    const vv = window.visualViewport;
+    const fit = () => { if (document.activeElement === el) el.scrollIntoView({ block: "center" }); };
+    vv?.addEventListener("resize", fit);
+    el.addEventListener("blur", () => vv?.removeEventListener("resize", fit), { once: true });
+  };
 
   const reveal = () =>
     requestAnimationFrame(() => status.current?.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
@@ -365,6 +407,7 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
         setState("ok");
         reveal();
         setMessage("");
+        setTrimmed(false);
       } else {
         setState("error");
         setErr(f.err[j.error ?? ""] ?? f.err.default);
@@ -379,26 +422,31 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
 
   return (
     <div ref={panel} id="hire-form-panel" className="hire-form-panel" data-open={open} inert={!open}>
-    <form className="hire-form" onSubmit={submit} data-testid="hire-form">
+    <form className="hire-form" onSubmit={submit} data-testid="hire-form" method="post" action="/api/hire-contact" aria-describedby="hire-form-agents">
+      <p id="hire-form-agents" className="sr-only">{f.agents}</p>
       <div className="hire-form-row">
-        <label className="hire-form-field">
+        <label className="hire-form-field" htmlFor="hire-name">
           <span>{f.name}</span>
-          <input ref={first} required maxLength={80} autoComplete="name" autoCapitalize="words" enterKeyHint="next" value={name} onChange={(e) => setName(e.target.value)} />
+          <input ref={first} id="hire-name" name="name" type="text" required maxLength={80} autoComplete="name" autoCapitalize="words" enterKeyHint="next" value={name} onFocus={keepVisible} onChange={(e) => setName(e.target.value)} />
         </label>
-        <label className="hire-form-field">
+        <label className="hire-form-field" htmlFor="hire-email">
           <span>{f.email}</span>
-          <input required type="email" inputMode="email" autoCapitalize="none" spellCheck={false} enterKeyHint="next" maxLength={254} autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input id="hire-email" name="email" required type="email" inputMode="email" autoCapitalize="none" spellCheck={false} enterKeyHint="next" maxLength={254} autoComplete="email" value={email} onFocus={keepVisible} onChange={(e) => setEmail(e.target.value)} />
         </label>
       </div>
-      <label className="hire-form-field">
+      <label className="hire-form-field" htmlFor="hire-message">
         <span className="hire-form-msg-label">
-          {f.message} <output className={`hire-form-count${left < 0 ? " is-over" : left <= 20 ? " is-low" : ""}`} aria-live="polite">{left}</output>
+          {f.message} <output htmlFor="hire-message" className={`hire-form-count${atLimit ? " is-over" : left <= 20 ? " is-low" : ""}`}>{left}</output>
         </span>
-        <textarea required rows={4} enterKeyHint="send" placeholder={f.ph} value={message} onChange={(e) => setMessage(e.target.value)} />
+        <textarea id="hire-message" name="message" required rows={4} maxLength={MAX_MESSAGE} autoComplete="off" enterKeyHint="send" placeholder={f.ph} value={message} aria-describedby="hire-message-limit" onFocus={keepVisible} onPaste={onPaste} onChange={(e) => onMessage(e.target.value)} />
+        <span id="hire-message-limit" className="hire-form-limit" role="alert" aria-live="assertive">{trimmed ? f.trimmed : atLimit ? f.limit : ""}</span>
       </label>
+      {/* Honeypot: odd name so browsers never autofill it. */}
       <label className="hire-hp" aria-hidden="true">
-        Website <input tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
+        Leave empty <input name="hire_hp" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
       </label>
+      {/* Native (no-fetch) POST fallback: the server reads the same budget fields. */}
+      {Object.entries(budget).map(([k, v]) => <input key={k} type="hidden" name={`budget.${k}`} value={String(v)} />)}
       <div className="hire-form-budget" role="group" aria-label={f.budget}>
         <span className="hire-form-budget-title">{f.budget}</span>
         <dl>
@@ -411,9 +459,11 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
         </dl>
       </div>
       <div ref={tsBox} className="hire-turnstile" />
+      <MagicHr className="hire-form-hr" />
       <div className="hire-form-actions">
-        <button type="submit" className="hire-form-send" disabled={state === "sending" || left < 0 || !token}>
+        <button type="submit" className="hire-btn hire-form-send" disabled={state === "sending" || used === 0 || !token}>
           {state === "sending" ? f.sending : f.send}
+          <span className="hire-btn-rainbow" aria-hidden />
         </button>
         <p ref={status} className="hire-form-status" role="status">{state === "ok" ? f.ok : state === "error" ? err : ""}</p>
       </div>

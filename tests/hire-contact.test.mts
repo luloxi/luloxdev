@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { handleHireContact, parseBudget } from "../src/lib/hire-contact.ts";
+import { bodyFromForm, handleHireContact, parseBudget } from "../src/lib/hire-contact.ts";
 
 const budget = { mode: "project", hours: 20, complexity: "medium", onSite: true, days: 2, extra: false };
 const ok = { name: "Ana", email: "ana@example.com", message: "Hola, quiero una web.", budget, turnstileToken: "good-token" };
@@ -156,4 +156,24 @@ test("urgency days are recomputed server-side in both modes; client totals ignor
 test("parseBudget: urgency off → 0 days; missing days → 1", () => {
   assert.equal(parseBudget({ ...budget, extra: false, extraDays: 5 })!.extraDays, 0);
   assert.equal(parseBudget({ ...budget, extra: true })!.extraDays, 1);
+});
+
+test("native form post: fields map to the JSON shape, Turnstile token included", () => {
+  const b = bodyFromForm([
+    ["name", "Ana"], ["email", "ana@example.com"], ["message", "Hola"], ["hire_hp", ""],
+    ["budget.mode", "project"], ["budget.hours", "4"], ["budget.complexity", "low"], ["budget.onSite", "false"], ["budget.extra", "true"],
+    ["cf-turnstile-response", "good-token"], ["evil", "x"],
+  ]);
+  assert.deepEqual(b, {
+    name: "Ana", email: "ana@example.com", message: "Hola", hire_hp: "", turnstileToken: "good-token",
+    budget: { mode: "project", hours: 4, complexity: "low", onSite: false, extra: true },
+  });
+});
+
+test("hire_hp honeypot also pretends success; 281 chars rejected server-side", async () => {
+  const { env, sent } = mkEnv({ resend: true });
+  assert.deepEqual(await handleHireContact({ ...ok, hire_hp: "http://spam" }, env, "x"), { status: 200, body: { ok: true } });
+  assert.equal((await handleHireContact({ ...ok, message: "a".repeat(281) }, env, "x")).status, 400);
+  assert.equal((await handleHireContact({ ...ok, message: "😀".repeat(280) }, env, "x")).status, 200);
+  assert.equal(sent.length, 1);
 });

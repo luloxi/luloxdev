@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { linkifyBlogTerms } from "@/lib/blog-linkify";
 import { parseVideoUrl, VIDEO_IFRAME_ALLOW } from "@/lib/video-embed";
+import { MagicHr } from "@/components/magic-hr";
 
 const components: Components = {
   h2: ({ children }) => <h2 className="blog-h2">{children}</h2>,
@@ -82,7 +83,7 @@ const components: Components = {
   ),
   th: ({ children }) => <th className="blog-th">{children}</th>,
   td: ({ children }) => <td className="blog-td">{children}</td>,
-  hr: () => <hr className="blog-hr" />,
+  hr: () => <MagicHr />,
 };
 
 export function BlogMarkdown({ content }: { content: string }) {
