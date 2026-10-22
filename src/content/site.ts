@@ -24,7 +24,8 @@ export type SectionId =
   | "projects"
   | "blog"
   | "tastes"
-  | "contact";
+  | "contact"
+  | "hire";
 
 /** Main sections - stacked Linktree-style buttons */
 export const sections = [
@@ -32,6 +33,7 @@ export const sections = [
   { id: "projects" as const, href: "/proyectos" },
   { id: "contact" as const, href: "/contacto" },
   { id: "about" as const, href: "/sobre-mi" },
+  { id: "hire" as const, href: "/contratar" },
 ];
 
 

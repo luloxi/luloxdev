@@ -23,6 +23,7 @@
   --section-blog: #00A4EF;
   --section-tastes: #fb7185;
   --section-contact: #7FBA00;
+  --section-hire: #FF8A1E;
 }
 
 /* Light mode: clean neutral (white / cool grey), crimson accent used sparingly */
@@ -48,6 +49,7 @@
   --section-blog: #0078C8;
   --section-tastes: #be123c;
   --section-contact: #4E8A00;
+  --section-hire: #0090B0;
   /* Shared light elevation */
   --light-ink: color-mix(in oklab, #1d2027 8%, transparent);
   --light-glass: color-mix(in oklab, #ffffff 78%, transparent);
@@ -74,6 +76,7 @@
   --section-blog: #00A4EF;
   --section-tastes: #fb7185;
   --section-contact: #7FBA00;
+  --section-hire: #FF8A1E;
 }
 
 @theme inline {
@@ -4276,3 +4279,65 @@ body.ie-off .ie-row-pencil { display: none; }
 .sec-reorder-n { font-family: var(--font-mono, monospace); font-size: 11px; opacity: .6; min-width: 1.2rem; }
 .sec-reorder-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sec-reorder-note { margin: .5rem 0 0; font-size: .75rem; opacity: .75; }
+
+/* r19: Contratarme / Hire me calculator. Nick orange (#ff8a1e) × Judy cyan (#00d4ff). */
+.hire { --o: #ff8a1e; --cy: #00d4ff; --ink: var(--foreground); display: grid; gap: 1.4rem; }
+:root:not(.dark) .hire { --o: #d9640a; --cy: #0090b0; }
+.hire-intro { color: var(--muted); font-size: .95rem; line-height: 1.6; margin: 0; }
+.hire-field { border: 0; padding: 0; margin: 0; display: grid; gap: .6rem; min-width: 0; }
+.hire-label { font-family: var(--font-mono, monospace); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--cy); margin-bottom: .55rem; display: flex; align-items: baseline; gap: .6rem; padding: 0; }
+.hire-hours { font-size: 1.1rem; letter-spacing: 0; color: var(--o); font-weight: 800; text-shadow: 0 0 12px color-mix(in srgb, var(--o) 45%, transparent); }
+.hire-hint { margin: 0; font-size: .82rem; color: var(--muted); }
+.hire-seg { display: grid; grid-template-columns: 1fr 1fr; padding: 4px; gap: 4px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--cy) 40%, transparent); }
+.hire-seg-btn { padding: .6rem; border-radius: 9px; font-weight: 700; color: var(--muted); transition: all .2s; }
+.hire-seg-btn[aria-checked="true"] { color: #111; background: linear-gradient(135deg, var(--cy), color-mix(in srgb, var(--cy) 60%, #fff)); box-shadow: 0 0 18px color-mix(in srgb, var(--cy) 50%, transparent); }
+:root:not(.dark) .hire-seg-btn[aria-checked="true"] { color: #fff; background: linear-gradient(135deg, var(--cy), #006b85); }
+.hire-chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+.hire-chip { padding: .4rem .75rem; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--o) 45%, transparent); font-size: .85rem; transition: all .2s; }
+.hire-chip span { opacity: .6; font-size: .75rem; margin-left: .2rem; }
+.hire-chip[aria-pressed="true"] { background: color-mix(in srgb, var(--o) 18%, transparent); border-color: var(--o); color: var(--o); box-shadow: 0 0 12px color-mix(in srgb, var(--o) 35%, transparent); }
+.hire-range { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 99px; background: linear-gradient(90deg, var(--cy), var(--o) var(--p), color-mix(in srgb, var(--muted) 25%, transparent) var(--p)); outline: none; }
+.hire-range::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--o); border: 3px solid var(--background); box-shadow: 0 0 0 2px var(--o), 0 0 16px var(--o); cursor: grab; }
+.hire-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--o); border: 3px solid var(--background); box-shadow: 0 0 0 2px var(--o), 0 0 16px var(--o); cursor: grab; }
+.hire-range:focus-visible { outline: 2px solid var(--cy); outline-offset: 6px; }
+.hire-cx { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+.hire-cx-card { --a: var(--cy); text-align: left; display: grid; gap: .2rem; padding: .7rem .75rem; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--a) 35%, transparent); transition: all .2s; }
+.hire-cx-medium { --a: color-mix(in srgb, var(--cy) 50%, var(--o)); }
+.hire-cx-high { --a: var(--o); }
+.hire-cx-card[aria-checked="true"] { border-color: var(--a); background: color-mix(in srgb, var(--a) 14%, transparent); box-shadow: 0 0 20px -4px var(--a); transform: translateY(-2px); }
+.hire-cx-name { font-weight: 800; color: var(--a); }
+.hire-cx-rate { font-family: var(--font-mono, monospace); font-size: .8rem; }
+.hire-cx-desc { font-size: .74rem; color: var(--muted); line-height: 1.35; }
+@media (max-width: 480px) { .hire-cx { grid-template-columns: 1fr; } }
+.hire-toggles { display: grid; gap: .45rem; }
+.hire-toggle { display: flex; align-items: center; gap: .75rem; text-align: left; padding: .3rem 0; }
+.hire-toggle:disabled { opacity: .4; cursor: not-allowed; }
+.hire-toggle-knob { flex: none; width: 40px; height: 22px; border-radius: 99px; position: relative; background: color-mix(in srgb, var(--muted) 30%, transparent); transition: background .2s; }
+.hire-toggle-knob::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.hire-toggle[aria-checked="true"] .hire-toggle-knob { background: var(--o); box-shadow: 0 0 12px color-mix(in srgb, var(--o) 55%, transparent); }
+.hire-toggle[aria-checked="true"] .hire-toggle-knob::after { transform: translateX(18px); }
+.hire-toggle-text { display: grid; }
+.hire-toggle-text small { color: var(--muted); font-size: .75rem; }
+.hire-toggle:focus-visible { outline: 2px solid var(--cy); outline-offset: 3px; border-radius: 8px; }
+/* The receipt is the one purposeful container. */
+.hire-receipt { position: relative; padding: 1.1rem 1.2rem; border-radius: 16px; border: 1px solid color-mix(in srgb, var(--cy) 40%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--cy) 9%, transparent), color-mix(in srgb, var(--o) 9%, transparent));
+  box-shadow: 0 10px 34px -16px color-mix(in srgb, var(--cy) 60%, transparent); }
+:root:not(.dark) .hire-receipt { background: linear-gradient(135deg, #e3f6ff, #fff1e3); }
+.hire-receipt-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: .6rem; }
+.hire-badge { font-family: var(--font-mono, monospace); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; padding: .2rem .5rem; border-radius: 6px; color: var(--o); border: 1px dashed var(--o); }
+.hire-receipt-mode { font-size: .78rem; color: var(--muted); }
+.hire-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: .3rem; font-size: .88rem; }
+.hire-lines li { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px dashed color-mix(in srgb, var(--muted) 30%, transparent); padding-bottom: .3rem; }
+.hire-lines em { font-style: normal; color: var(--muted); font-size: .78rem; }
+.hire-lines li span:last-child { font-family: var(--font-mono, monospace); }
+.hire-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: .8rem; gap: 1rem; }
+.hire-total span { font-weight: 700; }
+.hire-total strong { font-size: clamp(1.8rem, 6vw, 2.4rem); color: var(--o); font-variant-numeric: tabular-nums; text-shadow: 0 0 22px color-mix(in srgb, var(--o) 45%, transparent); }
+.hire-deposit { display: flex; justify-content: space-between; font-size: .82rem; color: var(--muted); font-family: var(--font-mono, monospace); }
+.hire-note { margin: .8rem 0 0; font-size: .78rem; color: var(--muted); line-height: 1.5; }
+.hire-formula { margin: .4rem 0 0; font-size: .75rem; color: var(--muted); }
+.hire-formula code { color: var(--cy); }
+/* Home nav: odd last tile spans both columns. */
+@media (min-width: 640px) { .cp-nav > .cp-nav-item:last-child:nth-child(odd) { grid-column: 1 / -1; } }
+@media (prefers-reduced-motion: reduce) { .hire *, .hire-cx-card { transition: none !important; } }

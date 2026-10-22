@@ -9,7 +9,8 @@ import {
   XIcon,
 } from "@/components/icons/social";
 import { PageShell } from "@/components/page-shell";
-import { CALL_BOOKING_URL, contactSocials } from "@/content/site";
+import Link from "next/link";
+import { contactSocials } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 
 const socialIcons: Record<
@@ -60,11 +61,9 @@ export default function ContactPage() {
         })}
       </div>
 
-      <a
+      <Link
         className="call-cta"
-        href={CALL_BOOKING_URL}
-        target="_blank"
-        rel="noopener noreferrer"
+        href="/contratar"
         data-testid="call-cta"
       >
         <span className="call-cta-icon" aria-hidden="true">
@@ -78,7 +77,7 @@ export default function ContactPage() {
           <span className="call-cta-sub">{t.contact.callSub}</span>
         </span>
         <span className="call-cta-arrow" aria-hidden="true">→</span>
-      </a>
+      </Link>
     </PageShell>
   );
 }

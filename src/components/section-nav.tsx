@@ -11,6 +11,7 @@ const accents: Record<SectionId, string> = {
   blog: "var(--section-blog)",
   tastes: "var(--section-tastes)",
   contact: "var(--section-contact)",
+  hire: "var(--section-hire)",
 };
 
 /**

@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = site.url;
   const now = new Date();
-  const pages = ["", "/sobre-mi", "/proyectos", "/blog", "/contacto", "/privacidad"].map(
+  const pages = ["", "/sobre-mi", "/proyectos", "/blog", "/contacto", "/contratar", "/privacidad"].map(
     (path) => ({
       url: `${base}${path}`,
       lastModified: now,

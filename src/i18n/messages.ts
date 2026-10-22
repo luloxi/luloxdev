@@ -8,6 +8,7 @@ export const messages = {
       blog: "Blog",
       tastes: "Gustos",
       contact: "Contacto",
+      hire: "Contratarme",
     },
     ui: {
       backHome: "Inicio",
@@ -227,8 +228,8 @@ export const messages = {
       emailLabel: "Email",
       copy: "Copiar",
       copied: "Copiado",
-      callTitle: "Agendá una videollamada",
-      callSub: "Para hablar en serio, boludeces no.",
+      callTitle: "Contratarme",
+      callSub: "Calculá un presupuesto estimado y agendá una videollamada.",
     },
   },
   en: {
@@ -238,6 +239,7 @@ export const messages = {
       blog: "Blog",
       tastes: "Tastes",
       contact: "Contact",
+      hire: "Hire me",
     },
     ui: {
       backHome: "Home",
@@ -457,8 +459,8 @@ export const messages = {
       emailLabel: "Email",
       copy: "Copy",
       copied: "Copied",
-      callTitle: "Book a video call",
-      callSub: "For serious talk, no nonsense.",
+      callTitle: "Hire me",
+      callSub: "Get an estimate and book a video call.",
     },
   },
 } as const;
