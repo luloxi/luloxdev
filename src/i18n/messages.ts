@@ -229,7 +229,6 @@ export const messages = {
       copy: "Copiar",
       copied: "Copiado",
       callTitle: "Contratar",
-      callSub: "Calculá un presupuesto estimado y agendá una videollamada.",
     },
   },
   en: {
@@ -460,7 +459,6 @@ export const messages = {
       copy: "Copy",
       copied: "Copied",
       callTitle: "Hire me",
-      callSub: "Get an estimate and book a video call.",
     },
   },
 } as const;

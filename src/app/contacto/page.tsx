@@ -74,7 +74,6 @@ export default function ContactPage() {
         </span>
         <span className="call-cta-text">
           <span className="call-cta-title">{t.contact.callTitle}</span>
-          <span className="call-cta-sub">{t.contact.callSub}</span>
         </span>
         <span className="call-cta-arrow" aria-hidden="true">→</span>
       </Link>

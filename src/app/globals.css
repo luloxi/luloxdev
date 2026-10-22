@@ -4350,3 +4350,15 @@ body.ie-off .ie-row-pencil { display: none; }
 .hire-stepper button { width: 2rem; height: 2rem; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--o) 50%, transparent); color: var(--o); font-weight: 800; }
 .hire-stepper button:disabled { opacity: .35; }
 .hire-stepper output { min-width: 1.5rem; text-align: center; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* r22: two CTAs on /contratar: call (primary) + Contacto (secondary). Stack on mobile. */
+.hire-ctas { display: grid; gap: .75rem; grid-template-columns: 1fr; align-items: stretch; }
+@media (min-width: 640px) { .hire-ctas { grid-template-columns: 2fr 1fr; } }
+.hire-ctas .call-cta { margin: 0; height: 100%; }
+.hire-cta-alt { position: relative; display: grid; align-content: center; gap: .2rem; padding: .9rem 2.6rem .9rem 1.1rem; border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--cy, #00d4ff) 50%, transparent); color: var(--foreground); transition: transform .2s, box-shadow .2s, border-color .2s; }
+.hire-cta-alt:hover, .hire-cta-alt:focus-visible { transform: translateY(-2px); border-color: var(--cy, #00d4ff); box-shadow: 0 0 20px -6px var(--cy, #00d4ff); }
+.hire-cta-alt:focus-visible { outline: 2px solid var(--cy, #00d4ff); outline-offset: 3px; }
+.hire-cta-alt-title { font-weight: 800; font-size: 1.05rem; color: var(--cy, #00d4ff); }
+.hire-cta-alt-sub { font-size: .82rem; color: var(--muted); }
+.hire-cta-alt .call-cta-arrow { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--cy, #00d4ff); }

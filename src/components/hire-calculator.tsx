@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CALL_BOOKING_URL } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
@@ -41,8 +42,8 @@ const copy = {
     formula: "Cómo calculo",
     fProject: "(horas × valor por complejidad) + extra",
     fHourly: "(horas × valor por complejidad) + presencial + viático + extra",
-    cta: "Agendá una videollamada",
-    ctaSub: "Contame tu idea y cerramos el número.",
+    cta: "Agendar una videollamada",
+    contact: "Contacto",
   },
   en: {
     intro: "Your quote in seconds.",
@@ -80,7 +81,7 @@ const copy = {
     fProject: "(hours × rate by complexity) + extra",
     fHourly: "(hours × rate by complexity) + on-site + travel + extra",
     cta: "Book a video call",
-    ctaSub: "Tell me your idea and we'll settle the number.",
+    contact: "Contact",
   },
 };
 
@@ -234,6 +235,7 @@ export function HireCalculator() {
         </p>
       </section>
 
+      <div className="hire-ctas">
       <a className="call-cta" href={CALL_BOOKING_URL} target="_blank" rel="noopener noreferrer" data-testid="hire-call-cta">
         <span className="call-cta-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -243,10 +245,14 @@ export function HireCalculator() {
         </span>
         <span className="call-cta-text">
           <span className="call-cta-title">{c.cta}</span>
-          <span className="call-cta-sub">{c.ctaSub}</span>
         </span>
         <span className="call-cta-arrow" aria-hidden="true">→</span>
       </a>
+        <Link className="hire-cta-alt" href="/contacto">
+          <span className="hire-cta-alt-title">{c.contact}</span>
+          <span className="call-cta-arrow" aria-hidden="true">→</span>
+        </Link>
+      </div>
     </div>
   );
 }
