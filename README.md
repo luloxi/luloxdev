@@ -27,7 +27,7 @@ Es copyleft a propósito: llevátelo, mejoralo y dejalo abierto para el que veng
 
 ## 🚀 Arranque rápido
 
-Necesitás **Node.js 22.16+** (lo pide Wrangler, que ya no soporta Node 20, y los tests usan `node:sqlite`) y una cuenta gratis de Cloudflare (solo para publicar). Te recomiendo **pnpm** (está fijado en `package.json`); npm también funciona.
+Necesitás **Node.js 26.12.1+** (la última versión Current; está en `.nvmrc`, corré `nvm use`) y una cuenta gratis de Cloudflare (solo para publicar). Te recomiendo **pnpm** (está fijado en `package.json`); npm también funciona.
 
 ```bash
 # 1. Instalar

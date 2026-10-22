@@ -27,7 +27,7 @@ It's copyleft on purpose: take it, make it better, and keep it open for the next
 
 ## 🚀 Quick start
 
-You need **Node.js 22.16+** (Wrangler no longer supports Node 20, and the tests use `node:sqlite`) and a free Cloudflare account (only for deploying).
+You need **Node.js 26.12.1+** (the latest Current release; pinned in `.nvmrc`, run `nvm use`) and a free Cloudflare account (only for deploying).
 **pnpm is recommended** (the repo pins it in `package.json`); npm works too.
 
 ```bash
