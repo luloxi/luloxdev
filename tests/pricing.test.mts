@@ -25,5 +25,16 @@ test("on-site always adds travel (US$25)", () => {
   assert.equal(r.total, 72 + 25 + 25 + 100);
   assert.equal(r.deposit, 111);
   assert.equal(estimate({ mode: "hourly", hours: 4, complexity: "medium", extra: false, onSite: false }).total, 72);
-  assert.equal(estimate({ mode: "project", hours: 4, complexity: "medium", extra: false, onSite: true }).total, 72);
+  assert.equal(estimate({ mode: "project", hours: 4, complexity: "medium", extra: false, onSite: true }).total, 72 + 50); // 1 day default
+});
+
+test("hourly capped at 6h", () => {
+  assert.equal(estimate({ mode: "hourly", hours: 12, complexity: "low", extra: false }).total, 60);
+});
+
+test("project on-site: days × (25 + 25), not discounted", () => {
+  const r = estimate({ mode: "project", hours: 20, complexity: "low", extra: false, onSite: true, onSiteDays: 3 });
+  assert.equal(r.total, 170 + 75 + 75);
+  assert.equal(r.lines.find((l) => l.id === "travel")?.days, 3);
+  assert.equal(estimate({ mode: "project", hours: 10, complexity: "low", extra: false, onSite: true, onSiteDays: 99 }).total, 100 + 500);
 });

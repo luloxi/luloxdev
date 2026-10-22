@@ -23,7 +23,7 @@
   --section-blog: #00A4EF;
   --section-tastes: #fb7185;
   --section-contact: #7FBA00;
-  --section-hire: #FF8A1E;
+  --section-hire: #B46CFF;
 }
 
 /* Light mode: clean neutral (white / cool grey), crimson accent used sparingly */
@@ -49,7 +49,7 @@
   --section-blog: #0078C8;
   --section-tastes: #be123c;
   --section-contact: #4E8A00;
-  --section-hire: #0090B0;
+  --section-hire: #7A2FE0;
   /* Shared light elevation */
   --light-ink: color-mix(in oklab, #1d2027 8%, transparent);
   --light-glass: color-mix(in oklab, #ffffff 78%, transparent);
@@ -76,7 +76,7 @@
   --section-blog: #00A4EF;
   --section-tastes: #fb7185;
   --section-contact: #7FBA00;
-  --section-hire: #FF8A1E;
+  --section-hire: #B46CFF;
 }
 
 @theme inline {
@@ -4341,3 +4341,10 @@ body.ie-off .ie-row-pencil { display: none; }
 /* Home nav: odd last tile spans both columns. */
 @media (min-width: 640px) { .cp-nav > .cp-nav-item:last-child:nth-child(odd) { grid-column: 1 / -1; } }
 @media (prefers-reduced-motion: reduce) { .hire *, .hire-cx-card { transition: none !important; } }
+
+/* r21: on-site days stepper (project mode). */
+.hire-stepper { display: flex; align-items: center; gap: .5rem; padding-left: 3.25rem; }
+.hire-stepper-label { font-size: .85rem; color: var(--muted); margin-right: .25rem; }
+.hire-stepper button { width: 2rem; height: 2rem; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--o) 50%, transparent); color: var(--o); font-weight: 800; }
+.hire-stepper button:disabled { opacity: .35; }
+.hire-stepper output { min-width: 1.5rem; text-align: center; font-weight: 800; font-variant-numeric: tabular-nums; }

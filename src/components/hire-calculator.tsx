@@ -25,6 +25,9 @@ const copy = {
     } as Record<Complexity, [string, string]>,
     conditions: "Condiciones",
     onSite: "Presencial",
+    projectOnSite: "Requiere presencialidad",
+    days: "Días presenciales",
+    dayUnit: ["día", "días"],
     travel: "Viático*",
     travelNote: "*El viático puede variar según la distancia.",
     extra: "Condiciones especiales",
@@ -60,6 +63,9 @@ const copy = {
     } as Record<Complexity, [string, string]>,
     conditions: "Conditions",
     onSite: "On-site",
+    projectOnSite: "Requires on-site work",
+    days: "On-site days",
+    dayUnit: ["day", "days"],
     travel: "Travel*",
     travelNote: "*Travel may vary with distance.",
     extra: "Special conditions",
@@ -107,11 +113,12 @@ export function HireCalculator() {
   const [hours, setHours] = useState(PRICING.sizes.m);
   const [complexity, setComplexity] = useState<Complexity>("medium");
   const [onSite, setOnSite] = useState(false);
+  const [days, setDays] = useState(1);
   const [extra, setExtra] = useState(false);
 
-  const r = estimate({ mode, hours, complexity, extra, onSite });
+  const r = estimate({ mode, hours, complexity, extra, onSite, onSiteDays: days });
   const total = useCountUp(r.total);
-  const maxH = mode === "project" ? PRICING.maxProjectHours : 12;
+  const maxH = mode === "project" ? PRICING.maxProjectHours : PRICING.maxHourlyHours;
 
   const switchMode = (m: Mode) => {
     setMode(m);
@@ -176,10 +183,19 @@ export function HireCalculator() {
       <fieldset className="hire-field">
         <legend className="hire-label">{c.conditions}</legend>
         <div className="hire-toggles">
-          {mode === "hourly" ? (
-            <>
-              <Toggle on={onSite} set={setOnSite} label={c.onSite} sub={`+US$ ${PRICING.onSiteSurcharge} · ${c.travel} +US$ ${PRICING.travel}`} />
-            </>
+          <Toggle
+            on={onSite}
+            set={setOnSite}
+            label={mode === "project" ? c.projectOnSite : c.onSite}
+            sub={`+US$ ${PRICING.onSiteSurcharge} · ${c.travel} +US$ ${PRICING.travel}${mode === "project" ? ` / ${c.dayUnit[0]}` : ""}`}
+          />
+          {mode === "project" && onSite ? (
+            <div className="hire-stepper" role="group" aria-label={c.days}>
+              <span className="hire-stepper-label">{c.days}</span>
+              <button type="button" aria-label="−" disabled={days <= 1} onClick={() => setDays((d) => Math.max(1, d - 1))}>−</button>
+              <output aria-live="polite">{days}</output>
+              <button type="button" aria-label="+" disabled={days >= PRICING.maxOnSiteDays} onClick={() => setDays((d) => Math.min(PRICING.maxOnSiteDays, d + 1))}>+</button>
+            </div>
           ) : null}
           <Toggle on={extra} set={setExtra} label={c.extra} sub={`+US$ ${PRICING.extra} · ${c.extraHint}`} />
         </div>
@@ -197,6 +213,7 @@ export function HireCalculator() {
                 {c.lines[l.id]}
                 {l.id === "work" ? <em> {hours}h × US$ {PRICING.rates[complexity]}</em> : null}
                 {l.id === "discount" ? <em> -{l.pct}%</em> : null}
+                {l.days && mode === "project" ? <em> {l.days} {c.dayUnit[l.days === 1 ? 0 : 1]} × US$ {l.amount / l.days}</em> : null}
               </span>
               <span>{money(l.amount)}</span>
             </li>
