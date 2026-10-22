@@ -44,6 +44,7 @@ const copy = {
     fHourly: "(horas × valor por complejidad) + presencial + viático + extra",
     cta: "Agendar una videollamada",
     contact: "Contacto",
+    form: { title: "Escribime", name: "Nombre", email: "Tu email", message: "Mensaje", ph: "Contame qué necesitás…", budget: "Presupuesto que se envía", send: "Enviar", sending: "Enviando…", ok: "¡Listo! Te respondo a tu email.", err: { invalid_name: "Falta tu nombre.", invalid_email: "Revisá el email.", invalid_message: "El mensaje debe tener entre 1 y 280 caracteres.", rate_limited: "Demasiados envíos. Probá en un rato.", default: "No se pudo enviar. Probá de nuevo." } as Record<string, string>, yes: "sí", no: "no" },
   },
   en: {
     intro: "Your quote in seconds.",
@@ -82,6 +83,7 @@ const copy = {
     fHourly: "(hours × rate by complexity) + on-site + travel + extra",
     cta: "Book a video call",
     contact: "Contact",
+    form: { title: "Write to me", name: "Name", email: "Your email", message: "Message", ph: "Tell me what you need…", budget: "Quote that will be sent", send: "Send", sending: "Sending…", ok: "Done! I'll reply to your email.", err: { invalid_name: "Your name is missing.", invalid_email: "Check the email.", invalid_message: "Message must be 1–280 characters.", rate_limited: "Too many sends. Try again later.", default: "Couldn't send. Try again." } as Record<string, string>, yes: "yes", no: "no" },
   },
 };
 
@@ -231,9 +233,22 @@ export function HireCalculator() {
         {r.lines.some((l) => l.id === "travel") ? <p className="hire-note">{c.travelNote}</p> : null}
         <p className="hire-note">{c.note}</p>
         <p className="hire-formula">
-          <span>{c.formula}:</span> <code>{mode === "project" ? c.fProject : c.fHourly}</code>
+          <span>{c.formula}:</span>
+          <code>{mode === "project" ? c.fProject : c.fHourly}</code>
         </p>
       </section>
+
+      <HireForm
+        c={c}
+        budget={{ mode, hours: Math.min(hours, maxH), complexity, onSite, days, extra }}
+        rows={[
+          [c.mode, c.modes[mode]],
+          [c.hours, `${Math.min(hours, maxH)}h · ${c.cx[complexity][0]} (US$ ${PRICING.rates[complexity]}${c.perHour})`],
+          [c.onSite, onSite ? (mode === "project" ? `${c.form.yes}, ${days} ${c.dayUnit[days === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
+          [c.extra, extra ? c.form.yes : c.form.no],
+          [c.total, money(r.total)],
+        ]}
+      />
 
       <div className="hire-ctas">
       <a className="call-cta" href={CALL_BOOKING_URL} target="_blank" rel="noopener noreferrer" data-testid="hire-call-cta">
@@ -266,5 +281,84 @@ function Toggle({ on, set, label, sub, disabled }: { on: boolean; set: (v: boole
         <small>{sub}</small>
       </span>
     </button>
+  );
+}
+
+type Copy = (typeof copy)["es"];
+
+function HireForm({ c, budget, rows }: { c: Copy; budget: Record<string, unknown>; rows: [string, string][] }) {
+  const f = c.form;
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [website, setWebsite] = useState("");
+  const [state, setState] = useState<"idle" | "sending" | "ok" | "error">("idle");
+  const [err, setErr] = useState("");
+  const left = 280 - [...message].length;
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setState("sending");
+    setErr("");
+    try {
+      const res = await fetch("/api/hire-contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message, website, budget }),
+      });
+      const j = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (res.ok && j.ok) {
+        setState("ok");
+        setMessage("");
+      } else {
+        setState("error");
+        setErr(f.err[j.error ?? ""] ?? f.err.default);
+      }
+    } catch {
+      setState("error");
+      setErr(f.err.default);
+    }
+  };
+
+  return (
+    <form className="hire-form" onSubmit={submit} data-testid="hire-form">
+      <h2 className="hire-label hire-form-title">{f.title}</h2>
+      <div className="hire-form-row">
+        <label className="hire-form-field">
+          <span>{f.name}</span>
+          <input required maxLength={80} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
+        </label>
+        <label className="hire-form-field">
+          <span>{f.email}</span>
+          <input required type="email" maxLength={254} autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        </label>
+      </div>
+      <label className="hire-form-field">
+        <span className="hire-form-msg-label">
+          {f.message} <output className={`hire-form-count${left < 0 ? " is-over" : left <= 20 ? " is-low" : ""}`} aria-live="polite">{left}</output>
+        </span>
+        <textarea required rows={4} placeholder={f.ph} value={message} onChange={(e) => setMessage(e.target.value)} />
+      </label>
+      <label className="hire-hp" aria-hidden="true">
+        Website <input tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
+      </label>
+      <div className="hire-form-budget" role="group" aria-label={f.budget}>
+        <span className="hire-form-budget-title">{f.budget}</span>
+        <dl>
+          {rows.map(([k, v], i) => (
+            <div key={i} className={i === rows.length - 1 ? "is-total" : undefined}>
+              <dt>{k}</dt>
+              <dd>{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+      <div className="hire-form-actions">
+        <button type="submit" className="hire-form-send" disabled={state === "sending" || left < 0}>
+          {state === "sending" ? f.sending : f.send}
+        </button>
+        <p className="hire-form-status" role="status">{state === "ok" ? f.ok : state === "error" ? err : ""}</p>
+      </div>
+    </form>
   );
 }
