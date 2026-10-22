@@ -4348,10 +4348,6 @@ body.ie-off .ie-row-pencil { display: none; }
 .hire-stepper button:disabled { opacity: .35; }
 .hire-stepper output { min-width: 1.5rem; text-align: center; font-weight: 800; font-variant-numeric: tabular-nums; }
 
-/* r22: two CTAs on /contratar: call (primary) + Contacto (secondary). Stack on mobile. */
-.hire-ctas { display: grid; gap: .75rem; grid-template-columns: 1fr; align-items: stretch; }
-@media (min-width: 640px) { .hire-ctas { grid-template-columns: 2fr 1fr; } }
-.hire-ctas .call-cta { margin: 0; height: 100%; }
 
 /* /contratar: formula on its own line, never split */
 .hire-formula code { display: block; white-space: nowrap; overflow-x: auto; margin-top: .15rem; scrollbar-width: none; }
@@ -4385,19 +4381,10 @@ body.ie-off .ie-row-pencil { display: none; }
 .hire-form-status { margin: 0; font-size: .88rem; color: var(--muted); }
 
 
-/* r24: "Escribime" = video-call button with colors inverted; toggles the form panel. */
-.hire-write { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.15rem 1.35rem; border-radius: 20px; cursor: pointer;
-  background: #ffa860; color: #24498f; border: 2px solid #24498f; font: inherit; text-align: left; transition: transform .2s ease, filter .2s ease; }
-.hire-write:hover, .hire-write:focus-visible { transform: translateY(-2px) scale(1.01); filter: brightness(1.05); }
-.hire-write:focus-visible { outline: 3px solid #ffa860; outline-offset: 3px; }
-.hire-write .call-cta-arrow { transition: transform .3s ease; }
-.hire-write[aria-expanded="true"] .call-cta-arrow { transform: rotate(180deg); }
-:root:not(.dark) .hire-write { background: #004d5c; color: #ecb180; border-color: #ecb180; }
-:root:not(.dark) .hire-write:focus-visible { outline-color: #004d5c; }
 .hire-form-panel { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .4s ease, opacity .3s ease; }
 .hire-form-panel > .hire-form { overflow: hidden; min-height: 0; }
 .hire-form-panel[data-open="true"] { grid-template-rows: 1fr; opacity: 1; }
-@media (prefers-reduced-motion: reduce) { .hire-form-panel, .hire-write, .hire-write .call-cta-arrow { transition: none; } .hire-write:hover, .hire-write:focus-visible { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .hire-form-panel { transition: none; } }
 .hire-form-panel > .hire-form { transition: padding .4s ease; }
 .hire-form-panel:not([data-open="true"]) > .hire-form { padding-block: 0; }
 @media (prefers-reduced-motion: reduce) { .hire-form-panel > .hire-form { transition: none; } }
@@ -4434,3 +4421,21 @@ body.ie-off .ie-row-pencil { display: none; }
 .contact-hire { margin-top: 2rem; }
 /* Mobile: keep the repo link inside the first screen instead of forcing a scroll. */
 @media (max-width: 899px) { .home-main { min-height: calc(100% - 2.2rem); } }
+
+
+/* r26: /contratar action row: Escribime (HireButton style) · Videollamada · Contacto. ~48px, words only. */
+.hire-ctas { display: grid; gap: 1rem; grid-template-columns: 1fr; margin-top: 1.6rem; }
+@media (min-width: 640px) { .hire-ctas { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.hire-act { position: relative; display: flex; align-items: center; justify-content: center; text-align: center; box-sizing: border-box;
+  height: 48px; min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 2px solid; cursor: pointer; text-decoration: none;
+  font-family: var(--font-orbitron), var(--font-display); font-weight: 800; font-size: .95rem; letter-spacing: .06em; line-height: 1; white-space: nowrap; text-transform: uppercase;
+  transition: transform .2s ease, filter .2s ease; }
+.hire-btn.hire-act { width: auto; padding: 0 1rem; font-size: .95rem; }
+.hire-act:hover, .hire-act:focus-visible { transform: translateY(-2px); filter: brightness(1.08); }
+.hire-act-call { background: linear-gradient(135deg, #24498f, #1b3870); color: #ffa860; border-color: #ffa860; }
+.hire-act-contact { background: #ffa860; color: #24498f; border-color: #24498f; }
+.hire-act-call:focus-visible, .hire-act-contact:focus-visible { outline: 3px solid #ffa860; outline-offset: 3px; }
+:root:not(.dark) .hire-act-call { background: linear-gradient(135deg, #ecb180, #e09d6e); color: #004d5c; border-color: #0099b3; }
+:root:not(.dark) .hire-act-contact { background: #004d5c; color: #ecb180; border-color: #ecb180; }
+:root:not(.dark) .hire-act-call:focus-visible, :root:not(.dark) .hire-act-contact:focus-visible { outline-color: #004d5c; }
+@media (prefers-reduced-motion: reduce) { .hire-act { transition: none; } .hire-act:hover, .hire-act:focus-visible { transform: none; } }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { CALL_BOOKING_URL } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 import { estimate, PRICING, type Complexity, type Mode } from "@/lib/pricing";
@@ -41,8 +42,9 @@ const copy = {
     formula: "Cómo calculo",
     fProject: "(horas × valor por complejidad) + extra",
     fHourly: "(horas × valor por complejidad) + presencial + viático + extra",
-    cta: "Agendar una videollamada",
+    cta: "Videollamada",
     write: "Escribime",
+    contact: "Contacto",
     form: { name: "Nombre", email: "Tu email", message: "Mensaje", ph: "Contame qué necesitás…", budget: "Presupuesto que se envía", send: "Enviar", sending: "Enviando…", ok: "¡Listo! Te respondo a tu email.", err: { invalid_name: "Falta tu nombre.", invalid_email: "Revisá el email.", invalid_message: "El mensaje debe tener entre 1 y 280 caracteres.", rate_limited: "Demasiados envíos. Probá en un rato.", default: "No se pudo enviar. Probá de nuevo." } as Record<string, string>, yes: "sí", no: "no" },
   },
   en: {
@@ -80,8 +82,9 @@ const copy = {
     formula: "How I calculate",
     fProject: "(hours × rate by complexity) + extra",
     fHourly: "(hours × rate by complexity) + on-site + travel + extra",
-    cta: "Book a video call",
+    cta: "Video call",
     write: "Write me",
+    contact: "Contact",
     form: { name: "Name", email: "Your email", message: "Message", ph: "Tell me what you need…", budget: "Quote that will be sent", send: "Send", sending: "Sending…", ok: "Done! I'll reply to your email.", err: { invalid_name: "Your name is missing.", invalid_email: "Check the email.", invalid_message: "Message must be 1–280 characters.", rate_limited: "Too many sends. Try again later.", default: "Couldn't send. Try again." } as Record<string, string>, yes: "yes", no: "no" },
   },
 };
@@ -239,22 +242,16 @@ export function HireCalculator() {
       </section>
 
       <div className="hire-ctas">
-      <a className="call-cta" href={CALL_BOOKING_URL} target="_blank" rel="noopener noreferrer" data-testid="hire-call-cta">
-        <span className="call-cta-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2.5" y="6" width="13" height="12" rx="2.5" />
-            <path d="M15.5 10.5 21.5 7v10l-6-3.5" />
-          </svg>
-        </span>
-        <span className="call-cta-text">
-          <span className="call-cta-title">{c.cta}</span>
-        </span>
-        <span className="call-cta-arrow" aria-hidden="true">→</span>
-      </a>
-        <button type="button" className="hire-write" aria-expanded={formOpen} aria-controls="hire-form-panel" onClick={() => setFormOpen((o) => !o)} data-testid="hire-write">
-          <span className="call-cta-title">{c.write}</span>
-          <span className="call-cta-arrow" aria-hidden="true">↓</span>
+        <button type="button" className="hire-btn hire-act" aria-expanded={formOpen} aria-controls="hire-form-panel" onClick={() => setFormOpen((o) => !o)} data-testid="hire-write">
+          {c.write}
+          <span className="hire-btn-rainbow" aria-hidden />
         </button>
+        <a className="hire-act hire-act-call" href={CALL_BOOKING_URL} target="_blank" rel="noopener noreferrer" data-testid="hire-call-cta">
+          {c.cta}
+        </a>
+        <Link className="hire-act hire-act-contact" href="/contacto">
+          {c.contact}
+        </Link>
       </div>
 
       <HireForm
