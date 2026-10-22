@@ -35,7 +35,7 @@ pnpm install                  # o: npm install
 
 # 2. Variables (secretos locales, ignorados por git)
 cp .dev.vars.example .dev.vars
-# completá BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET (RESEND_API_KEY es opcional)
+# completá BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, TURNSTILE_SECRET_KEY (RESEND_API_KEY es opcional)
 
 # 3. Base local (D1 en .wrangler/state) + posts de ejemplo
 pnpm db:migrate:local         # o: npm run db:migrate:local
@@ -53,6 +53,7 @@ pnpm dev                      # o: npm run dev  → http://localhost:3000
 | `BETTER_AUTH_URL` | opcional | URL pública del sitio |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | secret | Cliente OAuth de Google. Redirect: `<sitio>/api/auth/callback/google` |
 | `RESEND_API_KEY` | secret opcional | Envía el mail del formulario |
+| `TURNSTILE_SECRET_KEY` | secret | Clave secreta de Cloudflare Turnstile. El formulario de /contratar verifica el token en el server (siteverify) antes de mandar el mail; sin ella responde 503. La site key pública está en `src/content/site.ts` (`turnstileSiteKey`); si forkeás, creá tu widget (dominios: el tuyo y `localhost`) y cambiala |
 | `CONTACT_TO`, `CONTACT_FROM`, `CONTACT_INBOX` | `vars` en `wrangler.jsonc` | A dónde llega el mail del formulario, el remitente (un dominio verificado en Resend) y la casilla para tu copia |
 
 En local van en `.dev.vars`. En producción: `npx wrangler secret put <NOMBRE>`.
@@ -76,7 +77,7 @@ En local van en `.dev.vars`. En producción: `npx wrangler secret put <NOMBRE>`.
    - `npx wrangler r2 bucket create <tu-bucket>`
    - cambiá `name`, `routes` (tu dominio), el destino de `send_email` y `vars` (`CONTACT_TO`, `CONTACT_FROM`, `CONTACT_INBOX`)
 3. `pnpm db:migrate:remote` (el script usa la base `luloxdev`; si la tuya se llama distinto, cambialo en `package.json`)
-4. Secrets: `npx wrangler secret put BETTER_AUTH_SECRET` (igual para los de Google y `RESEND_API_KEY`)
+4. Secrets: `npx wrangler secret put BETTER_AUTH_SECRET` (igual para los de Google, `TURNSTILE_SECRET_KEY` y `RESEND_API_KEY`)
 5. `pnpm run deploy` (si falla una vez, volvé a correrlo)
 
 ## 🎨 Hacelo tuyo

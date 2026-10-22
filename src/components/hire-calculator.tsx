@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { CALL_BOOKING_URL } from "@/content/site";
+import { CALL_BOOKING_URL, site } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 import { estimate, PRICING, type Complexity, type Mode } from "@/lib/pricing";
 
@@ -45,7 +45,7 @@ const copy = {
     cta: "Videollamada",
     write: "Escribime",
     contact: "Contacto",
-    form: { name: "Nombre", email: "Tu email", message: "Mensaje", ph: "Contame qué necesitás…", budget: "Presupuesto que se envía", send: "Enviar", sending: "Enviando…", ok: "¡Listo! Te respondo a tu email.", err: { invalid_name: "Falta tu nombre.", invalid_email: "Revisá el email.", invalid_message: "El mensaje debe tener entre 1 y 280 caracteres.", rate_limited: "Demasiados envíos. Probá en un rato.", default: "No se pudo enviar. Probá de nuevo." } as Record<string, string>, yes: "sí", no: "no" },
+    form: { name: "Nombre", email: "Tu email", message: "Mensaje", ph: "Contame qué necesitás…", budget: "Presupuesto que se envía", send: "Enviar", sending: "Enviando…", ok: "¡Listo! Te respondo a tu email.", err: { invalid_name: "Falta tu nombre.", invalid_email: "Revisá el email.", invalid_message: "El mensaje debe tener entre 1 y 280 caracteres.", rate_limited: "Demasiados envíos. Probá en un rato.", captcha_failed: "Falta la verificación anti-bots. Esperá el tilde y probá de nuevo.", default: "No se pudo enviar. Probá de nuevo." } as Record<string, string>, yes: "sí", no: "no" },
   },
   en: {
     intro: "Your quote in seconds.",
@@ -85,7 +85,7 @@ const copy = {
     cta: "Video call",
     write: "Write me",
     contact: "Contact",
-    form: { name: "Name", email: "Your email", message: "Message", ph: "Tell me what you need…", budget: "Quote that will be sent", send: "Send", sending: "Sending…", ok: "Done! I'll reply to your email.", err: { invalid_name: "Your name is missing.", invalid_email: "Check the email.", invalid_message: "Message must be 1–280 characters.", rate_limited: "Too many sends. Try again later.", default: "Couldn't send. Try again." } as Record<string, string>, yes: "yes", no: "no" },
+    form: { name: "Name", email: "Your email", message: "Message", ph: "Tell me what you need…", budget: "Quote that will be sent", send: "Send", sending: "Sending…", ok: "Done! I'll reply to your email.", err: { invalid_name: "Your name is missing.", invalid_email: "Check the email.", invalid_message: "Message must be 1–280 characters.", rate_limited: "Too many sends. Try again later.", captcha_failed: "Anti-bot check missing. Wait for the checkmark and try again.", default: "Couldn't send. Try again." } as Record<string, string>, yes: "yes", no: "no" },
   },
 };
 
@@ -334,6 +334,7 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
   const [website, setWebsite] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "ok" | "error">("idle");
   const [err, setErr] = useState("");
+  const { box: tsBox, token, reset: resetTs } = useTurnstile(open);
   const left = 280 - [...message].length;
 
   const reveal = () =>
@@ -347,9 +348,10 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
       const res = await fetch("/api/hire-contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message, website, budget }),
+        body: JSON.stringify({ name, email, message, website, budget, turnstileToken: token }),
       });
       const j = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      resetTs(); // tokens are single-use
       if (res.ok && j.ok) {
         setState("ok");
         reveal();
@@ -399,8 +401,9 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
           ))}
         </dl>
       </div>
+      <div ref={tsBox} className="hire-turnstile" />
       <div className="hire-form-actions">
-        <button type="submit" className="hire-form-send" disabled={state === "sending" || left < 0}>
+        <button type="submit" className="hire-form-send" disabled={state === "sending" || left < 0 || !token}>
           {state === "sending" ? f.sending : f.send}
         </button>
         <p ref={status} className="hire-form-status" role="status">{state === "ok" ? f.ok : state === "error" ? err : ""}</p>
@@ -408,4 +411,60 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
     </form>
     </div>
   );
+}
+
+type TurnstileApi = {
+  render: (el: HTMLElement, o: Record<string, unknown>) => string;
+  reset: (id: string) => void;
+  remove: (id: string) => void;
+};
+declare global {
+  interface Window { turnstile?: TurnstileApi }
+}
+
+const TS_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+let tsLoad: Promise<TurnstileApi> | null = null;
+function loadTurnstile(): Promise<TurnstileApi> {
+  tsLoad ??= new Promise((resolve, reject) => {
+    if (window.turnstile) return resolve(window.turnstile);
+    const s = document.createElement("script");
+    s.src = TS_SRC;
+    s.async = true;
+    s.onload = () => (window.turnstile ? resolve(window.turnstile) : reject(new Error("turnstile")));
+    s.onerror = () => { tsLoad = null; reject(new Error("turnstile")); };
+    document.head.appendChild(s);
+  });
+  return tsLoad;
+}
+
+/** Cloudflare Turnstile (managed) rendered once the form opens, matching the site theme. */
+function useTurnstile(active: boolean) {
+  const box = useRef<HTMLDivElement>(null);
+  const id = useRef<string | null>(null);
+  const [token, setToken] = useState("");
+  useEffect(() => {
+    if (!active || id.current || !box.current) return;
+    let alive = true;
+    loadTurnstile()
+      .then((ts) => {
+        if (!alive || !box.current || id.current) return;
+        id.current = ts.render(box.current, {
+          sitekey: site.turnstileSiteKey,
+          theme: document.documentElement.classList.contains("light") ? "light" : "dark",
+          language: document.documentElement.lang || "auto",
+          size: "flexible",
+          callback: (t: string) => setToken(t),
+          "expired-callback": () => setToken(""),
+          "error-callback": () => setToken(""),
+        });
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [active]);
+  useEffect(() => () => { if (id.current) window.turnstile?.remove(id.current); }, []);
+  const reset = () => {
+    setToken("");
+    if (id.current) window.turnstile?.reset(id.current);
+  };
+  return { box, token, reset };
 }

@@ -36,7 +36,7 @@ pnpm install                 # or: npm install
 
 # 2. Env vars (local secrets, git-ignored)
 cp .dev.vars.example .dev.vars
-# fill in BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET (RESEND_API_KEY optional)
+# fill in BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, TURNSTILE_SECRET_KEY (RESEND_API_KEY optional)
 
 # 3. Local database (D1 in .wrangler/state) + sample posts
 pnpm db:migrate:local        # or: npm run db:migrate:local
@@ -54,6 +54,7 @@ pnpm dev                     # or: npm run dev  → http://localhost:3000
 | `BETTER_AUTH_URL` | optional | Public site URL |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | secret | Google OAuth client. Redirect URI: `<site>/api/auth/callback/google` |
 | `RESEND_API_KEY` | optional secret | Sends the contact form email |
+| `TURNSTILE_SECRET_KEY` | secret | Cloudflare Turnstile secret. The /contratar form verifies the token server-side (siteverify) before sending; without it the form returns 503. The public site key lives in `src/content/site.ts` (`turnstileSiteKey`); if you fork, create your own widget (domains: yours and `localhost`) and swap it |
 | `CONTACT_TO`, `CONTACT_FROM`, `CONTACT_INBOX` | `vars` in `wrangler.jsonc` | Where the form email goes, the sender (a domain verified in Resend) and the inbox for your copy |
 
 Locally they live in `.dev.vars`. In production: `npx wrangler secret put <NAME>`.
@@ -77,7 +78,7 @@ Locally they live in `.dev.vars`. In production: `npx wrangler secret put <NAME>
    - `npx wrangler r2 bucket create <your-bucket>`
    - change `name`, `routes` (your domain), the `send_email` destination and `vars` (`CONTACT_TO`, `CONTACT_FROM`, `CONTACT_INBOX`)
 3. `pnpm db:migrate:remote` (the script uses the db name `luloxdev`; change it in `package.json` if yours differs)
-4. Set secrets: `npx wrangler secret put BETTER_AUTH_SECRET` (same for the Google ones and `RESEND_API_KEY`)
+4. Set secrets: `npx wrangler secret put BETTER_AUTH_SECRET` (same for the Google ones, `TURNSTILE_SECRET_KEY` and `RESEND_API_KEY`)
 5. `pnpm run deploy` (if it fails the first time, just run it again)
 
 ## 🎨 Make it yours

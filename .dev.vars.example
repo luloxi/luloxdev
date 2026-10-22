@@ -14,3 +14,7 @@ GOOGLE_CLIENT_SECRET=
 # Optional: Resend API key for the /contratar contact form.
 # Without it the form falls back to the Cloudflare Email Routing binding (prod only).
 RESEND_API_KEY=
+
+# Cloudflare Turnstile secret for the /contratar form (Dashboard > Turnstile > widget).
+# Required: without it the form refuses to send. The public site key is in src/content/site.ts.
+TURNSTILE_SECRET_KEY=

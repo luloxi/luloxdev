@@ -16,6 +16,8 @@ export const site = {
   heroPhoto: "/avatar-hero.jpg",
   /** Share preview (og:image / twitter:image), 1200x630 top crop of heroPhoto. */
   ogImage: "/og.png",
+  /** Public Turnstile site key for the /contratar form (secret: TURNSTILE_SECRET_KEY). */
+  turnstileSiteKey: "0x4AAAAAAFhUYfv6XY9bzY__",
   /** Used for absolute OG/Twitter URLs when env is missing */
   url: "https://lulox.com.ar",
   xHandle: "@LuloxDev",

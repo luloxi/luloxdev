@@ -3,20 +3,33 @@ import assert from "node:assert/strict";
 import { handleHireContact, parseBudget } from "../src/lib/hire-contact.ts";
 
 const budget = { mode: "project", hours: 20, complexity: "medium", onSite: true, days: 2, extra: false };
-const ok = { name: "Ana", email: "ana@example.com", message: "Hola, quiero una web.", budget };
+const ok = { name: "Ana", email: "ana@example.com", message: "Hola, quiero una web.", budget, turnstileToken: "good-token" };
+const SITEVERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 function mkEnv(opts: { limitOk?: boolean; resend?: boolean } = {}) {
   const sent: unknown[] = [];
+  const verified: URLSearchParams[] = [];
+  const fetchMock = (async (u: string, init: RequestInit) => {
+    if (u === SITEVERIFY) {
+      const f = init.body as URLSearchParams;
+      verified.push(f);
+      return Response.json({ success: f.get("response") === "good-token" && f.get("secret") === "ts-secret" });
+    }
+    sent.push({ via: "resend", m: JSON.parse(String(init.body)) });
+    return new Response("{}", { status: 200 });
+  }) as unknown as typeof fetch;
   const env = {
+    TURNSTILE_SECRET_KEY: "ts-secret",
+    fetch: fetchMock,
     CONTACT_TO: "lucianoolivabianco@gmail.com",
     CONTACT_FROM: "no-responder@lulox.com.ar",
     CONTACT_RL: { limit: async () => ({ success: opts.limitOk ?? true }) },
     CONTACT_EMAIL: { send: async (m: unknown) => void sent.push({ via: "binding", m }) },
     ...(opts.resend
-      ? { RESEND_API_KEY: "test-key", fetch: (async (_u: string, init: RequestInit) => { sent.push({ via: "resend", m: JSON.parse(String(init.body)) }); return new Response("{}", { status: 200 }); }) as unknown as typeof fetch }
+      ? { RESEND_API_KEY: "test-key" }
       : {}),
   };
-  return { env, sent };
+  return { env, sent, verified };
 }
 
 test("valid submission sends via Resend with reply-to and server-computed budget", async () => {
@@ -78,7 +91,8 @@ test("rate limit → 429, nothing sent", async () => {
 
 test("no transport → 503; send failure → 502", async () => {
   assert.equal((await handleHireContact(ok, {}, "x")).status, 503);
-  const r = await handleHireContact(ok, { CONTACT_EMAIL: { send: async () => { throw new Error("x"); } } }, "x");
+  const { env } = mkEnv();
+  const r = await handleHireContact(ok, { ...env, CONTACT_EMAIL: { send: async () => { throw new Error("x"); } } }, "x");
   assert.equal(r.status, 502);
 });
 
@@ -86,4 +100,27 @@ test("parseBudget clamps days and drops them when not on-site", () => {
   assert.equal(parseBudget({ ...budget, days: 50 })?.days, 10);
   assert.equal(parseBudget({ ...budget, onSite: false })?.days, 0);
   assert.equal(parseBudget({ ...budget, mode: "hourly", hours: 4 })?.days, 1);
+});
+
+test("Turnstile: missing or invalid token → 403, nothing sent; valid token is verified with secret + IP", async () => {
+  const { env, sent, verified } = mkEnv({ resend: true });
+  const noToken: Record<string, unknown> = { ...ok };
+  delete noToken.turnstileToken;
+  assert.deepEqual(await handleHireContact(noToken, env, "1.2.3.4"), { status: 403, body: { error: "captcha_failed" } });
+  assert.equal((await handleHireContact({ ...ok, turnstileToken: "" }, env, "1.2.3.4")).status, 403);
+  assert.equal((await handleHireContact({ ...ok, turnstileToken: "bad-token" }, env, "1.2.3.4")).status, 403);
+  assert.equal(sent.length, 0);
+  assert.equal((await handleHireContact(ok, env, "1.2.3.4")).status, 200);
+  assert.equal(sent.length, 1);
+  const last = verified.at(-1)!;
+  assert.equal(last.get("remoteip"), "1.2.3.4");
+  assert.equal(last.get("secret"), "ts-secret");
+});
+
+test("Turnstile: no secret configured → 503; siteverify down → 403", async () => {
+  const { env, sent } = mkEnv();
+  assert.equal((await handleHireContact(ok, { ...env, TURNSTILE_SECRET_KEY: undefined }, "x")).status, 503);
+  const down = (async () => { throw new Error("net"); }) as unknown as typeof fetch;
+  assert.equal((await handleHireContact(ok, { ...env, fetch: down }, "x")).status, 403);
+  assert.equal(sent.length, 0);
 });

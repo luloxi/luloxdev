@@ -4364,6 +4364,11 @@ body.ie-off .ie-row-pencil { display: none; }
 .hire-form-count { font-family: var(--font-mono, monospace); font-variant-numeric: tabular-nums; }
 .hire-form-count.is-low { color: var(--o); }
 .hire-form-count.is-over { color: #e5484d; font-weight: 700; }
+/* Turnstile: reserve its height so the form doesn't jump when it loads. */
+.hire-turnstile {
+  min-height: 65px;
+}
+
 .hire-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .hire-form-budget { border-left: 2px solid var(--cy, #00d4ff); padding: .2rem 0 .2rem .9rem; }
 .hire-form-budget-title { font-family: var(--font-mono, monospace); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--o); }

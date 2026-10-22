@@ -4,7 +4,8 @@ import { estimate, PRICING, type Complexity, type Mode } from "./pricing";
  * /contratar contact form: validates the submission, recomputes the budget
  * server-side from the calculator inputs (never trusts client totals) and
  * sends one email to Luciano via Resend (RESEND_API_KEY), falling back to the
- * Email Routing `send_email` binding.
+ * Email Routing `send_email` binding. Every send needs a valid Cloudflare
+ * Turnstile token, checked server-side via siteverify (TURNSTILE_SECRET_KEY).
  */
 export type HireEnv = {
   CONTACT_EMAIL?: { send: (msg: unknown) => Promise<unknown> };
@@ -13,6 +14,8 @@ export type HireEnv = {
   CONTACT_FROM?: string;
   /** Preferred transport (Worker secret, already used by the old contact form). */
   RESEND_API_KEY?: string;
+  /** Turnstile secret (Worker secret). Without it the form refuses to send. */
+  TURNSTILE_SECRET_KEY?: string;
   fetch?: typeof fetch;
 };
 
@@ -59,6 +62,22 @@ export function budgetLines(b: Budget): { summary: string[]; lines: [string, str
   return { summary, lines, total: usd(r.total), deposit: usd(r.deposit) };
 }
 
+const SITEVERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+
+/** True only if Cloudflare confirms the Turnstile token. Fails closed. */
+export async function verifyTurnstile(token: unknown, env: HireEnv, ip: string): Promise<boolean> {
+  if (typeof token !== "string" || !token || token.length > 2048 || !env.TURNSTILE_SECRET_KEY) return false;
+  const form = new URLSearchParams({ secret: env.TURNSTILE_SECRET_KEY, response: token });
+  if (ip && ip !== "unknown") form.set("remoteip", ip);
+  try {
+    const r = await (env.fetch ?? fetch)(SITEVERIFY, { method: "POST", body: form });
+    const j = (await r.json()) as { success?: boolean };
+    return r.ok && j.success === true;
+  } catch {
+    return false;
+  }
+}
+
 export type Result = { status: number; body: Record<string, unknown> };
 
 export async function handleHireContact(raw: unknown, env: HireEnv, ip: string): Promise<Result> {
@@ -80,7 +99,8 @@ export async function handleHireContact(raw: unknown, env: HireEnv, ip: string):
     const { success } = await env.CONTACT_RL.limit({ key: `hire:${ip}` });
     if (!success) return { status: 429, body: { error: "rate_limited" } };
   }
-  if (!env.RESEND_API_KEY && !env.CONTACT_EMAIL) return { status: 503, body: { error: "not_configured" } };
+  if (!env.TURNSTILE_SECRET_KEY || (!env.RESEND_API_KEY && !env.CONTACT_EMAIL)) return { status: 503, body: { error: "not_configured" } };
+  if (!(await verifyTurnstile(body.turnstileToken, env, ip))) return { status: 403, body: { error: "captcha_failed" } };
 
   const b = budgetLines(budget);
   const to = env.CONTACT_TO ?? "lucianoolivabianco@gmail.com";
