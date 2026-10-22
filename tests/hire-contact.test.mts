@@ -135,6 +135,25 @@ test("default calculator quote is recomputed server-side to the same totals", as
     const text = String((sent[0] as { m: { text: string } }).m.text);
     assert.match(text, new RegExp(`Total estimado: ${total.replace("$", "\\$")}\\n`));
     assert.match(text, /Presencial: no/);
-    assert.match(text, /Condiciones especiales: no/);
+    assert.match(text, /Urgencia: no/);
   }
+});
+
+test("urgency days are recomputed server-side in both modes; client totals ignored", async () => {
+  for (const [b, total, line] of [
+    [{ mode: "hourly", hours: 2, complexity: "low", onSite: false, days: 0, extra: true, extraDays: 3, total: 1 }, "US$ 320", "Urgencia: sí, 3 días"],
+    [{ mode: "project", hours: 4, complexity: "low", onSite: true, days: 2, extra: true, extraDays: 2, total: 9999 }, "US$ 340", "Urgencia: sí, 2 días"],
+    [{ mode: "project", hours: 4, complexity: "low", onSite: false, days: 1, extra: true, extraDays: 999 }, "US$ 1,040", "Urgencia: sí, 10 días"],
+  ] as const) {
+    const { env, sent } = mkEnv({ resend: true });
+    assert.equal((await handleHireContact({ ...ok, budget: b }, env, "x")).status, 200);
+    const text = String((sent[0] as { m: { text: string } }).m.text);
+    assert.match(text, new RegExp(`Total estimado: ${total.replace("$", "\\$")}\\n`));
+    assert.ok(text.includes(line), text);
+  }
+});
+
+test("parseBudget: urgency off → 0 days; missing days → 1", () => {
+  assert.equal(parseBudget({ ...budget, extra: false, extraDays: 5 })!.extraDays, 0);
+  assert.equal(parseBudget({ ...budget, extra: true })!.extraDays, 1);
 });

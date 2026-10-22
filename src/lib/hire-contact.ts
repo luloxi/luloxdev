@@ -24,7 +24,7 @@ const EMAIL_RE = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]{2,}$/;
 const MODES: Mode[] = ["project", "hourly"];
 const CX: Complexity[] = ["low", "medium", "high"];
 
-export type Budget = { mode: Mode; hours: number; complexity: Complexity; onSite: boolean; days: number; extra: boolean };
+export type Budget = { mode: Mode; hours: number; complexity: Complexity; onSite: boolean; days: number; extra: boolean; extraDays: number };
 
 export function parseBudget(v: unknown): Budget | null {
   if (!v || typeof v !== "object") return null;
@@ -37,13 +37,15 @@ export function parseBudget(v: unknown): Budget | null {
   if (hours < 1 || hours > maxH) return null;
   const onSite = b.onSite === true;
   const days = mode === "project" && onSite ? Math.max(1, Math.min(PRICING.maxOnSiteDays, Math.round(Number(b.days) || 1))) : onSite ? 1 : 0;
-  return { mode, hours: Math.round(hours), complexity, onSite, days, extra: b.extra === true };
+  const extra = b.extra === true;
+  const extraDays = extra ? Math.max(1, Math.min(PRICING.maxUrgencyDays, Math.round(Number(b.extraDays) || 1))) : 0;
+  return { mode, hours: Math.round(hours), complexity, onSite, days, extra, extraDays };
 }
 
 const LABEL = {
   mode: { project: "Por proyecto", hourly: "Por hora" },
   cx: { low: "Baja", medium: "Media", high: "Alta" },
-  lines: { work: "Trabajo", discount: "Descuento por volumen", onSite: "Recargo presencial", travel: "Viático", extra: "Condiciones especiales" },
+  lines: { work: "Trabajo", discount: "Descuento por volumen", onSite: "Recargo presencial", travel: "Viático", extra: "Urgencia" },
 } as const;
 
 const usd = (n: number) => `${n < 0 ? "-" : ""}US$ ${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
@@ -51,14 +53,14 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 const oneLine = (s: string) => s.replace(/[\r\n]+/g, " ").trim();
 
 export function budgetLines(b: Budget): { summary: string[]; lines: [string, string][]; total: string; deposit: string } {
-  const r = estimate({ mode: b.mode, hours: b.hours, complexity: b.complexity, extra: b.extra, onSite: b.onSite, onSiteDays: b.days });
+  const r = estimate({ mode: b.mode, hours: b.hours, complexity: b.complexity, extra: b.extra, onSite: b.onSite, onSiteDays: b.days, extraDays: b.extraDays });
   const summary = [
     `Modalidad: ${LABEL.mode[b.mode]}`,
     `Horas: ${b.hours}h · Complejidad: ${LABEL.cx[b.complexity]} (US$ ${PRICING.rates[b.complexity]}/h)`,
     `Presencial: ${b.onSite ? (b.mode === "project" ? `sí, ${b.days} ${b.days === 1 ? "día" : "días"}` : "sí") : "no"}`,
-    `Condiciones especiales: ${b.extra ? "sí" : "no"}`,
+    `Urgencia: ${b.extra ? `sí, ${b.extraDays} ${b.extraDays === 1 ? "día" : "días"}` : "no"}`,
   ];
-  const lines = r.lines.map((l): [string, string] => [`${LABEL.lines[l.id]}${l.id === "discount" ? ` (-${l.pct}%)` : ""}`, usd(l.amount)]);
+  const lines = r.lines.map((l): [string, string] => [`${LABEL.lines[l.id]}${l.id === "discount" ? ` (-${l.pct}%)` : ""}${l.days && (l.id === "extra" || b.mode === "project") ? ` (${l.days} ${l.days === 1 ? "día" : "días"})` : ""}`, usd(l.amount)]);
   return { summary, lines, total: usd(r.total), deposit: usd(r.deposit) };
 }
 

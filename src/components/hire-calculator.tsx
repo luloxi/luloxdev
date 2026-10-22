@@ -31,17 +31,17 @@ const copy = {
     dayUnit: ["día", "días"],
     travel: "Viático*",
     travelNote: "*El viático puede variar según la distancia.",
-    extra: "Condiciones especiales",
-    extraHint: "Urgencia, plazos ajustados, integraciones de terceros…",
-    lines: { work: "Trabajo", discount: "Descuento por volumen", onSite: "Recargo presencial", travel: "Viático*", extra: "Condiciones especiales" },
+    extra: "Urgencia",
+    extraDays: "Días de urgencia",
+    lines: { work: "Trabajo", discount: "Descuento por volumen", onSite: "Recargo presencial", travel: "Viático*", extra: "Urgencia" },
     estimate: "Estimación",
     total: "Total estimado",
     deposit: "Anticipo (50%)",
     perHour: "/h",
     note: `Estimación orientativa, no es un presupuesto final. Lo ajustamos juntos en la llamada. Presupuestos válidos ${PRICING.validityDays} días; 50% de anticipo y 50% contra entrega.`,
     formula: "Cómo calculo",
-    fProject: "(horas × complejidad) + extra",
-    fHourly: "(horas × complejidad) + presencial + viático + extra",
+    fProject: "(horas × complejidad) + presencial/día + viático/día + urgencia/día",
+    fHourly: "(horas × complejidad) + presencial + viático + urgencia/día",
     cta: "Videollamada",
     write: "Escribime",
     contact: "Contacto",
@@ -71,17 +71,17 @@ const copy = {
     dayUnit: ["day", "days"],
     travel: "Travel*",
     travelNote: "*Travel may vary with distance.",
-    extra: "Special conditions",
-    extraHint: "Urgency, tight deadlines, third-party integrations…",
-    lines: { work: "Work", discount: "Volume discount", onSite: "On-site surcharge", travel: "Travel*", extra: "Special conditions" },
+    extra: "Urgency",
+    extraDays: "Urgency days",
+    lines: { work: "Work", discount: "Volume discount", onSite: "On-site surcharge", travel: "Travel*", extra: "Urgency" },
     estimate: "Estimate",
     total: "Estimated total",
     deposit: "Deposit (50%)",
     perHour: "/h",
     note: `Ballpark estimate, not a final quote. We fine-tune it together on the call. Quotes are valid for ${PRICING.validityDays} days; 50% upfront, 50% on delivery.`,
     formula: "How I calculate",
-    fProject: "(hours × complexity) + extra",
-    fHourly: "(hours × complexity) + on-site + travel + extra",
+    fProject: "(hours × complexity) + on-site/day + travel/day + urgency/day",
+    fHourly: "(hours × complexity) + on-site + travel + urgency/day",
     cta: "Video call",
     write: "Write me",
     contact: "Contact",
@@ -120,9 +120,10 @@ export function HireCalculator() {
   const [onSite, setOnSite] = useState(false);
   const [days, setDays] = useState(1);
   const [extra, setExtra] = useState(false);
+  const [extraDays, setExtraDays] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
 
-  const r = estimate({ mode, hours, complexity, extra, onSite, onSiteDays: days });
+  const r = estimate({ mode, hours, complexity, extra, onSite, onSiteDays: days, extraDays });
   const total = useCountUp(r.total);
   const maxH = mode === "project" ? PRICING.maxProjectHours : PRICING.maxHourlyHours;
 
@@ -203,7 +204,15 @@ export function HireCalculator() {
               <button type="button" aria-label="+" disabled={days >= PRICING.maxOnSiteDays} onClick={() => setDays((d) => Math.min(PRICING.maxOnSiteDays, d + 1))}>+</button>
             </div>
           ) : null}
-          <Toggle on={extra} set={setExtra} label={c.extra} sub={`+US$ ${PRICING.extra} · ${c.extraHint}`} />
+          <Toggle on={extra} set={setExtra} label={c.extra} sub={`+US$ ${PRICING.extra} / ${c.dayUnit[0]}`} />
+          {extra ? (
+            <div className="hire-stepper" role="group" aria-label={c.extraDays}>
+              <span className="hire-stepper-label">{c.extraDays}</span>
+              <button type="button" aria-label="−" disabled={extraDays <= 1} onClick={() => setExtraDays((d) => Math.max(1, d - 1))}>−</button>
+              <output aria-live="polite">{extraDays}</output>
+              <button type="button" aria-label="+" disabled={extraDays >= PRICING.maxUrgencyDays} onClick={() => setExtraDays((d) => Math.min(PRICING.maxUrgencyDays, d + 1))}>+</button>
+            </div>
+          ) : null}
         </div>
       </fieldset>
 
@@ -219,7 +228,7 @@ export function HireCalculator() {
                 {c.lines[l.id]}
                 {l.id === "work" ? <em> {hours}h × US$ {PRICING.rates[complexity]}</em> : null}
                 {l.id === "discount" ? <em> -{l.pct}%</em> : null}
-                {l.days && mode === "project" ? <em> {l.days} {c.dayUnit[l.days === 1 ? 0 : 1]} × US$ {l.amount / l.days}</em> : null}
+                {l.days && (mode === "project" || l.id === "extra") ? <em> {l.days} {c.dayUnit[l.days === 1 ? 0 : 1]} × US$ {l.amount / l.days}</em> : null}
               </span>
               <span>{money(l.amount)}</span>
             </li>
@@ -249,12 +258,12 @@ export function HireCalculator() {
         <HireForm
           open={formOpen}
           c={c}
-          budget={{ mode, hours: Math.min(hours, maxH), complexity, onSite, days, extra }}
+          budget={{ mode, hours: Math.min(hours, maxH), complexity, onSite, days, extra, extraDays }}
           rows={[
             [c.mode, c.modes[mode]],
             [c.hours, `${Math.min(hours, maxH)}h · ${c.cx[complexity][0]} (US$ ${PRICING.rates[complexity]}${c.perHour})`],
             [c.onSite, onSite ? (mode === "project" ? `${c.form.yes}, ${days} ${c.dayUnit[days === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
-            [c.extra, extra ? c.form.yes : c.form.no],
+            [c.extra, extra ? `${c.form.yes}, ${extraDays} ${c.dayUnit[extraDays === 1 ? 0 : 1]}` : c.form.no],
             [c.total, money(r.total)],
           ]}
         />

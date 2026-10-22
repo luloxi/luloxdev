@@ -1,7 +1,7 @@
 /**
  * Lulox's pricing method (public, no client data). Edit the numbers here.
- *  - Per project: (hours × complexity rate) + extra
- *  - Per hour / on-site: (hours × rate) + on-site surcharge + travel + extra
+ *  - Per project: (hours × hourly complexity) + on-site/day + travel/day + urgency/day
+ *  - Per hour: (hours × rate) + on-site + travel + urgency/day
  */
 export type Complexity = "low" | "medium" | "high";
 export type Mode = "project" | "hourly";
@@ -12,8 +12,9 @@ export const PRICING = {
   onSiteSurcharge: 25,
   /** Always added with on-site work; may vary with distance. */
   travel: 25,
-  /** Variable-conditions extra (urgency, third-party integrations, tight deadlines...). */
+  /** Urgency surcharge, charged per required day (both modes). */
   extra: 100,
+  maxUrgencyDays: 10,
   /** Project size presets in hours (research, build, testing, polish, feedback, fixes, delivery). */
   sizes: { s: 10, m: 20, l: 40 },
   /** Calculator starting values: a low, friendly first price. No on-site, no extras. */
@@ -36,7 +37,10 @@ export type Inputs = {
   mode: Mode;
   hours: number;
   complexity: Complexity;
+  /** Urgency toggle (field kept as `extra`). */
   extra: boolean;
+  /** Urgency days (each adds PRICING.extra). Defaults to 1. */
+  extraDays?: number;
   onSite?: boolean;
   /** Project mode: on-site days (each adds surcharge + travel). */
   onSiteDays?: number;
@@ -55,7 +59,10 @@ export function estimate(i: Inputs, p = PRICING): { lines: Line[]; total: number
     lines.push({ id: "onSite", amount: p.onSiteSurcharge * days, days });
     lines.push({ id: "travel", amount: p.travel * days, days });
   }
-  if (i.extra) lines.push({ id: "extra", amount: p.extra });
+  if (i.extra) {
+    const days = Math.max(1, Math.min(p.maxUrgencyDays, Math.round(i.extraDays ?? 1) || 1));
+    lines.push({ id: "extra", amount: p.extra * days, days });
+  }
   const total = lines.reduce((a, l) => a + l.amount, 0);
   return { lines, total, deposit: Math.round(total * p.deposit) };
 }
