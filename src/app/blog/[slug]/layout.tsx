@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { localizePost } from "@/content/blog/types";
 import { getPublishedPost } from "@/lib/blog";
 import { getServerPrefs } from "@/lib/prefs";
+import { site } from "@/content/site";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -18,7 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await getServerPrefs();
   const L = localizePost(post, locale);
   const url = `/blog/${post.slug}`;
-  const images = post.coverImage ? [{ url: post.coverImage }] : undefined;
+  // Own cover if any, else the site share image (child openGraph replaces the root one).
+  const images = [{ url: new URL(post.coverImage ?? site.ogImage, site.url).href }];
   return {
     title: L.title,
     description: L.summary,
@@ -33,13 +35,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedTime: post.publishedAt,
       authors: ["Luciano Oliva Bianco"],
       tags: post.tags,
-      ...(images ? { images } : {}),
+      images,
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: L.title,
       description: L.summary,
-      ...(images ? { images: images.map((i) => i.url) } : {}),
+      images: images.map((i) => i.url),
     },
   };
 }

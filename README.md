@@ -86,6 +86,7 @@ En local van en `.dev.vars`. En producción: `npx wrangler secret put <NOMBRE>`.
 - `src/lib/auth/admin.ts`: `ADMIN_EMAILS`, las únicas cuentas de Google que pueden editar.
 - `src/lib/auth/options.ts`: `ALLOWED_HOSTS` y `TRUSTED_ORIGINS` (tus dominios, si no el login los rechaza).
 - `public/`: reemplazá las fotos (`avatar*.jpg`), imágenes de proyectos y logos.
+- `public/og.png`: la imagen para compartir (og:image/twitter:image, 1200x630), recorte desde arriba de `avatar-hero.jpg`. Si cambiás la foto, regenerala. Los posts con portada usan su propia portada.
 - `wrangler.jsonc` y el link del footer en `src/app/page.tsx`.
 
 **Sección por sección**

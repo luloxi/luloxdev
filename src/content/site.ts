@@ -12,8 +12,10 @@ export const site = {
     "Soy Luciano Oliva Bianco (Lulox). Hago research y builds en AI, blockchain, tokenización y comercio agéntico.",
   ens: "lulox.eth",
   avatar: "/avatar.jpg",
-  /** Landing (home) hero photo. Share/OG images keep using `avatar`. */
+  /** Landing (home) hero photo. */
   heroPhoto: "/avatar-hero.jpg",
+  /** Share preview (og:image / twitter:image), 1200x630 top crop of heroPhoto. */
+  ogImage: "/og.png",
   /** Used for absolute OG/Twitter URLs when env is missing */
   url: "https://lulox.com.ar",
   xHandle: "@LuloxDev",
