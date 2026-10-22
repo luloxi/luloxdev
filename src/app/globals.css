@@ -4394,3 +4394,11 @@ body.ie-off .ie-row-pencil { display: none; }
 .hire-form-send:hover:not(:disabled) { transform: translateY(-2px); }
 .hire-form-send:disabled { opacity: .55; cursor: not-allowed; }
 .hire-form-status { margin: 0; font-size: .88rem; color: var(--muted); }
+
+/* r24: Contratar tile gets an extra neon snot-green glow (violet text stays). */
+.cp-nav > .cp-nav-item[data-section="hire"] { --snot: #7CFF3A;
+  box-shadow: 0 0 18px -4px color-mix(in srgb, var(--section-hire) 55%, transparent), 0 0 26px -2px color-mix(in srgb, var(--snot) 70%, transparent), 0 0 48px -6px color-mix(in srgb, var(--snot) 45%, transparent);
+  animation: snot-pulse 3.2s ease-in-out infinite; }
+:root:not(.dark) .cp-nav > .cp-nav-item[data-section="hire"] { --snot: #3FD400; }
+@keyframes snot-pulse { 50% { box-shadow: 0 0 18px -4px color-mix(in srgb, var(--section-hire) 55%, transparent), 0 0 34px 0 color-mix(in srgb, var(--snot) 85%, transparent), 0 0 64px -4px color-mix(in srgb, var(--snot) 55%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .cp-nav > .cp-nav-item[data-section="hire"] { animation: none; } }
