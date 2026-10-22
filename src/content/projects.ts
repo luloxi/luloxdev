@@ -245,18 +245,7 @@ export const pastProjects: PastProject[] = [
   },
 ];
 
-export function getPastProject(id: string): PastProject | undefined {
-  return pastProjects.find((p) => p.id === id);
-}
-
 export const pastProjectIds = pastProjects.map((p) => p.id);
 
 export const focusTopicIds: string[] = focusTopics.map((t) => t.id);
 
-/** Topics whose keywords appear in the text (case-insensitive). Suggestion only. */
-export function suggestTopics(text: string): FocusTopicId[] {
-  const lower = text.toLowerCase();
-  return focusTopics
-    .filter((t) => t.keywords.some((k) => lower.includes(k)))
-    .map((t) => t.id);
-}

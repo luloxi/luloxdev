@@ -27,7 +27,7 @@ Es copyleft a propósito: llevátelo, mejoralo y dejalo abierto para el que veng
 
 ## 🚀 Arranque rápido
 
-Necesitás **Node.js 22+** y una cuenta gratis de Cloudflare (solo para publicar). Te recomiendo **pnpm** (está fijado en `package.json`); npm también funciona.
+Necesitás **Node.js 22.13+** y una cuenta gratis de Cloudflare (solo para publicar). Te recomiendo **pnpm** (está fijado en `package.json`); npm también funciona.
 
 ```bash
 # 1. Instalar

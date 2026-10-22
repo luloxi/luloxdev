@@ -27,7 +27,7 @@ It's copyleft on purpose: take it, make it better, and keep it open for the next
 
 ## 🚀 Quick start
 
-You need **Node.js 22+** and a free Cloudflare account (only for deploying).
+You need **Node.js 22.13+** and a free Cloudflare account (only for deploying).
 **pnpm is recommended** (the repo pins it in `package.json`); npm works too.
 
 ```bash

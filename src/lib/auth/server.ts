@@ -40,6 +40,3 @@ export async function getAuth(): Promise<Auth | null> {
   return auth;
 }
 
-export async function isAuthConfigured() {
-  return configured(await getEnv());
-}

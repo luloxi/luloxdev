@@ -33,21 +33,6 @@ export function prefixLines(value: string, s: number, e: number, make: (i: numbe
   return { text, selStart: lineStart, selEnd: lineStart + out.length };
 }
 
-export function insertLink(value: string, s: number, e: number, url: string, fallback: string): Edit {
-  const label = value.slice(s, e) || fallback;
-  const md = `[${label}](${url.trim()})`;
-  return { text: value.slice(0, s) + md + value.slice(e), selStart: s + 1, selEnd: s + 1 + label.length };
-}
-
-export function insertHr(value: string, s: number): Edit {
-  const before = value.slice(0, s);
-  const after = value.slice(s).replace(/^\n+/, "");
-  const pre = before.length === 0 || before.endsWith("\n\n") ? "" : before.endsWith("\n") ? "\n" : "\n\n";
-  const ins = `${pre}---\n\n`;
-  const pos = before.length + ins.length;
-  return { text: before + ins + after, selStart: pos, selEnd: pos };
-}
-
 /** Enter inside a list item: continue the list, or end it on an empty item. Null = default Enter. */
 export function continueList(value: string, s: number, e: number): Edit | null {
   if (s !== e) return null;

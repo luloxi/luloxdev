@@ -63,16 +63,6 @@ export function InstagramBrandIcon({ className }: IconProps) {
   );
 }
 
-export function LetterboxdIcon({ className }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden className={cn("fill-current", className)}>
-      <circle cx="6.5" cy="12" r="4.25" />
-      <circle cx="12" cy="12" r="4.25" opacity="0.7" />
-      <circle cx="17.5" cy="12" r="4.25" opacity="0.4" />
-    </svg>
-  );
-}
-
 /** Brand-colored Letterboxd (green / blue / orange circles) */
 export function LetterboxdBrandIcon({ className }: IconProps) {
   return (

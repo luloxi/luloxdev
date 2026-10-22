@@ -40,11 +40,6 @@ export type ProjectOverrideInput = {
   };
 };
 
-/** Schema lives in migrations/0001_init.sql (wrangler d1 migrations apply). */
-export async function ensureProjectSchema() {
-  // no-op on D1: kept so callers don't change
-}
-
 function isValidStatus(value: string): value is ProjectStatus {
   return value === "live" || value === "disabled" || value === "archive";
 }
