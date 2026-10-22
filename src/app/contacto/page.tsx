@@ -9,7 +9,7 @@ import {
   XIcon,
 } from "@/components/icons/social";
 import { PageShell } from "@/components/page-shell";
-import Link from "next/link";
+import { HireButton } from "@/components/hire-button";
 import { contactSocials } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 
@@ -61,22 +61,7 @@ export default function ContactPage() {
         })}
       </div>
 
-      <Link
-        className="call-cta"
-        href="/contratar"
-        data-testid="call-cta"
-      >
-        <span className="call-cta-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2.5" y="6" width="13" height="12" rx="2.5" />
-            <path d="M15.5 10.5 21.5 7v10l-6-3.5" />
-          </svg>
-        </span>
-        <span className="call-cta-text">
-          <span className="call-cta-title">{t.contact.callTitle}</span>
-        </span>
-        <span className="call-cta-arrow" aria-hidden="true">→</span>
-      </Link>
+      <HireButton className="contact-hire" />
     </PageShell>
   );
 }

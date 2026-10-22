@@ -4339,9 +4339,6 @@ body.ie-off .ie-row-pencil { display: none; }
 .hire-formula { margin: .4rem 0 0; font-size: .75rem; color: var(--muted); }
 .hire-formula code { color: var(--cy); }
 /* Home nav: odd last tile spans both columns. */
-/* r21: Contratar leads the menu: full row, double gap below, subtle violet glow. */
-.cp-nav > .cp-nav-item[data-section="hire"] { grid-column: 1 / -1; margin-bottom: 0.4rem;
-  box-shadow: 0 0 18px -4px color-mix(in srgb, var(--section-hire) 55%, transparent), 0 0 34px -10px color-mix(in srgb, var(--section-hire) 45%, transparent); }
 @media (prefers-reduced-motion: reduce) { .hire *, .hire-cx-card { transition: none !important; } }
 
 /* r21: on-site days stepper (project mode). */
@@ -4387,13 +4384,6 @@ body.ie-off .ie-row-pencil { display: none; }
 .hire-form-send:disabled { opacity: .55; cursor: not-allowed; }
 .hire-form-status { margin: 0; font-size: .88rem; color: var(--muted); }
 
-/* r24: Contratar tile gets an extra neon snot-green glow (violet text stays). */
-.cp-nav > .cp-nav-item[data-section="hire"] { --snot: #7CFF3A;
-  box-shadow: 0 0 18px -4px color-mix(in srgb, var(--section-hire) 55%, transparent), 0 0 26px -2px color-mix(in srgb, var(--snot) 70%, transparent), 0 0 48px -6px color-mix(in srgb, var(--snot) 45%, transparent);
-  animation: snot-pulse 3.2s ease-in-out infinite; }
-:root:not(.dark) .cp-nav > .cp-nav-item[data-section="hire"] { --snot: #3FD400; }
-@keyframes snot-pulse { 50% { box-shadow: 0 0 18px -4px color-mix(in srgb, var(--section-hire) 55%, transparent), 0 0 34px 0 color-mix(in srgb, var(--snot) 85%, transparent), 0 0 64px -4px color-mix(in srgb, var(--snot) 55%, transparent); } }
-@media (prefers-reduced-motion: reduce) { .cp-nav > .cp-nav-item[data-section="hire"] { animation: none; } }
 
 /* r24: "Escribime" = video-call button with colors inverted; toggles the form panel. */
 .hire-write { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.15rem 1.35rem; border-radius: 20px; cursor: pointer;
@@ -4411,3 +4401,36 @@ body.ie-off .ie-row-pencil { display: none; }
 .hire-form-panel > .hire-form { transition: padding .4s ease; }
 .hire-form-panel:not([data-open="true"]) > .hire-form { padding-block: 0; }
 @media (prefers-reduced-motion: reduce) { .hire-form-panel > .hire-form { transition: none; } }
+
+/* r25: discreet repo link at the very bottom of the landing. */
+.home-steal { flex: none; align-self: center; display: inline-flex; align-items: center; gap: .4rem; margin: 0 0 max(.6rem, env(safe-area-inset-bottom));
+  padding: .25rem .5rem; font-family: var(--font-mono, monospace); font-size: 11px; letter-spacing: .06em; color: var(--muted); opacity: .7; text-decoration: none; transition: opacity .2s, color .2s; }
+.home-steal:hover, .home-steal:focus-visible { opacity: 1; color: var(--cy, #00d4ff); }
+.home-steal:focus-visible { outline: 2px solid var(--cy, #00d4ff); outline-offset: 2px; border-radius: 6px; }
+.home-steal-icon { width: 14px; height: 14px; flex: none; }
+@media (prefers-reduced-motion: reduce) { .home-steal { transition: none; } }
+
+/* r25: HireButton, the landing's hero CTA (also on Contacto). Violet pill, strong neon snot-green glow,
+   rainbow line sweeping along the bottom edge. */
+.hire-btn { --snot: #7CFF3A; position: relative; isolation: isolate; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: .6rem;
+  width: 100%; padding: .95rem 1.6rem 1.05rem; border-radius: 999px; text-decoration: none;
+  background: linear-gradient(135deg, #8A3DFF, #B46CFF); color: #fff; border: 2px solid var(--snot);
+  font-family: var(--font-orbitron), var(--font-display); font-weight: 800; font-size: 1.15rem; letter-spacing: .08em; text-transform: uppercase;
+  text-shadow: 0 0 10px rgb(255 255 255 / .35);
+  box-shadow: 0 0 14px 2px color-mix(in srgb, var(--snot) 80%, transparent), 0 0 38px 8px color-mix(in srgb, var(--snot) 45%, transparent);
+  animation: hire-btn-glow 2.8s ease-in-out infinite; transition: transform .2s ease, filter .2s ease; }
+:root:not(.dark) .hire-btn { --snot: #2FC400; background: linear-gradient(135deg, #6A1FD6, #7A2FE0); }
+.hire-btn:hover, .hire-btn:focus-visible { transform: translateY(-2px) scale(1.02); filter: brightness(1.1); }
+.hire-btn:focus-visible { outline: 3px solid var(--snot); outline-offset: 4px; }
+.hire-btn-arrow { transition: transform .2s ease; }
+.hire-btn:hover .hire-btn-arrow { transform: translateX(4px); }
+.hire-btn-rainbow { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: -1; pointer-events: none;
+  background: linear-gradient(90deg, #ff3b3b, #ff9f1c, #ffe14d, #7CFF3A, #2ec5ff, #8a5cff, #ff4fd8, #ff3b3b); background-size: 200% 100%;
+  animation: hire-btn-rainbow 2.4s linear infinite; }
+@keyframes hire-btn-rainbow { to { background-position: -200% 0; } }
+@keyframes hire-btn-glow { 50% { box-shadow: 0 0 20px 4px color-mix(in srgb, var(--snot) 95%, transparent), 0 0 56px 14px color-mix(in srgb, var(--snot) 55%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .hire-btn, .hire-btn-rainbow, .hire-btn-arrow { animation: none; transition: none; } .hire-btn:hover, .hire-btn:focus-visible { transform: none; } }
+.cp-nav > .cp-nav-hire { grid-column: 1 / -1; margin: .35rem 0 1.1rem; }
+.contact-hire { margin-top: 2rem; }
+/* Mobile: keep the repo link inside the first screen instead of forcing a scroll. */
+@media (max-width: 899px) { .home-main { min-height: calc(100% - 2.2rem); } }

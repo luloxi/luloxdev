@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { bounce, playLaugh } from "@/components/laugh-button";
+import { GitHubIcon } from "@/components/icons/social";
 import { SectionNav } from "@/components/section-nav";
 import { site } from "@/content/site";
 
@@ -113,6 +114,10 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+      <a className="home-steal" href="https://github.com/luloxi/luloxdev" target="_blank" rel="noopener noreferrer">
+        <GitHubIcon className="home-steal-icon" />
+        Steal this portfolio!
+      </a>
     </div>
   );
 }

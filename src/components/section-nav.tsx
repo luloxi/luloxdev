@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { sections, type SectionId } from "@/content/site";
+import { HireButton } from "@/components/hire-button";
 import { useLocale } from "@/i18n/locale-provider";
 
 /** Theme-aware via CSS vars (see globals.css light/dark section tokens) */
@@ -24,6 +25,7 @@ export function SectionNav() {
   return (
     <nav aria-label="Sections" className="cp-nav">
       {sections.map((s) => {
+        if (s.id === "hire") return <HireButton key={s.href} className="cp-nav-hire" />;
         const accent = accents[s.id];
         const label = t.sections[s.id];
         return (
