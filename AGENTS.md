@@ -12,5 +12,5 @@ This rule applies to **every** change in this repo: new copy, edits, translation
 
 ## README (non-negotiable)
 
-- **Update `README.md` and `README.es.md` with every change** that touches features, routes, file paths, scripts, env var names or config. Keep both languages in sync.
+- **Update `README.md` (Spanish) and `README.en.md` (English) with every change** that touches features, routes, file paths, scripts, env var names or config. Keep both languages in sync.
 - Never put secret values in the README or `.dev.vars.example`: names only.

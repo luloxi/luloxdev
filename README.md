@@ -1,153 +1,152 @@
-# Steal this portfolio! 🦝
+**Español** | [English](README.en.md)
 
-> 🇦🇷 ¿Hablás español? Leé el [README en español](README.es.md).
+# ¡Robate este portfolio! 🦝
 
-The personal site of Luciano Oliva Bianco (Lulox), live at **https://lulox.com.ar**.
-It's a simple, bilingual (ES/EN) portfolio with a blog, an inline admin editor and a quote calculator, running on one Cloudflare Worker.
-Fork it, swap the content, deploy. That's the whole idea. ✨
-It's copyleft on purpose: take it, make it better, and keep it open for the next person. 🏴‍☠️
+El sitio personal de Luciano Oliva Bianco (Lulox), online en **https://lulox.com.ar**.
+Un portfolio simple y bilingüe (ES/EN) con blog, editor inline para el admin y una calculadora de presupuesto, todo en un solo Cloudflare Worker.
+Forkealo, cambiá el contenido y publicalo. Esa es toda la idea. ✨
+Es copyleft a propósito: llevátelo, mejoralo y dejalo abierto para el que venga. 🏴‍☠️
 
-## ✨ Features
+## ✨ Qué trae
 
-- 🏠 **Landing**: photo, name and a menu (Contratar, Blog, Sobre mí, Proyectos, Contacto). Screen-sized on desktop, made to fit the first screen on mobile.
-- ✍️ **Blog** with a Markdown/WYSIWYG editor, drafts, cover images (uploaded to R2) and drag-and-drop section reordering.
-- 👤 **Sobre mí** (about): your story plus experience cards, editable inline when you're signed in as admin.
-- 🧪 **Proyectos**: project cards and detail pages.
-- 💸 **Contratar** (hire me): a quote calculator plus a contact form that emails you the visitor's message and their quote.
-- 🌗 Dark and light themes, 🇦🇷/🇺🇸 Spanish and English.
-- 🔐 Admin sign-in with Google (only the emails you allow).
+- 🏠 **Inicio**: foto, nombre y menú (Contratar, Blog, Sobre mí, Proyectos, Contacto). En desktop ocupa la pantalla justa y en el celu entra en la primera pantalla.
+- ✍️ **Blog** con editor Markdown/WYSIWYG, borradores, portadas (subidas a R2) y reordenar secciones arrastrando.
+- 👤 **Sobre mí**: tu historia y las cards de experiencia, editables inline como admin.
+- 🧪 **Proyectos**: cards y páginas de detalle.
+- 💸 **Contratar**: calculadora de presupuesto y un formulario que te manda por mail el mensaje y el presupuesto.
+- 🌗 Tema claro y oscuro, 🇦🇷/🇺🇸 español e inglés.
+- 🔐 Login de admin con Google (solo los emails que permitas).
 
 ## 🧰 Stack
 
-- [Next.js](https://nextjs.org) (App Router) built for Cloudflare with [OpenNext](https://opennext.js.org/cloudflare)
-- [Cloudflare Workers](https://developers.cloudflare.com/workers/) + **D1** (SQLite) + **R2** (media) + Rate Limiting
-- [Better Auth](https://www.better-auth.com) with Google sign-in
-- [Resend](https://resend.com) for the contact form email (Cloudflare Email Routing `send_email` as fallback)
-- Tailwind CSS 4, TypeScript, `tsx --test` for tests
+- [Next.js](https://nextjs.org) (App Router), compilado para Cloudflare con [OpenNext](https://opennext.js.org/cloudflare)
+- [Cloudflare Workers](https://developers.cloudflare.com/workers/) + **D1** (SQLite) + **R2** (imágenes y archivos) + Rate Limiting
+- [Better Auth](https://www.better-auth.com) con login de Google
+- [Resend](https://resend.com) para el mail del formulario (con `send_email` de Cloudflare Email Routing como respaldo)
+- Tailwind CSS 4, TypeScript y `tsx --test` para los tests
 
-## 🚀 Quick start
+## 🚀 Arranque rápido
 
-You need **Node.js 22+** and a free Cloudflare account (only for deploying).
-**pnpm is recommended** (the repo pins it in `package.json`); npm works too.
+Necesitás **Node.js 22+** y una cuenta gratis de Cloudflare (solo para publicar). Te recomiendo **pnpm** (está fijado en `package.json`); npm también funciona.
 
 ```bash
-# 1. Install
-pnpm install                 # or: npm install
+# 1. Instalar
+pnpm install                  # o: npm install
 
-# 2. Env vars (local secrets, git-ignored)
+# 2. Variables (secretos locales, ignorados por git)
 cp .dev.vars.example .dev.vars
-# fill in BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET (RESEND_API_KEY optional)
+# completá BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET (RESEND_API_KEY es opcional)
 
-# 3. Local database (D1 in .wrangler/state) + sample posts
-pnpm db:migrate:local        # or: npm run db:migrate:local
-pnpm seed:blog               # or: npm run seed:blog
+# 3. Base local (D1 en .wrangler/state) + posts de ejemplo
+pnpm db:migrate:local         # o: npm run db:migrate:local
+pnpm seed:blog                # o: npm run seed:blog
 
-# 4. Run it
-pnpm dev                     # or: npm run dev  → http://localhost:3000
+# 4. Correrlo
+pnpm dev                      # o: npm run dev  → http://localhost:3000
 ```
 
-### Env vars
+### Variables
 
-| Name | Where | What |
+| Nombre | Dónde | Qué es |
 |---|---|---|
-| `BETTER_AUTH_SECRET` | secret | Random string for sessions |
-| `BETTER_AUTH_URL` | optional | Public site URL |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | secret | Google OAuth client. Redirect URI: `<site>/api/auth/callback/google` |
-| `RESEND_API_KEY` | optional secret | Sends the contact form email |
-| `CONTACT_TO`, `CONTACT_FROM`, `CONTACT_INBOX` | `vars` in `wrangler.jsonc` | Where the form email goes, the sender (a domain verified in Resend) and the inbox for your copy |
+| `BETTER_AUTH_SECRET` | secret | String aleatorio para las sesiones |
+| `BETTER_AUTH_URL` | opcional | URL pública del sitio |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | secret | Cliente OAuth de Google. Redirect: `<sitio>/api/auth/callback/google` |
+| `RESEND_API_KEY` | secret opcional | Envía el mail del formulario |
+| `CONTACT_TO`, `CONTACT_FROM`, `CONTACT_INBOX` | `vars` en `wrangler.jsonc` | A dónde llega el mail del formulario, el remitente (un dominio verificado en Resend) y la casilla para tu copia |
 
-Locally they live in `.dev.vars`. In production: `npx wrangler secret put <NAME>`.
+En local van en `.dev.vars`. En producción: `npx wrangler secret put <NOMBRE>`.
 
-### Everyday commands
+### Comandos de todos los días
 
-| pnpm | npm | Does |
+| pnpm | npm | Hace |
 |---|---|---|
-| `pnpm test` | `npm test` | Unit tests (`tests/*.test.mts`) |
-| `pnpm typecheck` | `npm run typecheck` | TypeScript check |
+| `pnpm test` | `npm test` | Tests (`tests/*.test.mts`) |
+| `pnpm typecheck` | `npm run typecheck` | Chequeo de TypeScript |
 | `pnpm lint` | `npm run lint` | ESLint |
-| `pnpm cf:build` | `npm run cf:build` | Production build for Cloudflare |
-| `pnpm preview` | `npm run preview` | Build + run the real Worker locally |
-| `pnpm run deploy` | `npm run deploy` | Build + deploy to Cloudflare |
+| `pnpm cf:build` | `npm run cf:build` | Build de producción para Cloudflare |
+| `pnpm preview` | `npm run preview` | Build + el Worker real en local |
+| `pnpm run deploy` | `npm run deploy` | Build + publicar en Cloudflare |
 
-### ☁️ Deploy to Cloudflare
+### ☁️ Publicar en Cloudflare
 
 1. `npx wrangler login`
-2. Create your own resources and put their names/ids in `wrangler.jsonc`:
-   - `npx wrangler d1 create <your-db>` (copy `database_id`)
-   - `npx wrangler r2 bucket create <your-bucket>`
-   - change `name`, `routes` (your domain), the `send_email` destination and `vars` (`CONTACT_TO`, `CONTACT_FROM`, `CONTACT_INBOX`)
-3. `pnpm db:migrate:remote` (the script uses the db name `luloxdev`; change it in `package.json` if yours differs)
-4. Set secrets: `npx wrangler secret put BETTER_AUTH_SECRET` (same for the Google ones and `RESEND_API_KEY`)
-5. `pnpm run deploy` (if it fails once, run it again)
+2. Creá tus recursos y poné nombres/ids en `wrangler.jsonc`:
+   - `npx wrangler d1 create <tu-db>` (copiá el `database_id`)
+   - `npx wrangler r2 bucket create <tu-bucket>`
+   - cambiá `name`, `routes` (tu dominio), el destino de `send_email` y `vars` (`CONTACT_TO`, `CONTACT_FROM`, `CONTACT_INBOX`)
+3. `pnpm db:migrate:remote` (el script usa la base `luloxdev`; si la tuya se llama distinto, cambialo en `package.json`)
+4. Secrets: `npx wrangler secret put BETTER_AUTH_SECRET` (igual para los de Google y `RESEND_API_KEY`)
+5. `pnpm run deploy` (si falla una vez, volvé a correrlo)
 
-## 🎨 Make it yours
+## 🎨 Hacelo tuyo
 
-**Do this first** 👇
-- `src/content/site.ts`: name, menu sections, socials, taste links, `CALL_BOOKING_URL` (your calendar booking page).
-- `src/lib/auth/admin.ts`: `ADMIN_EMAILS`, the only Google accounts that can edit.
-- `src/lib/auth/options.ts`: `ALLOWED_HOSTS` and `TRUSTED_ORIGINS` (your domains, or sign-in will refuse them).
-- `public/`: replace the photos (`avatar*.jpg`), project images and logos.
-- `wrangler.jsonc` and the footer link in `src/app/page.tsx`.
+**Primero esto** 👇
+- `src/content/site.ts`: nombre, secciones del menú, redes, links de gustos, `CALL_BOOKING_URL` (tu agenda).
+- `src/lib/auth/admin.ts`: `ADMIN_EMAILS`, las únicas cuentas de Google que pueden editar.
+- `src/lib/auth/options.ts`: `ALLOWED_HOSTS` y `TRUSTED_ORIGINS` (tus dominios, si no el login los rechaza).
+- `public/`: reemplazá las fotos (`avatar*.jpg`), imágenes de proyectos y logos.
+- `wrangler.jsonc` y el link del footer en `src/app/page.tsx`.
 
-**Section by section**
+**Sección por sección**
 
-| Section | Route | Files | How to edit |
+| Sección | Ruta | Archivos | Cómo se edita |
 |---|---|---|---|
-| Landing + menu | `/` | `src/app/page.tsx`, `src/components/section-nav.tsx`, `src/components/hire-button.tsx` | Menu items and order: `sections` in `src/content/site.ts`. The first one (`hire`) renders as the glowing pill. |
-| Blog | `/blog`, `/blog/[slug]` | `src/app/blog/`, `src/components/views/blog-*.tsx`, `src/lib/blog.ts` | Posts live in D1 (`blog_posts`). Sign in as admin and write at `/blog/nuevo` or edit any post. Sample posts: `src/content/blog/seed.ts`. |
-| Blog editor extras | | `src/components/blog-post-edit.tsx`, `md-wysiwyg.tsx`, `section-reorder.tsx`, `src/lib/article-sections.ts` | Covers and images upload to R2 (`/api/media`, served at `/media/...`). "Section order" splits the post by headings and `---` and lets you drag sections. |
-| Sobre mí | `/sobre-mi` | `src/app/sobre-mi/page.tsx`, `src/lib/page-layout.ts`, `src/lib/md-sections.ts` | Default text and experience cards (`about.timeline`) are in `src/i18n/messages.ts`. As admin you edit inline and add sections; edits are saved to D1 (`site_copy`) and win over the code. |
-| Gustos (tastes) | inside `/sobre-mi` | `tasteLinks` in `src/content/site.ts` | `/tastes` and `/gustos` redirect to `/sobre-mi`. |
-| Proyectos | `/proyectos`, `/proyectos/[id]` | `src/content/projects.ts`, `src/components/views/project*.tsx` | Add projects in `projects.ts`. Admin can override status and texts (stored in D1 `project_overrides`). |
-| Contacto | `/contacto` | `src/app/contacto/page.tsx` | Shows `contactSocials` from `site.ts` and the hire button. |
-| Contratar | `/contratar` | `src/components/hire-calculator.tsx`, `src/lib/pricing.ts` | All prices, presets, discounts and limits are in `PRICING` (`pricing.ts`, covered by `tests/pricing.test.mts`). |
-| Contact form email | `/api/hire-contact` | `src/lib/hire-contact.ts`, `src/app/api/hire-contact/route.ts` | Validates (280 chars, email), honeypot, rate limit (`CONTACT_RL`), recalculates the quote on the server and emails `CONTACT_TO` with the visitor as reply-to. |
-| Texts and i18n | everywhere | `src/i18n/messages.ts`, `src/i18n/locale-provider.tsx` | Every UI string in `es` and `en`. Language comes from a cookie; Spanish URLs are canonical (old English paths redirect, see `next.config.ts`). |
-| Themes | everywhere | `src/components/providers/theme-provider.tsx`, `src/app/globals.css` | Dark/light via the `.dark` class. Colors are CSS variables at the top of `globals.css`. |
-| Footer | `/` | `src/app/page.tsx` (`home-steal`) | The "Steal this portfolio!" link. Point it at your fork or remove it. |
+| Inicio + menú | `/` | `src/app/page.tsx`, `src/components/section-nav.tsx`, `src/components/hire-button.tsx` | Ítems y orden: `sections` en `src/content/site.ts`. El primero (`hire`) es la píldora que brilla. |
+| Blog | `/blog`, `/blog/[slug]` | `src/app/blog/`, `src/components/views/blog-*.tsx`, `src/lib/blog.ts` | Los posts viven en D1 (`blog_posts`). Entrá como admin y escribí en `/blog/nuevo` o editá cualquier post. Ejemplos: `src/content/blog/seed.ts`. |
+| Extras del editor | | `src/components/blog-post-edit.tsx`, `md-wysiwyg.tsx`, `section-reorder.tsx`, `src/lib/article-sections.ts` | Portadas e imágenes van a R2 (`/api/media`, servidas en `/media/...`). "Orden de secciones" corta el post por títulos y `---` y te deja arrastrarlas. |
+| Sobre mí | `/sobre-mi` | `src/app/sobre-mi/page.tsx`, `src/lib/page-layout.ts`, `src/lib/md-sections.ts` | Texto y cards de experiencia (`about.timeline`) en `src/i18n/messages.ts`. Como admin editás inline; se guarda en D1 (`site_copy`) y gana sobre el código. |
+| Gustos | dentro de `/sobre-mi` | `tasteLinks` en `src/content/site.ts` | `/tastes` y `/gustos` redirigen a `/sobre-mi`. |
+| Proyectos | `/proyectos`, `/proyectos/[id]` | `src/content/projects.ts`, `src/components/views/project*.tsx` | Agregá proyectos en `projects.ts`. El admin puede pisar estado y textos (D1 `project_overrides`). |
+| Contacto | `/contacto` | `src/app/contacto/page.tsx` | Muestra `contactSocials` de `site.ts` y el botón de contratar. |
+| Contratar | `/contratar` | `src/components/hire-calculator.tsx`, `src/lib/pricing.ts` | Tarifas, tamaños, descuentos y límites en `PRICING` (`pricing.ts`, con tests en `tests/pricing.test.mts`). |
+| Mail del formulario | `/api/hire-contact` | `src/lib/hire-contact.ts`, `src/app/api/hire-contact/route.ts` | Valida (280 caracteres, email), honeypot, rate limit (`CONTACT_RL`), recalcula el presupuesto en el server y manda el mail a `CONTACT_TO` con el visitante como reply-to. |
+| Textos e i18n | todo el sitio | `src/i18n/messages.ts`, `src/i18n/locale-provider.tsx` | Cada texto en `es` y `en`. El idioma sale de una cookie; las URLs en español son las canónicas (las viejas en inglés redirigen, ver `next.config.ts`). |
+| Temas | todo el sitio | `src/components/providers/theme-provider.tsx`, `src/app/globals.css` | Claro/oscuro con la clase `.dark`. Los colores son variables CSS arriba de `globals.css`. |
+| Footer | `/` | `src/app/page.tsx` (`home-steal`) | El link "Steal this portfolio!". Apuntalo a tu fork o sacalo. |
 
-## 🗂️ Project structure
+## 🗂️ Estructura del proyecto
 
 ```
 ├── src/
-│   ├── app/            # routes (pages + api/), globals.css
-│   ├── components/     # UI pieces (calculator, editor, nav, icons...)
-│   ├── content/        # site.ts, projects.ts, blog seed
-│   ├── i18n/           # messages.ts (ES/EN), locale provider
-│   └── lib/            # pricing, blog, auth, db, contact form logic
-├── migrations/         # D1 SQL migrations
-├── scripts/            # seed and maintenance scripts
-├── tests/              # unit tests (pnpm test)
-├── public/             # images, audio
-├── worker.ts           # Worker entry (www → apex redirect, then OpenNext)
-└── wrangler.jsonc      # Cloudflare config: D1, R2, email, rate limit, vars
+│   ├── app/            # rutas (páginas + api/), globals.css
+│   ├── components/     # piezas de UI (calculadora, editor, nav, íconos...)
+│   ├── content/        # site.ts, projects.ts, posts de ejemplo
+│   ├── i18n/           # messages.ts (ES/EN), provider de idioma
+│   └── lib/            # presupuestos, blog, auth, base de datos, lógica del formulario
+├── migrations/         # migraciones SQL de D1
+├── scripts/            # scripts de seed y mantenimiento
+├── tests/              # tests unitarios (pnpm test)
+├── public/             # imágenes, audio
+├── worker.ts           # entrada del Worker (redirige www al dominio raíz y después OpenNext)
+└── wrangler.jsonc      # config de Cloudflare: D1, R2, email, rate limit, vars
 ```
 
-## 🦝 Who's behind this
+## 🦝 Quién está atrás
 
-Hey, I'm **Luciano Oliva Bianco**, but folks call me **Lulox** (Lulo as a kid, the X came later, courtesy of Carlitox's laugh). I research, build, create, from La Boca, Buenos Aires.
+Soy **Luciano Oliva Bianco**, pero me dicen **Lulox** (Lulo de chico, la X llegó después, por la risa de Carlitox). Investigo, construyo, creo, desde La Boca, Buenos Aires.
 
-- 🎬 **FEDUN** (2015 - 2020): community manager, filming classes, marketing and web development.
-- 🛠️ **BuidlGuidl** (2023 - 2024): fullstack Web3 developer, building dApps with Scaffold-ETH 2 and Solidity as public goods.
-- 🔬 **Input Output Global** (Jul 2025 - Oct 2026): research and development on blockchain, finance and AI, plus automations, agents and web apps. Co-authored papers on tokenization and the legal context of agentic commerce.
+- 🎬 **FEDUN** (2015 - 2020): community manager, filmación de clases, marketing y desarrollo web.
+- 🛠️ **BuidlGuidl** (2023 - 2024): desarrollador fullstack Web3, dApps con Scaffold-ETH 2 y Solidity como bienes públicos.
+- 🔬 **Input Output Global** (jul 2025 - oct 2026): investigación y desarrollo en blockchain, finanzas e IA, además de automatizaciones, agentes y web apps. Coautor de papers sobre tokenización y el contexto legal del comercio agéntico.
 
-I mined Bitcoin around 2009 and lost the seed phrase, so trust me on the "keep your secrets out of git" part. 😅
+Minué Bitcoin por 2009 y perdí la seed phrase, así que creeme con lo de "no subas tus secretos a git". 😅
 
-### 💼 Hire me
+### 💼 Contratame
 
-Like the site? I build things like this, plus automations, AI agents and blockchain apps.
-Get a quote in seconds at **[lulox.com.ar/contratar](https://lulox.com.ar/contratar)**: US$ 10 - 25/h depending on complexity, volume discounts on bigger projects, on-site work available. 50% upfront, 50% on delivery. ☕ Coffee and a good conversation included.
+¿Te gustó el sitio? Hago cosas así, y también automatizaciones, agentes de IA y apps blockchain.
+Sacá tu presupuesto en segundos en **[lulox.com.ar/contratar](https://lulox.com.ar/contratar)**: US$ 10 - 25/h según complejidad, descuento por volumen en proyectos grandes y opción presencial. 50% al arrancar, 50% al entregar. ☕ Café y buena charla incluidos.
 
-## 🤝 Contributing
+## 🤝 Contribuir
 
-Issues and PRs are welcome. Keep it simple:
-1. `pnpm test && pnpm typecheck` before pushing.
-2. One change per PR, with a clear description.
-3. If you add or change a feature, update this README (and `README.es.md`).
-4. Copy style: no em dashes in anything a visitor reads (see `AGENTS.md`).
+Issues y PRs bienvenidos. Simple:
+1. `pnpm test && pnpm typecheck` antes de pushear.
+2. Un cambio por PR, con una descripción clara.
+3. Si agregás o cambiás algo, actualizá los dos READMEs (`README.md` en español y `README.en.md` en inglés).
+4. Estilo: nada de rayas largas en textos que lea un visitante (ver `AGENTS.md`).
 
-## 📄 License
+## 📄 Licencia
 
-The **code** is licensed under the [GNU AGPL-3.0-or-later](LICENSE). If you run a modified version on a server, you must share its source with its users.
+El **código** es [GNU AGPL-3.0-or-later](LICENSE). Si corrés una versión modificada en un servidor, tenés que compartir su código con sus usuarios.
 
-The **personal content is not** part of that license: Luciano's photos, texts, blog posts, project data, audio and the organization logos (`public/orgs/`). They're his (or their owners'). Replace them with your own. Fonts come from Google Fonts under their own (OFL) licenses.
+El **contenido personal no** entra en esa licencia: las fotos, textos, posts, datos de proyectos, audio y logos de organizaciones (`public/orgs/`) son de Luciano (o de sus dueños). Reemplazalos por los tuyos. Las fuentes vienen de Google Fonts con sus propias licencias (OFL).
