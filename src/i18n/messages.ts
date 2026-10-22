@@ -8,7 +8,7 @@ export const messages = {
       blog: "Blog",
       tastes: "Gustos",
       contact: "Contacto",
-      hire: "Contratarme",
+      hire: "Contratar",
     },
     ui: {
       backHome: "Inicio",
@@ -228,7 +228,7 @@ export const messages = {
       emailLabel: "Email",
       copy: "Copiar",
       copied: "Copiado",
-      callTitle: "Contratarme",
+      callTitle: "Contratar",
       callSub: "Calculá un presupuesto estimado y agendá una videollamada.",
     },
   },

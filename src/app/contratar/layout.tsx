@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/contratar" },
-  title: "Contratarme",
+  title: "Contratar",
   description: "Calculá un presupuesto estimado y agendá una videollamada con Lulox.",
 };
 
