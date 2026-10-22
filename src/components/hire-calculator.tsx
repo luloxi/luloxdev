@@ -7,7 +7,7 @@ import { estimate, PRICING, type Complexity, type Mode } from "@/lib/pricing";
 
 const copy = {
   es: {
-    intro: "Armá tu presupuesto en segundos. Es el mismo método que uso para cotizar: horas, complejidad y condiciones.",
+    intro: "Tu presupuesto en segundos.",
     mode: "Modalidad",
     modes: { project: "Por proyecto", hourly: "Por hora" } as Record<Mode, string>,
     modeHint: {
@@ -29,7 +29,7 @@ const copy = {
     travelNote: "*El viático puede variar según la distancia.",
     extra: "Condiciones especiales",
     extraHint: "Urgencia, plazos ajustados, integraciones de terceros…",
-    lines: { work: "Trabajo", onSite: "Recargo presencial", travel: "Viático*", extra: "Condiciones especiales" },
+    lines: { work: "Trabajo", discount: "Descuento por volumen", onSite: "Recargo presencial", travel: "Viático*", extra: "Condiciones especiales" },
     estimate: "Estimación",
     total: "Total estimado",
     deposit: "Anticipo (50%)",
@@ -42,7 +42,7 @@ const copy = {
     ctaSub: "Contame tu idea y cerramos el número.",
   },
   en: {
-    intro: "Build your estimate in seconds. It's the same method I use to quote: hours, complexity and conditions.",
+    intro: "Your quote in seconds.",
     mode: "Engagement",
     modes: { project: "Per project", hourly: "Per hour" } as Record<Mode, string>,
     modeHint: {
@@ -64,7 +64,7 @@ const copy = {
     travelNote: "*Travel may vary with distance.",
     extra: "Special conditions",
     extraHint: "Urgency, tight deadlines, third-party integrations…",
-    lines: { work: "Work", onSite: "On-site surcharge", travel: "Travel*", extra: "Special conditions" },
+    lines: { work: "Work", discount: "Volume discount", onSite: "On-site surcharge", travel: "Travel*", extra: "Special conditions" },
     estimate: "Estimate",
     total: "Estimated total",
     deposit: "Deposit (50%)",
@@ -78,7 +78,7 @@ const copy = {
   },
 };
 
-const money = (n: number) => `US$ ${Math.round(n).toLocaleString("en-US")}`;
+const money = (n: number) => `${n < 0 ? "-" : ""}US$ ${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 
 function useCountUp(value: number) {
   const [shown, setShown] = useState(value);
@@ -196,6 +196,7 @@ export function HireCalculator() {
               <span>
                 {c.lines[l.id]}
                 {l.id === "work" ? <em> {hours}h × US$ {PRICING.rates[complexity]}</em> : null}
+                {l.id === "discount" ? <em> -{l.pct}%</em> : null}
               </span>
               <span>{money(l.amount)}</span>
             </li>
