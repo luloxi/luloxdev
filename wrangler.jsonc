@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "luloxdev",
+  "name": "steal-this-portfolio",
   "main": "worker.ts",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -11,7 +11,7 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "luloxdev"
+      "service": "steal-this-portfolio"
     }
   ],
   // Cloudflare D1: blog_posts, project_overrides and the Better Auth tables.
@@ -20,8 +20,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "luloxdev",
-      "database_id": "61d3b739-db00-4fed-86d5-0387bf50b2cc",
+      "database_name": "steal-this-portfolio",
+      "database_id": "07f92fbd-f365-4770-b253-30aa1c1af997",
       "migrations_dir": "migrations"
     }
   ],

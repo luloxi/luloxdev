@@ -3,7 +3,7 @@
  * never overwrites edits or drafts made in /rothko).
  *
  *   pnpm seed:blog            # local D1 (.wrangler/state)
- *   pnpm seed:blog --remote   # Cloudflare D1 "luloxdev"
+ *   pnpm seed:blog --remote   # Cloudflare D1 (binding DB in wrangler.jsonc)
  */
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -38,7 +38,7 @@ writeFileSync(file, statements.join("\n") + "\n");
 
 execFileSync(
   "wrangler",
-  ["d1", "execute", "luloxdev", remote ? "--remote" : "--local", "--file", file, "-y"],
+  ["d1", "execute", "DB", remote ? "--remote" : "--local", "--file", file, "-y"],
   { stdio: "inherit" },
 );
 console.log(`Seeded ${statements.length} posts (existing slugs untouched) into ${remote ? "remote" : "local"} D1.`);

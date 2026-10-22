@@ -77,7 +77,7 @@ Locally they live in `.dev.vars`. In production: `npx wrangler secret put <NAME>
    - `npx wrangler d1 create <your-db>` (copy `database_id`)
    - `npx wrangler r2 bucket create <your-bucket>`
    - change `name`, `routes` (your domain), the `send_email` destination and `vars` (`CONTACT_TO`, `CONTACT_FROM`, `CONTACT_INBOX`)
-3. `pnpm db:migrate:remote` (the script uses the db name `luloxdev`; change it in `package.json` if yours differs)
+3. `pnpm db:migrate:remote` (the script uses the `DB` binding from `wrangler.jsonc`, not the db name, so no need to edit `package.json`)
 4. Set secrets: `npx wrangler secret put BETTER_AUTH_SECRET` (same for the Google ones, `TURNSTILE_SECRET_KEY` and `RESEND_API_KEY`)
 5. `pnpm run deploy` (if it fails the first time, just run it again)
 
