@@ -1,0 +1,16 @@
+# Copy to .dev.vars (git-ignored) for `pnpm dev` / `pnpm preview`. Never commit real values.
+# In production set them with: npx wrangler secret put <NAME>
+
+# Better Auth (any long random string, e.g. `openssl rand -base64 32`)
+BETTER_AUTH_SECRET=
+# Optional: public URL of the site (defaults to the request origin)
+BETTER_AUTH_URL=http://localhost:3000
+
+# Google OAuth client (Google Cloud Console > Credentials). Redirect URI:
+#   http://localhost:3000/api/auth/callback/google  (and your prod domain)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# Optional: Resend API key for the /contratar contact form.
+# Without it the form falls back to the Cloudflare Email Routing binding (prod only).
+RESEND_API_KEY=
