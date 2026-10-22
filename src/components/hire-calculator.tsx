@@ -15,7 +15,7 @@ const copy = {
       hourly: "Consultoría, soporte o trabajo puntual, remoto o presencial.",
     } as Record<Mode, string>,
     size: "Tamaño",
-    sizes: { s: "Chico", m: "Mediano", l: "Grande", xl: "Enorme" },
+    sizes: { s: "Chico", m: "Mediano", l: "Grande" },
     hours: "Horas estimadas",
     complexity: "Complejidad",
     cx: {
@@ -25,10 +25,11 @@ const copy = {
     } as Record<Complexity, [string, string]>,
     conditions: "Condiciones",
     onSite: "Presencial",
-    travel: "Viático",
+    travel: "Viático*",
+    travelNote: "*El viático puede variar según la distancia.",
     extra: "Condiciones especiales",
     extraHint: "Urgencia, plazos ajustados, integraciones de terceros…",
-    lines: { work: "Trabajo", onSite: "Recargo presencial", travel: "Viático", extra: "Condiciones especiales" },
+    lines: { work: "Trabajo", onSite: "Recargo presencial", travel: "Viático*", extra: "Condiciones especiales" },
     estimate: "Estimación",
     total: "Total estimado",
     deposit: "Anticipo (50%)",
@@ -49,7 +50,7 @@ const copy = {
       hourly: "Consulting, support or one-off work, remote or on-site.",
     } as Record<Mode, string>,
     size: "Size",
-    sizes: { s: "Small", m: "Medium", l: "Large", xl: "Huge" },
+    sizes: { s: "Small", m: "Medium", l: "Large" },
     hours: "Estimated hours",
     complexity: "Complexity",
     cx: {
@@ -59,10 +60,11 @@ const copy = {
     } as Record<Complexity, [string, string]>,
     conditions: "Conditions",
     onSite: "On-site",
-    travel: "Travel",
+    travel: "Travel*",
+    travelNote: "*Travel may vary with distance.",
     extra: "Special conditions",
     extraHint: "Urgency, tight deadlines, third-party integrations…",
-    lines: { work: "Work", onSite: "On-site surcharge", travel: "Travel", extra: "Special conditions" },
+    lines: { work: "Work", onSite: "On-site surcharge", travel: "Travel*", extra: "Special conditions" },
     estimate: "Estimate",
     total: "Estimated total",
     deposit: "Deposit (50%)",
@@ -105,12 +107,11 @@ export function HireCalculator() {
   const [hours, setHours] = useState(PRICING.sizes.m);
   const [complexity, setComplexity] = useState<Complexity>("medium");
   const [onSite, setOnSite] = useState(false);
-  const [travel, setTravel] = useState(false);
   const [extra, setExtra] = useState(false);
 
-  const r = estimate({ mode, hours, complexity, extra, onSite, travel });
+  const r = estimate({ mode, hours, complexity, extra, onSite });
   const total = useCountUp(r.total);
-  const maxH = mode === "project" ? 160 : 12;
+  const maxH = mode === "project" ? PRICING.maxProjectHours : 12;
 
   const switchMode = (m: Mode) => {
     setMode(m);
@@ -177,8 +178,7 @@ export function HireCalculator() {
         <div className="hire-toggles">
           {mode === "hourly" ? (
             <>
-              <Toggle on={onSite} set={(v) => { setOnSite(v); if (!v) setTravel(false); }} label={c.onSite} sub={`+US$ ${PRICING.onSiteSurcharge}`} />
-              <Toggle on={travel} disabled={!onSite} set={setTravel} label={c.travel} sub={`+US$ ${PRICING.travel}`} />
+              <Toggle on={onSite} set={setOnSite} label={c.onSite} sub={`+US$ ${PRICING.onSiteSurcharge} · ${c.travel} +US$ ${PRICING.travel}`} />
             </>
           ) : null}
           <Toggle on={extra} set={setExtra} label={c.extra} sub={`+US$ ${PRICING.extra} · ${c.extraHint}`} />
@@ -209,6 +209,7 @@ export function HireCalculator() {
           <span>{c.deposit}</span>
           <span>{money(r.deposit)}</span>
         </div>
+        {r.lines.some((l) => l.id === "travel") ? <p className="hire-note">{c.travelNote}</p> : null}
         <p className="hire-note">{c.note}</p>
         <p className="hire-formula">
           <span>{c.formula}:</span> <code>{mode === "project" ? c.fProject : c.fHourly}</code>
