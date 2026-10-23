@@ -88,7 +88,7 @@ En local van en `.dev.vars`. En producción: `npx wrangler secret put <NOMBRE>`.
 - `src/lib/auth/options.ts`: `ALLOWED_HOSTS` y `TRUSTED_ORIGINS` (tus dominios, si no el login los rechaza).
 - `public/`: reemplazá las fotos (`avatar*.jpg`), imágenes de proyectos y logos.
 - `public/og.png`: la imagen para compartir (og:image/twitter:image, 1200x630), recorte desde arriba de `avatar-hero.jpg`. Si cambiás la foto, regenerala. Los posts con portada usan su propia portada.
-- **Tarjetas para compartir (SEO):** cada ruta tiene su propio `og:title`, `twitter:title`, descripciones y `og:url` canónica (`https://lulox.com.ar/...`), en el idioma del visitante (cookie `lulox-locale`, si no `Accept-Language`). El formato es "Página | Lulox"; la home queda "Lulox" y cada artículo usa su título y su resumen. El helper está en `src/lib/page-metadata.ts`; el texto de cada ruta vive en su `layout.tsx` (o en `privacidad/page.tsx`) dentro de `generateMetadata`. Si agregás una ruta, sumale su `pageMetadata(...)`.
+- **Tarjetas para compartir (SEO):** cada ruta tiene su propio `og:title`, `twitter:title`, descripciones y `og:url` canónica (`https://lulox.com.ar/...`), en español por defecto (inglés solo con la cookie `lulox-locale=en`; se ignora `Accept-Language`, así X y otros crawlers ven "Contratar | Lulox"). El formato es "Página | Lulox"; la home queda "Lulox" y cada artículo usa su título y su resumen. El helper está en `src/lib/page-metadata.ts`; el texto de cada ruta vive en su `layout.tsx` (o en `privacidad/page.tsx`) dentro de `generateMetadata`. Si agregás una ruta, sumale su `pageMetadata(...)`.
 - `wrangler.jsonc` y el link del footer en `src/app/page.tsx`.
 
 **Sección por sección**

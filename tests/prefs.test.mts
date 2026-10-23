@@ -120,3 +120,13 @@ test("head script: system theme applied but not persisted", () => {
   assert.equal(r.theme, "light");
   assert.doesNotMatch(r.cookie, /lulox-theme/);
 });
+
+test("share metadata defaults to ES; EN only with an explicit en cookie (crawlers send none)", async () => {
+  const { metadataLocale } = await import("../src/lib/prefs-shared.ts");
+  assert.equal(metadataLocale(undefined), "es");
+  assert.equal(metadataLocale(null), "es");
+  assert.equal(metadataLocale(""), "es");
+  assert.equal(metadataLocale("es"), "es");
+  assert.equal(metadataLocale("EN"), "es");
+  assert.equal(metadataLocale("en"), "en");
+});

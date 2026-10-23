@@ -3,7 +3,7 @@ import { Orbitron, Space_Grotesk } from "next/font/google";
 import { CosmicBg } from "@/components/cosmic-bg";
 import { SiteControls } from "@/components/site-controls";
 import { LocaleProvider } from "@/i18n/locale-provider";
-import { getServerPrefs } from "@/lib/prefs";
+import { getMetadataLocale, getServerPrefs } from "@/lib/prefs";
 import { getCopyOverrides } from "@/lib/site-copy";
 import { isAdminRequest } from "@/lib/admin-request";
 import { AdminProvider } from "@/components/admin-context";
@@ -90,14 +90,14 @@ const baseMetadata: Metadata = {
   },
 };
 
-/** Home share card stays "Lulox"; description follows the request locale. */
+/** Home share card stays "Lulox"; description is ES unless the cookie says en. */
 const HOME_DESCRIPTION = {
   es: site.description,
   en: "I'm Luciano Oliva Bianco (Lulox). I research and build with AI, blockchain, tokenization and agentic commerce.",
 } as const;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { locale } = await getServerPrefs();
+  const locale = await getMetadataLocale();
   const home = buildPageMetadata(locale, "/", { title: null, description: HOME_DESCRIPTION[locale] });
   // Keep the "%s | Lulox" template for routes that only set a plain title.
   return { ...baseMetadata, ...home, title: baseMetadata.title };

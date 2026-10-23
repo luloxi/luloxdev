@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { localizePost } from "@/content/blog/types";
 import { getPublishedPost } from "@/lib/blog";
-import { getServerPrefs } from "@/lib/prefs";
+import { getMetadataLocale } from "@/lib/prefs";
 import { site } from "@/content/site";
 import { shareTitle } from "@/lib/page-metadata";
 
@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) {
     return { title: "Blog", robots: { index: false } };
   }
-  const { locale } = await getServerPrefs();
+  const locale = await getMetadataLocale();
   const L = localizePost(post, locale);
   const url = `/blog/${post.slug}`;
   const full = shareTitle(L.title);

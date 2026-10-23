@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { pastProjects } from "@/content/projects";
 import { messages } from "@/i18n/messages";
 import { buildPageMetadata, pageMetadata } from "@/lib/page-metadata";
-import { getServerPrefs } from "@/lib/prefs";
+import { getMetadataLocale } from "@/lib/prefs";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       en: { title: "Projects", description: messages.en.sections.projects },
     });
   }
-  const { locale } = await getServerPrefs();
+  const locale = await getMetadataLocale();
   const m = messages[locale].projects.past[project.id];
   return buildPageMetadata(locale, `/proyectos/${project.id}`, {
     title: m.title,

@@ -82,3 +82,11 @@ if(!l){l=nl(ls('${LOCALE_STORAGE_KEY}'));if(l){st='legacy';sc('${LOCALE_COOKIE}'
 if(l!==d.getAttribute('data-ssr-locale')&&nl(gc('${LOCALE_COOKIE}'))===l){var done=null;try{done=sessionStorage.getItem('lulox-lang-reload')}catch(e){}
 if(!done){try{sessionStorage.setItem('lulox-lang-reload','1')}catch(e){}d.setAttribute('data-prefs','reload');location.replace(location.href);return}}}}
 }catch(e){st='error'}d.setAttribute('data-prefs',st)})();`;
+
+/**
+ * Share-card (og/twitter) locale: EN only when the cookie explicitly says "en", otherwise ES.
+ * Crawlers (X, Slack, WhatsApp) send no cookie and often an English Accept-Language, so it's ignored here.
+ */
+export function metadataLocale(cookie: string | undefined | null): Locale {
+  return cookie === "en" ? "en" : "es";
+}

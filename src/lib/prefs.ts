@@ -6,6 +6,7 @@ import {
   THEME_COOKIE,
   isLocale,
   isTheme,
+  metadataLocale,
   type Theme,
 } from "@/lib/prefs-shared";
 
@@ -28,4 +29,9 @@ export async function getServerPrefs(): Promise<{ locale: Locale; theme: Theme }
     locale: isLocale(c) ? c : localeFromAcceptLanguage(h.get("accept-language")),
     theme: isTheme(t) ? t : DEFAULT_THEME,
   };
+}
+
+/** Locale for share metadata only: ES unless the cookie explicitly says "en" (see metadataLocale). */
+export async function getMetadataLocale(): Promise<Locale> {
+  return metadataLocale((await cookies()).get(LOCALE_COOKIE)?.value);
 }
