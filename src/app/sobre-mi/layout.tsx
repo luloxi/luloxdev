@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/sobre-mi" },
-  title: "Sobre mí",
-};
+export function generateMetadata() {
+  return pageMetadata("/sobre-mi", {
+    es: { title: "Sobre mí", description: "Mi historia y experiencia en AI, blockchain y desarrollo." },
+    en: { title: "About", description: "My story and experience in AI, blockchain and software." },
+  });
+}
 
 export default function AboutLayout({
   children,

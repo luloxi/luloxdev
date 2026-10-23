@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/contacto" },
-  title: "Contacto",
-};
+export function generateMetadata() {
+  return pageMetadata("/contacto", {
+    es: { title: "Contacto", description: "Escribime o encontrame en redes." },
+    en: { title: "Contact", description: "Write to me or find me on social media." },
+  });
+}
 
 export default function ContactLayout({
   children,

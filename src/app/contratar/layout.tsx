@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/contratar" },
-  title: "Contratar",
-  description: "Calculá un presupuesto estimado y agendá una videollamada con Lulox.",
-};
+export function generateMetadata() {
+  return pageMetadata("/contratar", {
+    es: { title: "Contratar", description: "Presupuesto en segundos para trabajar conmigo." },
+    en: { title: "Hire me", description: "Get a quote in seconds to work with me." },
+  });
+}
 
 export default function HireLayout({ children }: { children: React.ReactNode }) {
   return children;

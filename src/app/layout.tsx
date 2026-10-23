@@ -10,6 +10,7 @@ import { AdminProvider } from "@/components/admin-context";
 import { PREFS_HEAD_SCRIPT } from "@/lib/prefs-shared";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { site } from "@/content/site";
+import { buildPageMetadata } from "@/lib/page-metadata";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -37,7 +38,7 @@ function siteUrl() {
   return site.url;
 }
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
     default: site.name,
@@ -88,6 +89,19 @@ export const metadata: Metadata = {
     follow: true,
   },
 };
+
+/** Home share card stays "Lulox"; description follows the request locale. */
+const HOME_DESCRIPTION = {
+  es: site.description,
+  en: "I'm Luciano Oliva Bianco (Lulox). I research and build with AI, blockchain, tokenization and agentic commerce.",
+} as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { locale } = await getServerPrefs();
+  const home = buildPageMetadata(locale, "/", { title: null, description: HOME_DESCRIPTION[locale] });
+  // Keep the "%s | Lulox" template for routes that only set a plain title.
+  return { ...baseMetadata, ...home, title: baseMetadata.title };
+}
 
 export const viewport: Viewport = {
   themeColor: [

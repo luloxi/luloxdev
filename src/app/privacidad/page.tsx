@@ -1,11 +1,13 @@
-import type { Metadata } from "next";
 import { PageShell } from "@/components/page-shell";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "How lulox.dev handles data: no tracking, Google sign-in only for the site owner.",
-  alternates: { canonical: "/privacidad" },
-};
+import { pageMetadata } from "@/lib/page-metadata";
+
+export function generateMetadata() {
+  return pageMetadata("/privacidad", {
+    es: { title: "Privacidad", description: "Cómo maneja los datos este sitio: sin tracking, login con Google solo para el dueño." },
+    en: { title: "Privacy", description: "How this site handles data: no tracking, Google sign-in only for the site owner." },
+  });
+}
 
 const CONTACT = "lucianoolivabianco@gmail.com";
 

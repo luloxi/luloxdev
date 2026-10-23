@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/page-metadata";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/proyectos" },
-  title: "Proyectos",
-};
+export function generateMetadata() {
+  return pageMetadata("/proyectos", {
+    es: { title: "Proyectos", description: "Lo que construí en AI, blockchain y tokenización." },
+    en: { title: "Projects", description: "What I've built in AI, blockchain and tokenization." },
+  });
+}
 
 export default function ProjectsLayout({
   children,

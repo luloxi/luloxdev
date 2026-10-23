@@ -89,6 +89,7 @@ Locally they live in `.dev.vars`. In production: `npx wrangler secret put <NAME>
 - `src/lib/auth/options.ts`: `ALLOWED_HOSTS` and `TRUSTED_ORIGINS` (your domains, or sign-in will refuse them).
 - `public/`: replace the photos (`avatar*.jpg`), project images and logos.
 - `public/og.png`: the share preview image (og:image/twitter:image, 1200x630), a top-anchored crop of `avatar-hero.jpg`. Regenerate it if you change the photo. Posts with a cover image use their own cover.
+- **Share cards (SEO):** every route has its own `og:title`, `twitter:title`, descriptions and canonical `og:url` (`https://lulox.com.ar/...`), in the visitor's language (`lulox-locale` cookie, else `Accept-Language`). Format is "Page | Lulox"; the home stays "Lulox" and each article uses its own title and summary. The helper is `src/lib/page-metadata.ts`; each route's copy lives in its `layout.tsx` (or `privacidad/page.tsx`) inside `generateMetadata`. When you add a route, give it a `pageMetadata(...)` call.
 - `wrangler.jsonc` and the footer link in `src/app/page.tsx`.
 
 **Section by section**
