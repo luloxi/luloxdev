@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 /** Fixed chrome — always same screen corner on every page */
-export function SiteControls({ className, isAdmin = false }: { className?: string; isAdmin?: boolean }) {
+export function SiteControls({ className, signedIn = false }: { className?: string; signedIn?: boolean }) {
   return (
     <div
       data-inline-editor="skip"
@@ -17,7 +17,7 @@ export function SiteControls({ className, isAdmin = false }: { className?: strin
     >
       <LocaleToggle />
       <ThemeToggle />
-      {isAdmin ? <LogoutButton /> : <LoginLink />}
+      {signedIn ? <LogoutButton /> : <LoginLink />}
     </div>
   );
 }

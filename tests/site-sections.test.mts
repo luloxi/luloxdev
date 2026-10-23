@@ -26,7 +26,7 @@ import { pastProjectIds } from "../src/content/projects.ts";
 
 test("keys come from the code, in the current order", () => {
   assert.deepEqual(SECTION_KEYS, sections.map((s) => s.id));
-  assert.deepEqual(SECTION_KEYS, ["hire", "blog", "about", "projects", "contact"]);
+  assert.deepEqual(SECTION_KEYS, ["hire", "blog", "about", "projects", "contact", "referrals"]);
   assert.deepEqual(PROJECT_KEYS, pastProjectIds);
   assert.ok(!(SECTION_KEYS as readonly string[]).includes("home"), "home is not hideable");
 });
@@ -52,6 +52,7 @@ test("merge: sort by position, drop unknown/duplicates, append missing visible",
     { key: "about", visible: false },
     { key: "hire", visible: true },
     { key: "projects", visible: true },
+    { key: "referrals", visible: true }, // added after 0008 rows were saved: appended, visible
   ]);
   // Position ties keep the code order.
   assert.deepEqual(
@@ -170,6 +171,17 @@ test("sitemap filter: hidden sections and projects leave both languages", () => 
   const projects = pastProjectIds.filter((id) => shown(`/proyectos/${id}`));
   assert.ok(!projects.includes("mochi"));
   assert.equal(projects.length, pastProjectIds.length - 1);
+});
+
+test("referrals is a section: hiding it 404s /referidos and /en/referrals and drops it from the sitemap", () => {
+  assert.equal(sectionForPath("/referidos"), "referrals");
+  assert.equal(sectionForPath(enToEsPath("/en/referrals")!), "referrals");
+  const sec = HIDE(["referrals"]);
+  assert.ok(isPathHidden("/referidos", sec));
+  assert.ok(isPathHidden(enToEsPath("/en/referrals")!, sec));
+  assert.ok(!isPathHidden("/contratar", sec), "attribution on /contratar keeps working");
+  const pages = ["/", "/contratar", "/referidos", "/privacidad"].filter((p) => !isPathHidden(p, sec));
+  assert.deepEqual(pages, ["/", "/contratar", "/privacidad"]);
 });
 
 test("search: case and accent insensitive", () => {

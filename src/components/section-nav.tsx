@@ -6,6 +6,7 @@ import { HireButton } from "@/components/hire-button";
 import { useLocale } from "@/i18n/locale-provider";
 import { useSiteOrder } from "@/components/site-order-context";
 import { visibleItems } from "@/lib/site-sections";
+import { useSignedIn } from "@/components/admin-context";
 
 /** Theme-aware via CSS vars (see globals.css light/dark section tokens) */
 const accents: Record<SectionId, string> = {
@@ -15,6 +16,7 @@ const accents: Record<SectionId, string> = {
   tastes: "var(--section-tastes)",
   contact: "var(--section-contact)",
   hire: "var(--section-hire)",
+  referrals: "var(--section-referrals)",
 };
 
 /**
@@ -24,6 +26,7 @@ const accents: Record<SectionId, string> = {
 export function SectionNav() {
   const { t, href } = useLocale();
   const order = useSiteOrder();
+  const signedIn = useSignedIn();
   // Admin strip order; hidden sections only show (flagged) while the admin edits.
   const list = order.sections.length
     ? visibleItems(order.sections, order.showHidden).flatMap((o) => {
@@ -31,10 +34,15 @@ export function SectionNav() {
         return s ? [{ ...s, hidden: !o.visible }] : [];
       })
     : sections.map((s) => ({ ...s, hidden: false }));
+  // Referrals is only on the landing for signed-in users (Google, admin or not).
+  const shown = list.filter((s) => s.id !== "referrals" || signedIn);
+  // Hire spans the row; an odd number of half tiles stretches the last one so the grid closes.
+  const halves = shown.filter((s) => s.id !== "hire");
+  const wide = halves.length % 2 === 1 ? halves[halves.length - 1]?.id : null;
 
   return (
     <nav aria-label="Sections" className="cp-nav">
-      {list.map((s) => {
+      {shown.map((s) => {
         if (s.id === "hire") return <HireButton key={s.href} className={`cp-nav-hire${s.hidden ? " is-section-hidden" : ""}`} />;
         const accent = accents[s.id];
         const label = t.sections[s.id];
@@ -42,7 +50,7 @@ export function SectionNav() {
           <Link
             key={s.href}
             href={href(s.href)}
-            className={`cp-nav-item group${s.hidden ? " is-section-hidden" : ""}`}
+            className={`cp-nav-item group${s.hidden ? " is-section-hidden" : ""}${s.id === wide ? " is-wide" : ""}`}
             data-section={s.id}
             data-hidden={s.hidden ? "true" : undefined}
             style={{ ["--cp-accent" as string]: accent }}

@@ -126,6 +126,7 @@ const SEGMENT_SECTION: Readonly<Record<string, SectionKey>> = {
   tastes: "about",
   proyectos: "projects",
   contacto: "contact",
+  referidos: "referrals",
 };
 
 /**

@@ -1,5 +1,6 @@
 import { clampHours, estimate, PRICING, type Complexity, type Mode } from "./pricing";
 import { MAX_MESSAGE } from "./hire-limits";
+import { checkCodeShape } from "./referrals";
 
 export { MAX_MESSAGE };
 
@@ -84,7 +85,15 @@ export async function verifyTurnstile(token: unknown, env: HireEnv, ip: string):
 
 export type Result = { status: number; body: Record<string, unknown> };
 
-export async function handleHireContact(raw: unknown, env: HireEnv, ip: string): Promise<Result> {
+/** Referral + lead storage (D1 in the route, fakes in tests). Both optional: without them nothing is stored. */
+export type HireDeps = {
+  /** Active referrer for a normalized code, or null. */
+  findReferrer?: (code: string) => Promise<{ id: string; code: string; name: string } | null>;
+  /** Store the lead after the email went out. Errors are logged, never shown to the visitor. */
+  saveLead?: (lead: { name: string; email: string; message: string; budgetJson: string; totalUsd: number; refCode: string | null; referrerId: string | null }) => Promise<unknown>;
+};
+
+export async function handleHireContact(raw: unknown, env: HireEnv, ip: string, deps: HireDeps = {}): Promise<Result> {
   if (!raw || typeof raw !== "object") return { status: 400, body: { error: "invalid_json" } };
   const body = raw as Record<string, unknown>;
   // Honeypot: bots fill hidden fields. Pretend success, send nothing.
@@ -106,7 +115,20 @@ export async function handleHireContact(raw: unknown, env: HireEnv, ip: string):
   if (!env.TURNSTILE_SECRET_KEY || (!env.RESEND_API_KEY && !env.CONTACT_EMAIL)) return { status: 503, body: { error: "not_configured" } };
   if (!(await verifyTurnstile(body.turnstileToken, env, ip))) return { status: 403, body: { error: "captcha_failed" } };
 
+  // Referral code typed or prefilled from the lulox-ref cookie: only an active referrer counts.
+  // An unknown or paused code never blocks the message; it is just not attributed.
+  let referrer: { id: string; code: string; name: string } | null = null;
+  const shape = checkCodeShape(body.refCode);
+  if (shape.ok && deps.findReferrer) {
+    try {
+      referrer = await deps.findReferrer(shape.code);
+    } catch {
+      console.error("[hire-contact] referrer lookup failed");
+    }
+  }
+
   const b = budgetLines(budget);
+  const refLine = referrer ? `Referido por: ${referrer.code} (${oneLine(referrer.name)})` : null;
   const to = env.CONTACT_TO ?? "hola@lulox.com.ar";
   const from = env.CONTACT_FROM ?? "no-responder@lulox.com.ar";
   const subject = `Contratar: ${name} · ${b.total} (${LABEL.mode[budget.mode]})`;
@@ -120,6 +142,7 @@ export async function handleHireContact(raw: unknown, env: HireEnv, ip: string):
     ...b.lines.map(([k, v]) => `${k}: ${v}`),
     `Total estimado: ${b.total}`,
     `Anticipo (50%): ${b.deposit}`,
+    ...(refLine ? ["", refLine] : []),
     "",
     "--",
     `Enviado desde lulox.com.ar/contratar. Respondé este email para contestarle a ${email}.`,
@@ -132,6 +155,7 @@ export async function handleHireContact(raw: unknown, env: HireEnv, ip: string):
 <h3 style="margin:0 0 8px;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#7A2FE0">Presupuesto calculado</h3>
 <p style="margin:0 0 8px;font-size:14px;line-height:1.6">${b.summary.map(esc).join("<br>")}</p>
 <table role="presentation" style="border-collapse:collapse;width:100%;font-size:14px">${b.lines.map(([k, v]) => row(k, v)).join("")}${row("Total estimado", b.total, true)}${row("Anticipo (50%)", b.deposit)}</table>
+${refLine ? `<p style="margin:16px 0 0;font-size:14px;font-weight:700;color:#0F766E">${esc(refLine)}</p>` : ""}
 <p style="font-size:12px;color:#666;margin-top:24px">Enviado desde lulox.com.ar/contratar. Respondé este email para contestarle a ${esc(email)}.</p>
 </div></body></html>`;
 
@@ -150,7 +174,23 @@ export async function handleHireContact(raw: unknown, env: HireEnv, ip: string):
     console.error("[hire-contact] send failed");
     return { status: 502, body: { error: "send_failed" } };
   }
-  return { status: 200, body: { ok: true } };
+  if (deps.saveLead) {
+    try {
+      const r = estimate({ mode: budget.mode, hours: budget.hours, complexity: budget.complexity, extra: budget.extra, onSite: budget.onSite, onSiteDays: budget.days, extraDays: budget.extraDays });
+      await deps.saveLead({
+        name,
+        email,
+        message,
+        budgetJson: JSON.stringify({ ...budget, total: r.total, deposit: r.deposit }),
+        totalUsd: r.total,
+        refCode: referrer?.code ?? null,
+        referrerId: referrer?.id ?? null,
+      });
+    } catch {
+      console.error("[hire-contact] lead not stored");
+    }
+  }
+  return { status: 200, body: { ok: true, ...(referrer ? { ref: referrer.code } : {}) } };
 }
 
 /**
@@ -166,6 +206,7 @@ export function bodyFromForm(entries: Iterable<[string, unknown]>): Record<strin
       const key = k.slice(7);
       budget[key] = raw === "true" ? true : raw === "false" ? false : /^\d+$/.test(raw) ? Number(raw) : raw;
     } else if (k === "cf-turnstile-response") out.turnstileToken = raw;
+    else if (k === "ref_code") out.refCode = raw;
     else if (["name", "email", "message", "hire_hp", "turnstileToken"].includes(k)) out[k] = raw;
   }
   out.budget = budget;

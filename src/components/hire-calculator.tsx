@@ -9,6 +9,7 @@ import { MagicHr } from "@/components/magic-hr";
 import { clampHours, estimate, hoursDigits, maxHoursFor, minHoursFor, PRICING, type Complexity, type Mode } from "@/lib/pricing";
 import { charCount, clampMessage, MAX_MESSAGE } from "@/lib/hire-limits";
 import { LimitModal } from "@/components/limit-modal";
+import { checkCodeShape, normalizeCode, REF_PARAM, refFromCookie, CODE_MAX } from "@/lib/referrals";
 
 const copy = {
   es: {
@@ -51,6 +52,7 @@ const copy = {
     cta: "Videollamada",
     write: "Escribime",
     contact: "Contacto",
+    ref: { label: "Código de referido (opcional)", by: "Referido por", checking: "Buscando el código…", unknown: "No encontramos ese código activo.", invalid: "Letras, números y guiones, de 3 a 24." },
     form: { name: "Nombre", email: "Tu email", message: "Mensaje", ph: "Contame qué necesitás…", budget: "Presupuesto que se envía", send: "Enviar", sending: "Enviando…", limitTitle: "Máximo 280 caracteres", limitClose: "Entendido", agents: "Formulario de contacto: nombre, email y mensaje (hasta 280 caracteres). Para enviarlo hay que pasar la verificación de Cloudflare Turnstile.",  ok: "¡Listo! Te respondo a tu email.", err: { invalid_name: "Falta tu nombre.", invalid_email: "Revisá el email.", invalid_message: "El mensaje debe tener entre 1 y 280 caracteres.", rate_limited: "Demasiados envíos. Probá en un rato.", captcha_failed: "Falta la verificación anti-bots. Esperá el tilde y probá de nuevo.", default: "No se pudo enviar. Probá de nuevo." } as Record<string, string>, yes: "sí", no: "no" },
   },
   en: {
@@ -93,6 +95,7 @@ const copy = {
     cta: "Video call",
     write: "Write me",
     contact: "Contact",
+    ref: { label: "Referral code (optional)", by: "Referred by", checking: "Looking up the code…", unknown: "We couldn't find that active code.", invalid: "Letters, numbers and hyphens, 3 to 24." },
     form: { name: "Name", email: "Your email", message: "Message", ph: "Tell me what you need…", budget: "Quote that will be sent", send: "Send", sending: "Sending…", limitTitle: "280 characters max", limitClose: "Got it", agents: "Contact form: name, email and message (up to 280 characters). Sending it requires passing the Cloudflare Turnstile check.",  ok: "Done! I'll reply to your email.", err: { invalid_name: "Your name is missing.", invalid_email: "Check the email.", invalid_message: "Message must be 1–280 characters.", rate_limited: "Too many sends. Try again later.", captcha_failed: "Anti-bot check missing. Wait for the checkmark and try again.", default: "Couldn't send. Try again." } as Record<string, string>, yes: "yes", no: "no" },
   },
 };
@@ -119,6 +122,43 @@ function useCountUp(value: number) {
   return shown;
 }
 
+type RefState = "idle" | "checking" | "ok" | "unknown" | "invalid";
+
+/**
+ * Referral code on the quote: prefilled from the lulox-ref cookie (set by ?ref=
+ * on any page) or ?ref= itself, editable, checked live against active
+ * referrers. The server validates it again on send.
+ */
+function useReferralCode() {
+  const [code, setCode] = useState("");
+  const [result, setResult] = useState<{ code: string; state: RefState } | null>(null);
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get(REF_PARAM);
+    const c = refFromCookie(document.cookie) ?? (fromUrl ? normalizeCode(fromUrl) : "");
+    if (!c) return;
+    const id = requestAnimationFrame(() => setCode(c));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  const norm = normalizeCode(code);
+  const shape = checkCodeShape(norm);
+  useEffect(() => {
+    if (!shape.ok) return;
+    const ctl = new AbortController();
+    const t = window.setTimeout(async () => {
+      try {
+        const r = await fetch(`/api/referrals/check?code=${encodeURIComponent(norm)}`, { signal: ctl.signal });
+        const j = (await r.json()) as { status?: string; active?: boolean };
+        setResult({ code: norm, state: j.status === "taken" && j.active ? "ok" : "unknown" });
+      } catch {
+        /* aborted or offline: the server still checks on send */
+      }
+    }, 350);
+    return () => { ctl.abort(); window.clearTimeout(t); };
+  }, [norm, shape.ok]);
+  const state: RefState = !norm ? "idle" : !shape.ok ? "invalid" : result?.code === norm ? result.state : "checking";
+  return { code, setCode, norm, state };
+}
+
 export function HireCalculator() {
   const { locale, href } = useLocale();
   const contactShown = useSectionShown("contact");
@@ -131,6 +171,7 @@ export function HireCalculator() {
   const [extra, setExtra] = useState(false);
   const [extraDays, setExtraDays] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
+  const ref = useReferralCode();
   // Text being typed in the hours box (null = show the committed value).
   const [hoursText, setHoursText] = useState<string | null>(null);
   // Result of a native (no-fetch) form post comes back as ?contacto=…: reopen the form to show it.
@@ -298,6 +339,31 @@ export function HireCalculator() {
         </p>
       </section>
 
+      <div className="hire-ref" data-state={ref.state}>
+        <label className="hire-form-field" htmlFor="hire-ref-code">
+          <span>{c.ref.label}</span>
+          <input
+            id="hire-ref-code"
+            type="text"
+            inputMode="text"
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            maxLength={CODE_MAX}
+            value={ref.code}
+            aria-describedby="hire-ref-status"
+            onChange={(e) => ref.setCode(e.target.value.replace(/\s+/g, "").toLowerCase())}
+          />
+        </label>
+        <p id="hire-ref-status" className="hire-ref-status" role="status" data-testid="hire-ref-status">
+          {ref.state === "ok" ? (
+            <>
+              {c.ref.by}: <strong>{ref.norm}</strong>
+            </>
+          ) : ref.state === "checking" ? c.ref.checking : ref.state === "unknown" ? c.ref.unknown : ref.state === "invalid" ? c.ref.invalid : ""}
+        </p>
+      </div>
+
       <div className="hire-ctas">
         <button type="button" className="hire-btn hire-act" aria-expanded={formOpen} aria-controls="hire-form-panel" onClick={() => setFormOpen((o) => !o)} data-testid="hire-write">
           {c.write}
@@ -307,12 +373,14 @@ export function HireCalculator() {
           open={formOpen}
           c={c}
           budget={{ mode, hours: Math.min(hours, maxH), complexity, onSite, days, extra, extraDays: mode === "project" ? extraDays : 1 }}
+          refCode={ref.state === "ok" ? ref.norm : ""}
           rows={[
             [c.total, money(r.total)],
             [c.mode, c.modes[mode]],
             [c.hours, `${Math.min(hours, maxH)}h · ${c.cx[complexity][0]} (US$ ${PRICING.rates[complexity]}${c.perHour})`],
             [c.onSite, onSite ? (mode === "project" ? `${c.form.yes}, ${days} ${c.dayUnit[days === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
             [c.extra, extra ? (mode === "project" ? `${c.form.yes}, ${extraDays} ${c.dayUnit[extraDays === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
+            ...(ref.state === "ok" ? [[c.ref.by, ref.norm] as [string, string]] : []),
           ]}
         />
         <a className="hire-act hire-act-call" href={CALL_BOOKING_URL} target="_blank" rel="noopener noreferrer" data-testid="hire-call-cta">
@@ -343,7 +411,7 @@ function Toggle({ on, set, label, sub, disabled }: { on: boolean; set: (v: boole
 
 type Copy = (typeof copy)["es"];
 
-function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: Record<string, unknown>; rows: [string, string][] }) {
+function HireForm({ open, c, budget, rows, refCode }: { open: boolean; c: Copy; budget: Record<string, unknown>; rows: [string, string][]; refCode: string }) {
   const first = useRef<HTMLInputElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const status = useRef<HTMLParagraphElement>(null);
@@ -440,7 +508,7 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
       const res = await fetch("/api/hire-contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message, website, budget, turnstileToken: token }),
+        body: JSON.stringify({ name, email, message, website, budget, turnstileToken: token, refCode: refCode || undefined }),
       });
       const j = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
       resetTs(); // tokens are single-use
@@ -486,6 +554,7 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
       </label>
       {/* Native (no-fetch) POST fallback: the server reads the same budget fields. */}
       {Object.entries(budget).map(([k, v]) => <input key={k} type="hidden" name={`budget.${k}`} value={String(v)} />)}
+      {refCode ? <input type="hidden" name="ref_code" value={refCode} /> : null}
       <div className="hire-form-budget" role="group" aria-label={f.budget}>
         <span className="hire-form-budget-title">{f.budget}</span>
         <dl>

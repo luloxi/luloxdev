@@ -8,6 +8,9 @@ import type { Locale } from "@/i18n/types";
 import { editModeFromCookie } from "@/lib/edit-mode";
 import { isPathHidden, sectionForPath } from "@/lib/site-sections";
 import { isAdminHeaders, loadSiteOrder } from "@/lib/site-order";
+import { getDb } from "@/lib/db";
+import { REF_COOKIE, REF_MAX_AGE, REF_PARAM, checkCodeShape } from "@/lib/referrals";
+import { getActiveReferrer } from "@/lib/referrals-db";
 
 /**
  * Every page request passes through here and gets the x-lulox-locale request
@@ -67,7 +70,42 @@ async function hiddenFromVisitor(request: NextRequest, esPath: string | null): P
   return !(await isAdminHeaders(request.headers));
 }
 
+/**
+ * ?ref=CODE on any page: remember the referrer for 90 days (cookie lulox-ref,
+ * last valid code wins). Only codes of active referrers are stored; anything
+ * else leaves the cookie as it was.
+ */
+async function withRefCookie(request: NextRequest, res: NextResponse): Promise<NextResponse> {
+  const raw = request.nextUrl.searchParams.get(REF_PARAM);
+  if (!raw) return res;
+  const shape = checkCodeShape(raw);
+  if (!shape.ok) return res;
+  try {
+    const db = await getDb();
+    if (!db || !(await getActiveReferrer(db, shape.code))) return res;
+    res.cookies.set(REF_COOKIE, shape.code, {
+      path: "/",
+      maxAge: REF_MAX_AGE,
+      sameSite: "lax",
+      secure: request.nextUrl.protocol === "https:",
+      httpOnly: false, // the hire page reads it to show "Referido por"
+    });
+  } catch (err) {
+    console.error("[proxy] ref cookie", err);
+  }
+  return res;
+}
+
 export default async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  // Admin pages (/admin/referidos): a real allowlist check; everyone else gets the plain 404.
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    if (!getSessionCookie(request) || !(await isAdminHeaders(request.headers))) return notFoundRewrite(request, "es");
+  }
+  return withRefCookie(request, await route(request));
+}
+
+async function route(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
   const locale = localeFromPath(pathname);
 

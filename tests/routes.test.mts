@@ -27,6 +27,7 @@ const MAP: [string, string][] = [
   ["/privacidad", "/en/privacy"],
   ["/blog", "/en/blog"],
   ["/ingresar", "/en/sign-in"],
+  ["/referidos", "/en/referrals"],
 ];
 
 test("route map es <-> en is symmetric", () => {

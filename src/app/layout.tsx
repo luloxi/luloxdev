@@ -5,7 +5,7 @@ import { SiteControls } from "@/components/site-controls";
 import { LocaleProvider } from "@/i18n/locale-provider";
 import { getRequestLocale, getServerPrefs } from "@/lib/prefs";
 import { getCopyOverrides } from "@/lib/site-copy";
-import { isAdminRequest } from "@/lib/admin-request";
+import { getViewer } from "@/lib/viewer";
 import { AdminProvider } from "@/components/admin-context";
 import { SiteOrderProvider } from "@/components/site-order-context";
 import { AdminStripGate } from "@/components/admin-strip-gate";
@@ -122,12 +122,14 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Per-request: language from the URL (proxy.ts header), theme from its cookie (else dark).
-  const [{ locale, theme }, overrides, isAdmin, order] = await Promise.all([
+  const [{ locale, theme }, overrides, viewer, order] = await Promise.all([
     getServerPrefs(),
     getCopyOverrides(),
-    isAdminRequest(),
+    getViewer(),
     getSiteOrder(),
   ]);
+  // Admin = allowlisted Google account; any other session is a plain user (referrals only).
+  const isAdmin = viewer?.isAdmin === true;
   // Project titles for the admin strip (admin only: visitors never pay for this read).
   let projectLabels: Record<string, { es: string; en: string }> = {};
   if (isAdmin) {
@@ -154,8 +156,8 @@ export default async function RootLayout({
         <ThemeProvider initialTheme={theme}>
           <LocaleProvider initialLocale={locale} overrides={overrides}>
             <CosmicBg />
-            <SiteControls isAdmin={isAdmin} />
-            <AdminProvider isAdmin={isAdmin}>
+            <SiteControls signedIn={Boolean(viewer)} />
+            <AdminProvider isAdmin={isAdmin} signedIn={Boolean(viewer)}>
               <SiteOrderProvider initial={order}>
                 <div className="relative z-10">{children}</div>
                 {isAdmin ? <AdminStripGate projectLabels={projectLabels} /> : null}

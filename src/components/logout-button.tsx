@@ -5,7 +5,7 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth/client";
 import { useLocale } from "@/i18n/locale-provider";
 
-/** Admin-only: sign out and reload to the public view. */
+/** Any signed-in user (admin or not): sign out and reload to the public view. */
 export function LogoutButton() {
   const { locale } = useLocale();
   const [busy, setBusy] = useState(false);

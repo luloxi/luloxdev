@@ -9,6 +9,7 @@ export const messages = {
       tastes: "Gustos",
       contact: "Contacto",
       hire: "Contratar",
+      referrals: "Referidos",
     },
     ui: {
       backHome: "Inicio",
@@ -241,6 +242,7 @@ export const messages = {
       tastes: "Tastes",
       contact: "Contact",
       hire: "Hire me",
+      referrals: "Referrals",
     },
     ui: {
       backHome: "Home",

@@ -26,6 +26,7 @@
   --section-tastes: #fb7185;
   --section-contact: #7FBA00;
   --section-hire: #B46CFF;
+  --section-referrals: #2DD4BF;
 }
 
 /* Light mode: clean neutral (white / cool grey), crimson accent used sparingly */
@@ -52,6 +53,7 @@
   --section-tastes: #be123c;
   --section-contact: #4E8A00;
   --section-hire: #7A2FE0;
+  --section-referrals: #0F766E;
   /* Shared light elevation */
   --light-ink: color-mix(in oklab, #1d2027 8%, transparent);
   --light-glass: color-mix(in oklab, #ffffff 78%, transparent);
@@ -79,6 +81,7 @@
   --section-tastes: #fb7185;
   --section-contact: #7FBA00;
   --section-hire: #B46CFF;
+  --section-referrals: #2DD4BF;
 }
 
 @theme inline {
@@ -4251,6 +4254,12 @@ body.ie-off .ie-row-pencil { display: none; }
 @keyframes hire-btn-glow { 50% { box-shadow: 0 0 20px 4px color-mix(in srgb, var(--snot) 95%, transparent), 0 0 56px 14px color-mix(in srgb, var(--snot) 55%, transparent); } }
 @media (prefers-reduced-motion: reduce) { .hire-btn, .hire-btn-rainbow, .hire-btn-arrow { animation: none; transition: none; } .hire-btn:hover, .hire-btn:focus-visible { transform: none; } }
 .cp-nav > .cp-nav-hire { grid-column: 1 / -1; margin: .35rem 0 1.1rem; }
+.cp-nav > .cp-nav-item.is-wide { grid-column: 1 / -1; }
+/* Landing on phones with the extra Referidos tile (signed-in users): slimmer tiles so it still fits one screen. */
+@media (max-width: 899px) {
+  .home-sections .cp-nav:has(> :nth-child(6)) { gap: .35rem; }
+  .home-sections .cp-nav:has(> :nth-child(6)) > .cp-nav-item { min-height: 3.05rem; padding-block: .4rem; }
+}
 .contact-hire { margin-top: 2rem; }
 /* Mobile: keep the repo link inside the first screen instead of forcing a scroll. */
 @media (max-width: 899px) { .home-main { min-height: calc(100% - 2.2rem); } }
@@ -4452,3 +4461,100 @@ html.has-admin-strip .home-root { overflow-y: auto; }
 /* Hidden section/project while the admin edits: still on the page, clearly marked. */
 .is-section-hidden { opacity: 0.45; filter: grayscale(0.7); outline: 1px dashed color-mix(in oklab, var(--neon-crimson) 55%, transparent); outline-offset: 2px; }
 .is-section-hidden:hover { opacity: 0.7; }
+
+/* /contratar: referral code (optional) under the quote. */
+.hire-ref { display: grid; gap: .35rem; margin: 0; }
+.hire-ref .hire-form-field input { font-family: var(--font-mono, monospace); letter-spacing: .04em; }
+.hire-ref-status { margin: 0; min-height: 1.2em; font-size: .85rem; color: var(--muted); overflow-wrap: anywhere; }
+.hire-ref-status:empty { min-height: 0; }
+.hire-ref[data-state="ok"] .hire-ref-status { color: var(--section-referrals); }
+.hire-ref[data-state="ok"] .hire-ref-status strong { font-family: var(--font-mono, monospace); }
+.hire-ref[data-state="ok"] .hire-form-field input { border-color: var(--section-referrals); }
+.hire-ref[data-state="unknown"] .hire-ref-status, .hire-ref[data-state="invalid"] .hire-ref-status { color: var(--o, #f97316); }
+
+/* /referidos (/en/referrals): program explainer, signup, own panel. Accent: --section-referrals. */
+.ref { --cy: var(--section-referrals); --o: var(--section-referrals); display: grid; gap: 1.2rem; min-width: 0; }
+.ref-lead { margin: 0; font-family: var(--font-orbitron), var(--font-display); font-weight: 800; font-size: clamp(1.25rem, 4.6vw, 1.6rem); line-height: 1.25;
+  color: var(--section-referrals); text-shadow: 0 0 18px color-mix(in oklab, var(--section-referrals) 35%, transparent); }
+.ref-sub, .ref-hint { margin: 0; color: var(--muted); line-height: 1.6; font-size: .95rem; }
+.ref-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: .7rem; }
+.ref-steps li { display: flex; gap: .8rem; align-items: flex-start; padding: .75rem .9rem; border-radius: 14px;
+  border: 1px solid color-mix(in oklab, var(--section-referrals) 35%, transparent);
+  background: color-mix(in oklab, var(--section-referrals) 7%, transparent); }
+.ref-steps li > div { display: grid; gap: .15rem; min-width: 0; }
+.ref-steps strong { font-size: 1rem; }
+.ref-steps span:not(.ref-step-n) { color: var(--muted); font-size: .9rem; line-height: 1.5; }
+.ref-step-n { flex: none; display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 999px; font-family: var(--font-orbitron), var(--font-display);
+  font-weight: 800; color: var(--background); background: var(--section-referrals); box-shadow: 0 0 14px color-mix(in oklab, var(--section-referrals) 50%, transparent); }
+.ref-signin { display: grid; gap: .7rem; }
+.ref-signin-btn .hire-btn-label { font-size: .9rem; line-height: 1.3; text-align: center; white-space: normal; }
+.ref-form { display: grid; gap: .9rem; min-width: 0; }
+.ref-h2 { margin: 0; font-family: var(--font-orbitron), var(--font-display); font-size: 1.1rem; letter-spacing: .06em; color: var(--section-referrals); }
+.ref-form input[readonly] { opacity: .75; cursor: default; }
+.ref-code-input { display: flex; align-items: stretch; min-width: 0; border: 1px solid color-mix(in srgb, var(--section-referrals) 45%, transparent); border-radius: 12px; overflow: hidden; }
+.ref-code-input:focus-within { border-color: var(--section-referrals); box-shadow: 0 0 0 3px color-mix(in srgb, var(--section-referrals) 25%, transparent); }
+.ref-code-prefix { display: grid; place-items: center; flex: none; white-space: nowrap; padding: 0 .6rem; font-family: var(--font-mono, monospace); font-size: .85rem; color: var(--muted);
+  background: color-mix(in srgb, var(--section-referrals) 10%, transparent); border-right: 1px solid color-mix(in srgb, var(--section-referrals) 30%, transparent); }
+.hire-form-field .ref-code-input input { border: 0; border-radius: 0; box-shadow: none; min-width: 0; font-family: var(--font-mono, monospace); }
+.ref-code-status { margin: -.4rem 0 0; font-size: .85rem; color: var(--muted); }
+.ref-code-status[data-status="available"] { color: var(--section-referrals); font-weight: 700; }
+.ref-code-status[data-status="taken"], .ref-code-status[data-status="reserved"], .ref-code-status[data-status="invalid"] { color: var(--neon-orange); }
+.ref-submit:disabled { cursor: not-allowed; opacity: .55; filter: grayscale(.4); animation: none; transform: none; }
+.ref-error { margin: 0; color: #e5484d; font-weight: 600; }
+.ref-panel { display: grid; gap: 1rem; min-width: 0; }
+.ref-paused { margin: 0; padding: .7rem .9rem; border-radius: 12px; border: 1px solid var(--neon-orange); color: var(--neon-orange); }
+.ref-code-line { margin: 0; font-size: 1rem; }
+.ref-code-line strong { font-family: var(--font-mono, monospace); color: var(--section-referrals); font-size: 1.15rem; }
+.ref-link-box { display: grid; gap: .4rem; min-width: 0; }
+.ref-label { font-family: var(--font-mono, monospace); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--section-referrals); }
+.ref-link-row { display: flex; gap: .5rem; align-items: stretch; min-width: 0; }
+.ref-link { flex: 1; min-width: 0; padding: .6rem .75rem; border-radius: 10px; font-size: .85rem; overflow-wrap: anywhere; word-break: break-all;
+  border: 1px dashed color-mix(in oklab, var(--section-referrals) 55%, transparent); background: color-mix(in oklab, var(--section-referrals) 6%, transparent); }
+.ref-copy { flex: none; cursor: pointer; min-width: 5.5rem; padding: 0 .9rem; border-radius: 10px; font: inherit; font-weight: 700; font-size: .85rem;
+  color: var(--background); background: var(--section-referrals); border: 0; transition: filter .2s ease; }
+.ref-copy:hover, .ref-copy:focus-visible { filter: brightness(1.12); }
+.ref-copy:focus-visible { outline: 2px solid var(--section-referrals); outline-offset: 2px; }
+.ref-stats { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+.ref-stats > div:first-child { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: baseline; gap: .6rem; }
+.ref-stats > div:first-child dd { margin: 0; }
+.ref-stats > div { padding: .7rem .8rem; border-radius: 12px; border: 1px solid color-mix(in oklab, var(--section-referrals) 30%, transparent); min-width: 0; }
+.ref-stats dt { font-size: .78rem; color: var(--muted); }
+.ref-stats dd { margin: .2rem 0 0; font-family: var(--font-mono, monospace); font-size: 1.05rem; font-weight: 700; overflow-wrap: anywhere; }
+.ref-quote { justify-self: start; color: var(--section-referrals); border-color: var(--section-referrals); background: transparent; }
+@media (max-width: 420px) { .ref-quote { justify-self: stretch; } }
+
+/* /admin/referidos */
+.radm { display: grid; gap: 1.1rem; min-width: 0; }
+.radm-card { display: grid; gap: .8rem; padding: 1rem; border-radius: 16px; min-width: 0;
+  border: 1px solid color-mix(in oklab, var(--section-referrals) 40%, transparent); background: color-mix(in oklab, var(--section-referrals) 5%, transparent); }
+.radm-card[data-active="false"] { opacity: .7; border-style: dashed; }
+.radm-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .8rem; align-items: start; }
+.radm-who { min-width: 0; }
+.radm-name { margin: 0; font-size: 1.05rem; display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; }
+.radm-code { font-size: .9rem; color: var(--section-referrals); }
+.radm-badge { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; padding: .1rem .45rem; border-radius: 999px; border: 1px solid var(--neon-orange); color: var(--neon-orange); }
+.radm-meta { margin: .2rem 0 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+.radm-owed { display: grid; justify-items: end; gap: .1rem; text-align: right; }
+.radm-owed span, .radm-owed small { color: var(--muted); font-size: .78rem; }
+.radm-owed strong { font-family: var(--font-mono, monospace); font-size: 1.1rem; color: var(--section-referrals); }
+.radm-actions, .radm-pay-actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.radm-btn { cursor: pointer; display: inline-flex; align-items: center; min-height: 40px; padding: 0 .9rem; border-radius: 999px; font: inherit; font-size: .85rem; font-weight: 700;
+  text-decoration: none; color: var(--section-referrals); background: transparent; border: 1.5px solid var(--section-referrals); }
+.radm-btn:hover, .radm-btn:focus-visible { background: color-mix(in oklab, var(--section-referrals) 14%, transparent); }
+.radm-btn:disabled { cursor: not-allowed; opacity: .5; }
+.radm-toggle { color: var(--neon-orange); border-color: var(--neon-orange); }
+.radm-leads { list-style: none; margin: 0; padding: 0; display: grid; gap: .7rem; }
+.radm-lead { display: grid; gap: .6rem; padding: .8rem; border-radius: 12px; border: 1px solid var(--border); min-width: 0; }
+.radm-lead-head { display: grid; gap: .15rem; min-width: 0; }
+.radm-msg { margin: .3rem 0 0; font-size: .85rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.radm-pay { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: .6rem; align-items: end; }
+.radm-pay-actions { grid-column: 1 / -1; }
+.radm-field { display: grid; gap: .25rem; font-size: .78rem; color: var(--muted); min-width: 0; }
+.radm-field strong { color: var(--foreground); font-size: .95rem; font-family: var(--font-mono, monospace); }
+.radm-amount { display: flex; min-width: 0; border: 1px solid color-mix(in srgb, var(--section-referrals) 45%, transparent); border-radius: 10px; overflow: hidden; }
+.radm-amount select { cursor: pointer; font: inherit; font-size: .9rem; color: var(--foreground); background: color-mix(in srgb, var(--section-referrals) 12%, var(--background)); border: 0; padding: 0 .4rem; }
+.radm-amount input { flex: 1; min-width: 0; font: inherit; font-size: 1rem; color: var(--foreground); background: transparent; border: 0; padding: .55rem .6rem; }
+.radm-status[data-status="paid"] { color: var(--section-referrals); }
+.radm-status[data-status="pending"] { color: var(--neon-orange); }
+.radm-note { font-size: .8rem; color: var(--muted); }
+.ref-admin-link { justify-self: start; }

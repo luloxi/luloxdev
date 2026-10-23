@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "@/i18n/locale-provider";
 import { EDIT_MODE_KEY, editModeCookie, editModeFromCookie } from "@/lib/edit-mode";
 
-type AdminState = { isAdmin: boolean; editOn: boolean };
-const AdminContext = createContext<AdminState>({ isAdmin: false, editOn: false });
+type AdminState = { isAdmin: boolean; editOn: boolean; signedIn: boolean };
+const AdminContext = createContext<AdminState>({ isAdmin: false, editOn: false, signedIn: false });
 
 /**
  * Admin flag (decided server-side per request) plus the edit-mode toggle.
  * Edit mode makes allowlisted body content editable in place; the page looks
  * exactly the same, no pencils or outlines.
  */
-export function AdminProvider({ isAdmin, children }: { isAdmin: boolean; children: ReactNode }) {
+export function AdminProvider({ isAdmin, signedIn = isAdmin, children }: { isAdmin: boolean; signedIn?: boolean; children: ReactNode }) {
   const { locale } = useLocale();
   const router = useRouter();
   const [editOn, setEditOn] = useState(true);
@@ -28,7 +28,7 @@ export function AdminProvider({ isAdmin, children }: { isAdmin: boolean; childre
   }, [isAdmin, router]);
   const es = locale === "es";
   return (
-    <AdminContext.Provider value={{ isAdmin, editOn: isAdmin && editOn }}>
+    <AdminContext.Provider value={{ isAdmin, editOn: isAdmin && editOn, signedIn: signedIn || isAdmin }}>
       {children}
       {isAdmin ? (
         <button
@@ -57,6 +57,11 @@ export function AdminProvider({ isAdmin, children }: { isAdmin: boolean; childre
 
 export function useIsAdmin() {
   return useContext(AdminContext).isAdmin;
+}
+
+/** Any Google session (admin or not): decided server-side by the root layout. */
+export function useSignedIn() {
+  return useContext(AdminContext).signedIn;
 }
 
 export function useEditMode() {

@@ -34,7 +34,7 @@ function GoogleMark({ className }: { className?: string }) {
 }
 
 /** Sign-in card; the server passes ?error= so no Suspense/loading shell is needed. */
-export function SignInPanel({ error }: { error: string | null }) {
+export function SignInPanel({ error, next = "/blog" }: { error: string | null; next?: string }) {
   const { t } = useLocale();
 
   async function signInGoogle() {
@@ -42,7 +42,7 @@ export function SignInPanel({ error }: { error: string | null }) {
     try {
       const result = await authClient.signIn.social({
         provider: "google",
-        callbackURL: `${origin}/blog`,
+        callbackURL: `${origin}${next}`,
         errorCallbackURL: `${origin}/ingresar?error=oauth`,
       });
 

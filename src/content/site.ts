@@ -29,7 +29,8 @@ export type SectionId =
   | "blog"
   | "tastes"
   | "contact"
-  | "hire";
+  | "hire"
+  | "referrals";
 
 /** Main sections - stacked Linktree-style buttons */
 export const sections = [
@@ -38,6 +39,8 @@ export const sections = [
   { id: "about" as const, href: "/sobre-mi" },
   { id: "projects" as const, href: "/proyectos" },
   { id: "contact" as const, href: "/contacto" },
+  /** Only shown to signed-in users (landing); the page itself is public. */
+  { id: "referrals" as const, href: "/referidos" },
 ];
 
 

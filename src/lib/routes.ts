@@ -21,6 +21,7 @@ export const SEGMENTS_ES_TO_EN: Readonly<Record<string, string>> = {
   contacto: "contact",
   privacidad: "privacy",
   ingresar: "sign-in",
+  referidos: "referrals",
 };
 
 const SEGMENTS_EN_TO_ES: Readonly<Record<string, string>> = Object.fromEntries(
