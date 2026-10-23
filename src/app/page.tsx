@@ -6,6 +6,7 @@ import { bounce, playLaugh } from "@/components/laugh-button";
 import { GitHubIcon } from "@/components/icons/social";
 import { SectionNav } from "@/components/section-nav";
 import { site } from "@/content/site";
+import { useLocale } from "@/i18n/locale-provider";
 
 /**
  * Home is locked to the visible viewport (no page scroll).
@@ -14,6 +15,7 @@ import { site } from "@/content/site";
  * Theme/lang controls live in layout (fixed).
  */
 export default function HomePage() {
+  const { t } = useLocale();
   const hudRef = useRef<HTMLDivElement>(null);
   const lastTap = useRef<{ t: number; x: number; y: number } | null>(null);
   const touchLaughAt = useRef(0);
@@ -105,7 +107,7 @@ export default function HomePage() {
       </main>
       <a className="home-steal" href="https://github.com/luloxi/steal-this-portfolio" target="_blank" rel="noopener noreferrer">
         <GitHubIcon className="home-steal-icon" />
-        Steal this portfolio!
+        {t.ui.stealPortfolio}
       </a>
     </div>
   );

@@ -105,7 +105,7 @@ En local van en `.dev.vars`. En producción: `npx wrangler secret put <NOMBRE>`.
 | Mail del formulario | `/api/hire-contact` | `src/lib/hire-contact.ts`, `src/app/api/hire-contact/route.ts` | Valida (280 caracteres, email), honeypot, rate limit (`CONTACT_RL`), recalcula el presupuesto en el server y manda el mail a `CONTACT_TO` con el visitante como reply-to. |
 | Textos e i18n | todo el sitio | `src/i18n/messages.ts`, `src/i18n/locale-provider.tsx` | Cada texto en `es` y `en`. El idioma sale de una cookie; las URLs en español son las canónicas (las viejas en inglés redirigen, ver `next.config.ts`). |
 | Temas | todo el sitio | `src/components/providers/theme-provider.tsx`, `src/app/globals.css` | Claro/oscuro con la clase `.dark`. Los colores son variables CSS arriba de `globals.css`. |
-| Footer | `/` | `src/app/page.tsx` (`home-steal`) | El link "Steal this portfolio!". Apuntalo a tu fork o sacalo. |
+| Footer | `/` | `src/app/page.tsx` (`home-steal`) | El link "¡Robate este portfolio!" / "Steal this portfolio!" (`ui.stealPortfolio` en `src/i18n/messages.ts`). Apuntalo a tu fork o sacalo. |
 
 ### 🖱️ Convención de cursor
 

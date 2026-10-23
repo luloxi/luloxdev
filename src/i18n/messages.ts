@@ -13,6 +13,7 @@ export const messages = {
     ui: {
       backHome: "Inicio",
       backHomeCta: "Volver al inicio",
+      stealPortfolio: "¡Robate este portfolio!",
       social: "Social",
       experience: "Experiencia",
       notFound: "Nada por acá.",
@@ -244,6 +245,7 @@ export const messages = {
     ui: {
       backHome: "Home",
       backHomeCta: "Back to home",
+      stealPortfolio: "Steal this portfolio!",
       social: "Social",
       experience: "Experience",
       notFound: "Nothing here.",

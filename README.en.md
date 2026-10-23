@@ -106,7 +106,7 @@ Locally they live in `.dev.vars`. In production: `npx wrangler secret put <NAME>
 | Contact form email | `/api/hire-contact` | `src/lib/hire-contact.ts`, `src/app/api/hire-contact/route.ts` | Validates (280 chars, email), honeypot, rate limit (`CONTACT_RL`), recalculates the quote on the server and emails `CONTACT_TO` with the visitor as reply-to. |
 | Texts and i18n | everywhere | `src/i18n/messages.ts`, `src/i18n/locale-provider.tsx` | Every UI string in `es` and `en`. Language comes from a cookie; Spanish URLs are canonical (old English paths redirect, see `next.config.ts`). |
 | Themes | everywhere | `src/components/providers/theme-provider.tsx`, `src/app/globals.css` | Dark/light via the `.dark` class. Colors are CSS variables at the top of `globals.css`. |
-| Footer | `/` | `src/app/page.tsx` (`home-steal`) | The "Steal this portfolio!" link. Point it at your fork or remove it. |
+| Footer | `/` | `src/app/page.tsx` (`home-steal`) | The "Steal this portfolio!" / "¡Robate este portfolio!" link (`ui.stealPortfolio` in `src/i18n/messages.ts`). Point it at your fork or remove it. |
 
 ### 🖱️ Cursor convention
 
