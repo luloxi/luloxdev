@@ -16,28 +16,35 @@ export const PRICING = {
   extra: 100,
   maxUrgencyDays: 10,
   /** Project size presets in hours (research, build, testing, polish, feedback, fixes, delivery). */
-  sizes: { s: 10, m: 20, l: 40 },
+  sizes: { s: 20, m: 30, l: 40 },
   /** Calculator starting values: a low, friendly first price. No on-site, no extras. */
   defaults: {
     /** Mode the calculator opens in (shown first, on the left). */
     mode: "hourly" as Mode,
-    project: { hours: 4, complexity: "low" as Complexity },
+    project: { hours: 8, complexity: "low" as Complexity },
     hourly: { hours: 2 },
   },
+  /** Per project starts at 8 h (less than that is hourly work); over 40 h is negotiated. */
+  minProjectHours: 8,
   maxProjectHours: 40,
   maxHourlyHours: 6,
   maxOnSiteDays: 10,
-  /** Project mode volume discount on hours × rate: [minHoursExclusive, pct], highest tier wins. */
-  volumeTiers: [[30, 0.25], [20, 0.2], [10, 0.15]] as [number, number][],
+  /**
+   * Project mode volume discount on hours × rate, by size: [minHoursInclusive, pct], highest tier wins.
+   * 8–19 h none · 20–29 h Chico 15% · 30–39 h Mediano 20% · 40 h Grande 25%.
+   */
+  volumeTiers: [[40, 0.25], [30, 0.2], [20, 0.15]] as [number, number][],
   deposit: 0.5,
   validityDays: 15,
 };
 
 export const maxHoursFor = (mode: Mode) => (mode === "project" ? PRICING.maxProjectHours : PRICING.maxHourlyHours);
+export const minHoursFor = (mode: Mode) => (mode === "project" ? PRICING.minProjectHours : 1);
 
-/** Hours are whole numbers 1..max for the mode (client input and server use the same rule). */
+/** Hours are whole numbers min..max for the mode (1–6 per hour, 8–40 per project; client input and server use the same rule). */
 export function clampHours(mode: Mode, n: number): number {
-  if (!Number.isFinite(n) || n < 1) return 1;
+  const min = minHoursFor(mode);
+  if (!Number.isFinite(n) || n < min) return min;
   return Math.min(maxHoursFor(mode), Math.floor(n));
 }
 
@@ -61,10 +68,10 @@ export type Inputs = {
 export type Line = { id: "work" | "discount" | "onSite" | "travel" | "extra"; amount: number; pct?: number; days?: number };
 
 export function estimate(i: Inputs, p = PRICING): { lines: Line[]; total: number; deposit: number } {
-  const hours = Math.min(i.mode === "project" ? p.maxProjectHours : p.maxHourlyHours, Math.max(0, Math.round(i.hours * 2) / 2));
+  const hours = Math.min(i.mode === "project" ? p.maxProjectHours : p.maxHourlyHours, Math.max(i.mode === "project" ? p.minProjectHours : 0, Math.round(i.hours * 2) / 2));
   const work = hours * p.rates[i.complexity];
   const lines: Line[] = [{ id: "work", amount: work }];
-  const tier = i.mode === "project" ? p.volumeTiers.find(([h]) => hours > h) : undefined;
+  const tier = i.mode === "project" ? p.volumeTiers.find(([h]) => hours >= h) : undefined;
   if (tier) lines.push({ id: "discount", amount: -Math.round(work * tier[1]), pct: Math.round(tier[1] * 100) });
   if (i.onSite) {
     const days = i.mode === "project" ? Math.max(1, Math.min(p.maxOnSiteDays, Math.round(i.onSiteDays ?? 1))) : 1;

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CALL_BOOKING_URL, site } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 import { MagicHr } from "@/components/magic-hr";
-import { clampHours, estimate, hoursDigits, maxHoursFor, PRICING, type Complexity, type Mode } from "@/lib/pricing";
+import { clampHours, estimate, hoursDigits, maxHoursFor, minHoursFor, PRICING, type Complexity, type Mode } from "@/lib/pricing";
 import { charCount, clampMessage, MAX_MESSAGE } from "@/lib/hire-limits";
 import { LimitModal } from "@/components/limit-modal";
 
@@ -21,7 +21,8 @@ const copy = {
     size: "Tamaño",
     sizes: { s: "Chico", m: "Mediano", l: "Grande" },
     hours: "Horas estimadas",
-    hoursInput: (max: number) => `Horas, de 1 a ${max}`,
+    hoursInput: (min: number, max: number) => `Horas, de ${min} a ${max}`,
+    projectRange: "De 8 a 40 h. Menos de 8, elegí por hora; más de 40 lo charlamos.",
     complexity: "Complejidad",
     cx: {
       low: ["Baja", "Lo liviano: consultas, consejos y cosas que resuelvo tranqui."],
@@ -44,7 +45,7 @@ const copy = {
     perHour: "/h",
     note: `Estimación orientativa, no es un presupuesto final. Lo ajustamos juntos en la llamada. Presupuestos válidos ${PRICING.validityDays} días; 50% de anticipo y 50% contra entrega.`,
     formula: "Cómo calculo",
-    fProject: "(horas × complejidad) + presencial/día + viático/día + (urgencia × día)",
+    fProject: "(horas × complejidad − descuento por tamaño: 20 h 15%, 30 h 20%, 40 h 25%) + presencial/día + viático/día + (urgencia × día)",
     fHourly: "(horas × complejidad) + presencial + viático + urgencia",
     cta: "Videollamada",
     write: "Escribime",
@@ -62,7 +63,8 @@ const copy = {
     size: "Size",
     sizes: { s: "Small", m: "Medium", l: "Large" },
     hours: "Estimated hours",
-    hoursInput: (max: number) => `Hours, 1 to ${max}`,
+    hoursInput: (min: number, max: number) => `Hours, ${min} to ${max}`,
+    projectRange: "8 to 40 h. Under 8, pick per hour; over 40, let's talk.",
     complexity: "Complexity",
     cx: {
       low: ["Low", "The light stuff: questions, advice and things I handle calmly."],
@@ -85,7 +87,7 @@ const copy = {
     perHour: "/h",
     note: `Ballpark estimate, not a final quote. We fine-tune it together on the call. Quotes are valid for ${PRICING.validityDays} days; 50% upfront, 50% on delivery.`,
     formula: "How I calculate",
-    fProject: "(hours × complexity) + on-site/day + travel/day + (urgency × day)",
+    fProject: "(hours × complexity − size discount: 20 h 15%, 30 h 20%, 40 h 25%) + on-site/day + travel/day + (urgency × day)",
     fHourly: "(hours × complexity) + on-site + travel + urgency",
     cta: "Video call",
     write: "Write me",
@@ -139,13 +141,14 @@ export function HireCalculator() {
   const r = estimate({ mode, hours, complexity, extra, onSite, onSiteDays: days, extraDays });
   const total = useCountUp(r.total);
   const maxH = maxHoursFor(mode);
-  // Hours box: digits only; over the max snaps to the max right away, 0/empty becomes 1 on blur.
+  const minH = minHoursFor(mode);
+  // Hours box: digits only; over the max snaps to the max right away, under the min/empty becomes the min on blur.
   const onHoursText = (raw: string) => {
     const d = hoursDigits(raw);
     const n = Number(d);
     if (d && n > maxH) { setHoursText(String(maxH)); setHours(maxH); return; }
     setHoursText(d);
-    if (n >= 1) setHours(clampHours(mode, n));
+    if (n >= minH) setHours(clampHours(mode, n));
   };
   const commitHoursText = () => {
     if (hoursText !== null) setHours(clampHours(mode, Number(hoursText)));
@@ -191,12 +194,12 @@ export function HireCalculator() {
         <input
           className="hire-range"
           type="range"
-          min={1}
+          min={minH}
           max={maxH}
           step={1}
           value={Math.min(hours, maxH)}
           aria-label={c.hours}
-          style={{ ["--range-p" as string]: `${((Math.min(hours, maxH) - 1) / (maxH - 1)) * 100}%` }}
+          style={{ ["--range-p" as string]: `${((Math.min(hours, maxH) - minH) / (maxH - minH)) * 100}%` }}
           onChange={(e) => { setHoursText(null); setHours(Number(e.target.value)); }}
         />
         <input
@@ -206,7 +209,7 @@ export function HireCalculator() {
           pattern="[0-9]*"
           enterKeyHint="done"
           autoComplete="off"
-          aria-label={c.hoursInput(maxH)}
+          aria-label={c.hoursInput(minH, maxH)}
           value={hoursText ?? String(Math.min(hours, maxH))}
           onChange={(e) => onHoursText(e.target.value)}
           onBlur={commitHoursText}
@@ -214,6 +217,7 @@ export function HireCalculator() {
           onFocus={(e) => { const el = e.currentTarget; el.select(); const vv = window.visualViewport; const fit = () => { if (document.activeElement === el) el.scrollIntoView({ block: "center" }); }; vv?.addEventListener("resize", fit); el.addEventListener("blur", () => vv?.removeEventListener("resize", fit), { once: true }); }}
         />
         </div>
+        {mode === "project" ? <p className="hire-hint">{c.projectRange}</p> : null}
       </fieldset>
 
       <fieldset className="hire-field">

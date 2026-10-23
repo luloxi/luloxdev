@@ -127,7 +127,7 @@ test("Turnstile: no secret configured → 503; siteverify down → 403", async (
 
 test("default calculator quote is recomputed server-side to the same totals", async () => {
   for (const [b, total] of [
-    [{ mode: "project", hours: 4, complexity: "low", onSite: false, days: 1, extra: false, total: 9999 }, "US$ 40"],
+    [{ mode: "project", hours: 8, complexity: "low", onSite: false, days: 1, extra: false, total: 9999 }, "US$ 80"],
     [{ mode: "hourly", hours: 2, complexity: "low", onSite: false, days: 1, extra: false }, "US$ 20"],
   ] as const) {
     const { env, sent } = mkEnv({ resend: true });
@@ -142,8 +142,8 @@ test("default calculator quote is recomputed server-side to the same totals", as
 test("urgency: server forces 1 day in hourly mode, recomputes project days; client totals ignored", async () => {
   for (const [b, total, line] of [
     [{ mode: "hourly", hours: 2, complexity: "low", onSite: false, days: 0, extra: true, extraDays: 3, total: 1 }, "US$ 120", "Urgencia: sí\n"],
-    [{ mode: "project", hours: 4, complexity: "low", onSite: true, days: 2, extra: true, extraDays: 2, total: 9999 }, "US$ 340", "Urgencia: sí, 2 días"],
-    [{ mode: "project", hours: 4, complexity: "low", onSite: false, days: 1, extra: true, extraDays: 999 }, "US$ 1,040", "Urgencia: sí, 10 días"],
+    [{ mode: "project", hours: 8, complexity: "low", onSite: true, days: 2, extra: true, extraDays: 2, total: 9999 }, "US$ 380", "Urgencia: sí, 2 días"],
+    [{ mode: "project", hours: 8, complexity: "low", onSite: false, days: 1, extra: true, extraDays: 999 }, "US$ 1,080", "Urgencia: sí, 10 días"],
   ] as const) {
     const { env, sent } = mkEnv({ resend: true });
     assert.equal((await handleHireContact({ ...ok, budget: b }, env, "x")).status, 200);
@@ -181,9 +181,11 @@ test("hire_hp honeypot also pretends success; 281 chars rejected server-side", a
   assert.equal(sent.length, 1);
 });
 
-test("server clamps hours like the input: 9h per hour → 6h, 0 → 1, project over max → max", () => {
+test("server clamps hours like the input: 9h per hour → 6h, 0 → 1, project over max → max, under 8 → 8", () => {
   assert.equal(parseBudget({ ...budget, mode: "hourly", hours: 9 })?.hours, 6);
   assert.equal(parseBudget({ ...budget, mode: "hourly", hours: 0 })?.hours, 1);
   assert.equal(parseBudget({ ...budget, hours: 99 })?.hours, 40);
-  assert.equal(parseBudget({ ...budget, hours: 4.9 })?.hours, 4);
+  assert.equal(parseBudget({ ...budget, hours: 12.9 })?.hours, 12);
+  assert.equal(parseBudget({ ...budget, hours: 4 })?.hours, 8);
+  assert.equal(parseBudget({ ...budget, hours: 0 })?.hours, 8);
 });
