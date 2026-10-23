@@ -1,4 +1,4 @@
-import { estimate, PRICING, type Complexity, type Mode } from "./pricing";
+import { clampHours, estimate, PRICING, type Complexity, type Mode } from "./pricing";
 import { MAX_MESSAGE } from "./hire-limits";
 
 export { MAX_MESSAGE };
@@ -33,15 +33,15 @@ export function parseBudget(v: unknown): Budget | null {
   const b = v as Record<string, unknown>;
   const mode = MODES.find((m) => m === b.mode);
   const complexity = CX.find((c) => c === b.complexity);
-  const hours = Number(b.hours);
-  if (!mode || !complexity || !Number.isFinite(hours)) return null;
-  const maxH = mode === "project" ? PRICING.maxProjectHours : PRICING.maxHourlyHours;
-  if (hours < 1 || hours > maxH) return null;
+  const rawHours = Number(b.hours);
+  if (!mode || !complexity || !Number.isFinite(rawHours)) return null;
+  // Same rule as the hours input: whole hours, clamped to 1..max for the mode.
+  const hours = clampHours(mode, rawHours);
   const onSite = b.onSite === true;
   const days = mode === "project" && onSite ? Math.max(1, Math.min(PRICING.maxOnSiteDays, Math.round(Number(b.days) || 1))) : onSite ? 1 : 0;
   const extra = b.extra === true;
   const extraDays = extra ? Math.max(1, Math.min(PRICING.maxUrgencyDays, Math.round(Number(b.extraDays) || 1))) : 0;
-  return { mode, hours: Math.round(hours), complexity, onSite, days, extra, extraDays };
+  return { mode, hours, complexity, onSite, days, extra, extraDays };
 }
 
 const LABEL = {

@@ -33,6 +33,17 @@ export const PRICING = {
   validityDays: 15,
 };
 
+export const maxHoursFor = (mode: Mode) => (mode === "project" ? PRICING.maxProjectHours : PRICING.maxHourlyHours);
+
+/** Hours are whole numbers 1..max for the mode (client input and server use the same rule). */
+export function clampHours(mode: Mode, n: number): number {
+  if (!Number.isFinite(n) || n < 1) return 1;
+  return Math.min(maxHoursFor(mode), Math.floor(n));
+}
+
+/** Typed/pasted text -> digits only (no decimals, e, signs, spaces). "" when nothing usable. */
+export const hoursDigits = (raw: string) => raw.replace(/\D+/g, "").replace(/^0+(?=\d)/, "").slice(0, 3);
+
 export type Inputs = {
   mode: Mode;
   hours: number;

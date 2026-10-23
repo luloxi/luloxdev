@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CALL_BOOKING_URL, site } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 import { MagicHr } from "@/components/magic-hr";
-import { estimate, PRICING, type Complexity, type Mode } from "@/lib/pricing";
+import { clampHours, estimate, hoursDigits, maxHoursFor, PRICING, type Complexity, type Mode } from "@/lib/pricing";
 import { charCount, clampMessage, MAX_MESSAGE } from "@/lib/hire-limits";
 import { LimitModal } from "@/components/limit-modal";
 
@@ -21,9 +21,10 @@ const copy = {
     size: "Tamaño",
     sizes: { s: "Chico", m: "Mediano", l: "Grande" },
     hours: "Horas estimadas",
+    hoursInput: (max: number) => `Horas, de 1 a ${max}`,
     complexity: "Complejidad",
     cx: {
-      low: ["Baja", "Lo liviano: consultas, consejos, cosas que resuelvo tranqui mientras estoy en otra."],
+      low: ["Baja", "Lo liviano: consultas, consejos y cosas que resuelvo tranqui."],
       medium: ["Media", "Le pongo foco de verdad, pero sin salir a investigar."],
       high: ["Alta", "Toda mi atención, y me pongo a investigar a fondo."],
     } as Record<Complexity, [string, string]>,
@@ -48,7 +49,7 @@ const copy = {
     cta: "Videollamada",
     write: "Escribime",
     contact: "Contacto",
-    form: { name: "Nombre", email: "Tu email", message: "Mensaje", ph: "Contame qué necesitás…", budget: "Presupuesto que se envía", send: "Enviar", sending: "Enviando…", limitTitle: "¡Uy, te pasaste de 280!", limitTitleReached: "¡Tope de 280, justo!", limitTrimmed: "Tu texto superó los 280 caracteres, así que lo recorté justo ahí. Lo esencial entra, prometido.", limitReached: "Llegaste a los 280 caracteres: es el tope. Si querés contarme más, lo seguimos por email o en una llamada.", limitClose: "Entendido", limitCountdown: (n: number) => `Se cierra en ${n}…`, agents: "Formulario de contacto: nombre, email y mensaje (hasta 280 caracteres). Para enviarlo hay que pasar la verificación de Cloudflare Turnstile.",  ok: "¡Listo! Te respondo a tu email.", err: { invalid_name: "Falta tu nombre.", invalid_email: "Revisá el email.", invalid_message: "El mensaje debe tener entre 1 y 280 caracteres.", rate_limited: "Demasiados envíos. Probá en un rato.", captcha_failed: "Falta la verificación anti-bots. Esperá el tilde y probá de nuevo.", default: "No se pudo enviar. Probá de nuevo." } as Record<string, string>, yes: "sí", no: "no" },
+    form: { name: "Nombre", email: "Tu email", message: "Mensaje", ph: "Contame qué necesitás…", budget: "Presupuesto que se envía", send: "Enviar", sending: "Enviando…", limitTitle: "Máximo 280 caracteres", limitClose: "Entendido", agents: "Formulario de contacto: nombre, email y mensaje (hasta 280 caracteres). Para enviarlo hay que pasar la verificación de Cloudflare Turnstile.",  ok: "¡Listo! Te respondo a tu email.", err: { invalid_name: "Falta tu nombre.", invalid_email: "Revisá el email.", invalid_message: "El mensaje debe tener entre 1 y 280 caracteres.", rate_limited: "Demasiados envíos. Probá en un rato.", captcha_failed: "Falta la verificación anti-bots. Esperá el tilde y probá de nuevo.", default: "No se pudo enviar. Probá de nuevo." } as Record<string, string>, yes: "sí", no: "no" },
   },
   en: {
     intro: "Your quote in seconds.",
@@ -61,9 +62,10 @@ const copy = {
     size: "Size",
     sizes: { s: "Small", m: "Medium", l: "Large" },
     hours: "Estimated hours",
+    hoursInput: (max: number) => `Hours, 1 to ${max}`,
     complexity: "Complexity",
     cx: {
-      low: ["Low", "The light stuff: questions, advice, things I can do calmly on the side."],
+      low: ["Low", "The light stuff: questions, advice and things I handle calmly."],
       medium: ["Medium", "Real focus from me, no research needed."],
       high: ["High", "My full attention, plus digging into research."],
     } as Record<Complexity, [string, string]>,
@@ -88,7 +90,7 @@ const copy = {
     cta: "Video call",
     write: "Write me",
     contact: "Contact",
-    form: { name: "Name", email: "Your email", message: "Message", ph: "Tell me what you need…", budget: "Quote that will be sent", send: "Send", sending: "Sending…", limitTitle: "Whoa, over 280!", limitTitleReached: "Bang on 280!", limitTrimmed: "Your text went past 280 characters, so I trimmed it right there. The good stuff fits, promise.", limitReached: "You hit 280 characters: that's the cap. Want to tell me more? Let's keep going by email or on a call.", limitClose: "Got it", limitCountdown: (n: number) => `Closing in ${n}…`, agents: "Contact form: name, email and message (up to 280 characters). Sending it requires passing the Cloudflare Turnstile check.",  ok: "Done! I'll reply to your email.", err: { invalid_name: "Your name is missing.", invalid_email: "Check the email.", invalid_message: "Message must be 1–280 characters.", rate_limited: "Too many sends. Try again later.", captcha_failed: "Anti-bot check missing. Wait for the checkmark and try again.", default: "Couldn't send. Try again." } as Record<string, string>, yes: "yes", no: "no" },
+    form: { name: "Name", email: "Your email", message: "Message", ph: "Tell me what you need…", budget: "Quote that will be sent", send: "Send", sending: "Sending…", limitTitle: "280 characters max", limitClose: "Got it", agents: "Contact form: name, email and message (up to 280 characters). Sending it requires passing the Cloudflare Turnstile check.",  ok: "Done! I'll reply to your email.", err: { invalid_name: "Your name is missing.", invalid_email: "Check the email.", invalid_message: "Message must be 1–280 characters.", rate_limited: "Too many sends. Try again later.", captcha_failed: "Anti-bot check missing. Wait for the checkmark and try again.", default: "Couldn't send. Try again." } as Record<string, string>, yes: "yes", no: "no" },
   },
 };
 
@@ -125,6 +127,8 @@ export function HireCalculator() {
   const [extra, setExtra] = useState(false);
   const [extraDays, setExtraDays] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
+  // Text being typed in the hours box (null = show the committed value).
+  const [hoursText, setHoursText] = useState<string | null>(null);
   // Result of a native (no-fetch) form post comes back as ?contacto=…: reopen the form to show it.
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).has("contacto")) return;
@@ -134,11 +138,24 @@ export function HireCalculator() {
 
   const r = estimate({ mode, hours, complexity, extra, onSite, onSiteDays: days, extraDays });
   const total = useCountUp(r.total);
-  const maxH = mode === "project" ? PRICING.maxProjectHours : PRICING.maxHourlyHours;
+  const maxH = maxHoursFor(mode);
+  // Hours box: digits only; over the max snaps to the max right away, 0/empty becomes 1 on blur.
+  const onHoursText = (raw: string) => {
+    const d = hoursDigits(raw);
+    const n = Number(d);
+    if (d && n > maxH) { setHoursText(String(maxH)); setHours(maxH); return; }
+    setHoursText(d);
+    if (n >= 1) setHours(clampHours(mode, n));
+  };
+  const commitHoursText = () => {
+    if (hoursText !== null) setHours(clampHours(mode, Number(hoursText)));
+    setHoursText(null);
+  };
 
   const switchMode = (m: Mode) => {
     setMode(m);
     setHours(PRICING.defaults[m].hours);
+    setHoursText(null);
   };
 
   return (
@@ -170,6 +187,7 @@ export function HireCalculator() {
             ))}
           </div>
         ) : null}
+        <div className="hire-hours-row">
         <input
           className="hire-range"
           type="range"
@@ -178,9 +196,24 @@ export function HireCalculator() {
           step={1}
           value={Math.min(hours, maxH)}
           aria-label={c.hours}
-          style={{ ["--p" as string]: `${((Math.min(hours, maxH) - 1) / (maxH - 1)) * 100}%` }}
-          onChange={(e) => setHours(Number(e.target.value))}
+          style={{ ["--range-p" as string]: `${((Math.min(hours, maxH) - 1) / (maxH - 1)) * 100}%` }}
+          onChange={(e) => { setHoursText(null); setHours(Number(e.target.value)); }}
         />
+        <input
+          className="hire-hours-input"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          enterKeyHint="done"
+          autoComplete="off"
+          aria-label={c.hoursInput(maxH)}
+          value={hoursText ?? String(Math.min(hours, maxH))}
+          onChange={(e) => onHoursText(e.target.value)}
+          onBlur={commitHoursText}
+          onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+          onFocus={(e) => { const el = e.currentTarget; el.select(); const vv = window.visualViewport; const fit = () => { if (document.activeElement === el) el.scrollIntoView({ block: "center" }); }; vv?.addEventListener("resize", fit); el.addEventListener("blur", () => vv?.removeEventListener("resize", fit), { once: true }); }}
+        />
+        </div>
       </fieldset>
 
       <fieldset className="hire-field">
@@ -227,7 +260,7 @@ export function HireCalculator() {
 
       <section className="hire-receipt" aria-live="polite">
         <div className="hire-receipt-top">
-          <span className="hire-badge">{c.estimate}</span>
+          <h3 className="hire-receipt-title">{c.estimate}</h3>
           <span className="hire-receipt-mode">{c.modes[mode]}</span>
         </div>
         <ul className="hire-lines">
@@ -269,11 +302,11 @@ export function HireCalculator() {
           c={c}
           budget={{ mode, hours: Math.min(hours, maxH), complexity, onSite, days, extra, extraDays }}
           rows={[
+            [c.total, money(r.total)],
             [c.mode, c.modes[mode]],
             [c.hours, `${Math.min(hours, maxH)}h · ${c.cx[complexity][0]} (US$ ${PRICING.rates[complexity]}${c.perHour})`],
             [c.onSite, onSite ? (mode === "project" ? `${c.form.yes}, ${days} ${c.dayUnit[days === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
             [c.extra, extra ? `${c.form.yes}, ${extraDays} ${c.dayUnit[extraDays === 1 ? 0 : 1]}` : c.form.no],
-            [c.total, money(r.total)],
           ]}
         />
         <a className="hire-act hire-act-call" href={CALL_BOOKING_URL} target="_blank" rel="noopener noreferrer" data-testid="hire-call-cta">
@@ -449,7 +482,7 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
         <span className="hire-form-budget-title">{f.budget}</span>
         <dl>
           {rows.map(([k, v], i) => (
-            <div key={i} className={i === rows.length - 1 ? "is-total" : undefined}>
+            <div key={i} className={i === 0 ? "is-total" : undefined}>
               <dt>{k}</dt>
               <dd>{v}</dd>
             </div>
@@ -469,11 +502,8 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
     {limitHit ? (
       <LimitModal
         nonce={limitHit.nonce}
-        kind={limitHit.kind}
-        title={limitHit.kind === "trimmed" ? f.limitTitle : f.limitTitleReached}
-        body={limitHit.kind === "trimmed" ? f.limitTrimmed : f.limitReached}
+        title={f.limitTitle}
         close={f.limitClose}
-        countdown={f.limitCountdown}
         onClose={closeLimit}
       />
     ) : null}

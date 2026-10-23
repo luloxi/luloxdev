@@ -67,7 +67,7 @@ test("validation: email, name, empty message, budget", async () => {
     [{ email: "nope" }, "invalid_email"],
     [{ name: "  " }, "invalid_name"],
     [{ message: "   " }, "invalid_message"],
-    [{ budget: { ...budget, hours: 99 } }, "invalid_budget"],
+    [{ budget: { ...budget, hours: "lots" } }, "invalid_budget"],
     [{ budget: { ...budget, mode: "x" } }, "invalid_budget"],
   ] as const) {
     const r = await handleHireContact({ ...ok, ...patch }, env, "x");
@@ -176,4 +176,11 @@ test("hire_hp honeypot also pretends success; 281 chars rejected server-side", a
   assert.equal((await handleHireContact({ ...ok, message: "a".repeat(281) }, env, "x")).status, 400);
   assert.equal((await handleHireContact({ ...ok, message: "😀".repeat(280) }, env, "x")).status, 200);
   assert.equal(sent.length, 1);
+});
+
+test("server clamps hours like the input: 9h per hour → 6h, 0 → 1, project over max → max", () => {
+  assert.equal(parseBudget({ ...budget, mode: "hourly", hours: 9 })?.hours, 6);
+  assert.equal(parseBudget({ ...budget, mode: "hourly", hours: 0 })?.hours, 1);
+  assert.equal(parseBudget({ ...budget, hours: 99 })?.hours, 40);
+  assert.equal(parseBudget({ ...budget, hours: 4.9 })?.hours, 4);
 });

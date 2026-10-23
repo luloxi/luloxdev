@@ -17,7 +17,8 @@
     "test": "tsx --test tests/*.test.mts",
     "cf:build": "NEXT_BUILD_TARGET=cloudflare opennextjs-cloudflare build",
     "preview": "pnpm cf:build && opennextjs-cloudflare preview",
-    "deploy": "pnpm cf:build && opennextjs-cloudflare deploy"
+    "deploy": "pnpm cf:build && opennextjs-cloudflare deploy",
+    "audit:cursor": "node scripts/audit-cursor.mjs"
   },
   "dependencies": {
     "@tiptap/core": "^2.27.3",
@@ -53,6 +54,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "jsdom": "^30.1.3",
+    "playwright-core": "~1.60.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",

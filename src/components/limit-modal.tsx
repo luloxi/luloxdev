@@ -5,68 +5,83 @@ import { useEffect, useRef, useState } from "react";
 export const LIMIT_MODAL_SECONDS = 5;
 
 type Props = {
-  /** Changes on every trigger: restarts the single modal's countdown instead of stacking modals. */
+  /** Changes on every trigger (e.g. another paste): resets the single modal's lock to 5 s. */
   nonce: number;
-  kind: "trimmed" | "limit";
   title: string;
-  body: string;
   close: string;
-  countdown: (n: number) => string;
   onClose: () => void;
 };
 
-/** Over-the-limit notice: crimson dialog with a rotating rainbow border and a 5 s countdown ring. */
-export function LimitModal({ nonce, kind, title, body, close, countdown, onClose }: Props) {
+/**
+ * 280-character notice: crimson dialog, rotating CTA-rainbow border, countdown ring.
+ * Locked for 5 s (no button, Esc or outside tap); then "Entendido"/"Got it" enables and any of
+ * the three closes it. Centered on the visual viewport so it stays in view with the keyboard open.
+ */
+export function LimitModal({ nonce, title, close, onClose }: Props) {
   const box = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
   const [left, setLeft] = useState(LIMIT_MODAL_SECONDS);
+  const [vp, setVp] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const locked = left > 0;
+  const lockedRef = useRef(true);
+  useEffect(() => { lockedRef.current = locked; }, [locked]);
   const done = useRef(onClose);
   useEffect(() => { done.current = onClose; }, [onClose]);
+  const tryClose = () => { if (!lockedRef.current) done.current(); };
 
-  // (Re)start the countdown on every trigger.
+  // (Re)start the 5 s lock on every trigger.
   useEffect(() => {
     const start = Date.now();
-    const tick = () => {
-      const n = LIMIT_MODAL_SECONDS - Math.floor((Date.now() - start) / 1000);
-      if (n <= 0) done.current();
-      else setLeft(n);
-    };
-    const id = window.setInterval(tick, 250);
-    const first = requestAnimationFrame(() => setLeft(LIMIT_MODAL_SECONDS));
-    return () => { window.clearInterval(id); cancelAnimationFrame(first); };
+    const tick = () => setLeft(Math.max(0, LIMIT_MODAL_SECONDS - Math.floor((Date.now() - start) / 1000)));
+    const first = requestAnimationFrame(tick);
+    const id = window.setInterval(tick, 200);
+    return () => { cancelAnimationFrame(first); window.clearInterval(id); };
   }, [nonce]);
 
-  // Focus the close button, trap Tab inside, close on Esc.
+  // Locked: focus the dialog itself. Unlocked: focus the button.
   useEffect(() => {
-    btn.current?.focus({ preventScroll: true });
+    (locked ? box.current : btn.current)?.focus({ preventScroll: true });
+  }, [locked, nonce]);
+
+  // Follow the visual viewport (on-screen keyboard) so the dialog stays centered in what's visible.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const fit = () => setVp({ top: vv.offsetTop, left: vv.offsetLeft, width: vv.width, height: vv.height });
+    fit();
+    vv.addEventListener("resize", fit);
+    vv.addEventListener("scroll", fit);
+    return () => { vv.removeEventListener("resize", fit); vv.removeEventListener("scroll", fit); };
+  }, []);
+
+  // Esc closes only when unlocked; Tab never leaves the dialog.
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { e.preventDefault(); done.current(); return; }
+      if (e.key === "Escape") { e.preventDefault(); tryClose(); return; }
       if (e.key !== "Tab" || !box.current) return;
-      const items = box.current.querySelectorAll<HTMLElement>("button, [href], [tabindex]:not([tabindex='-1'])");
-      if (!items.length) return;
-      const first = items[0], last = items[items.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-      else if (!box.current.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+      e.preventDefault();
+      (lockedRef.current ? box.current : btn.current)?.focus();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
   return (
-    <div className="limit-modal-backdrop" onPointerDown={(e) => { if (e.target === e.currentTarget) done.current(); }}>
-      <div ref={box} className="limit-modal" role="dialog" aria-modal="true" aria-labelledby="limit-modal-title" aria-describedby="limit-modal-body" data-kind={kind}>
+    <div
+      className="limit-modal-backdrop"
+      style={vp ? { top: vp.top, left: vp.left, width: vp.width, height: vp.height, right: "auto", bottom: "auto" } : undefined}
+      onPointerDown={(e) => { if (e.target === e.currentTarget) tryClose(); }}
+    >
+      <div ref={box} tabIndex={-1} className="limit-modal" role="dialog" aria-modal="true" aria-labelledby="limit-modal-title" data-locked={locked}>
         <div className="limit-modal-inner">
-          <div className="limit-modal-ring" style={{ "--p": left / LIMIT_MODAL_SECONDS } as React.CSSProperties} aria-hidden>
+          <div className="limit-modal-ring" style={{ "--limit-p": left / LIMIT_MODAL_SECONDS } as React.CSSProperties} aria-hidden>
             <span className="limit-modal-ring-fill" />
             <span className="limit-modal-num">{left}</span>
           </div>
-          <div className="limit-modal-text">
-            <h2 id="limit-modal-title">{title}</h2>
-            <p id="limit-modal-body">{body}</p>
-            <p className="limit-modal-count" aria-live="polite">{countdown(left)}</p>
-          </div>
-          <button ref={btn} type="button" className="limit-modal-close" onClick={() => done.current()}>{close}</button>
+          <h2 id="limit-modal-title">{title}</h2>
+          <button ref={btn} type="button" className="limit-modal-close" disabled={locked} aria-label={locked ? `${close} (${left})` : close} onClick={tryClose}>
+            {locked ? left : close}
+          </button>
         </div>
       </div>
     </div>

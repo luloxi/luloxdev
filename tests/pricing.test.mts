@@ -59,3 +59,19 @@ test("urgency is US$100 per day in both modes, capped, off by default", () => {
   const l = estimate({ mode: "hourly", hours: 2, complexity: "low", extra: true, extraDays: 2 }).lines.find((x) => x.id === "extra");
   assert.deepEqual(l, { id: "extra", amount: 200, days: 2 });
 });
+
+test("hours input: digits only, clamped 1..max per mode", async () => {
+  const { clampHours, hoursDigits, maxHoursFor } = await import("../src/lib/pricing.ts");
+  assert.equal(hoursDigits("2.5"), "25");
+  assert.equal(hoursDigits("1e3"), "13");
+  assert.equal(hoursDigits("-4"), "4");
+  assert.equal(hoursDigits("+ 7 h"), "7");
+  assert.equal(hoursDigits("abc"), "");
+  assert.equal(hoursDigits("007"), "7");
+  assert.equal(clampHours("hourly", 9), 6);
+  assert.equal(clampHours("hourly", 0), 1);
+  assert.equal(clampHours("hourly", Number("")), 1);
+  assert.equal(clampHours("hourly", 3.7), 3);
+  assert.equal(clampHours("project", 999), maxHoursFor("project"));
+  assert.equal(maxHoursFor("hourly"), 6);
+});
