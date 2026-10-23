@@ -42,7 +42,8 @@ export function clampHours(mode: Mode, n: number): number {
 }
 
 /** Typed/pasted text -> digits only (no decimals, e, signs, spaces). "" when nothing usable. */
-export const hoursDigits = (raw: string) => raw.replace(/\D+/g, "").replace(/^0+(?=\d)/, "").slice(0, 3);
+// Whole hours: drop any decimal part ("2.5" → "2", not "25"), then keep digits only.
+export const hoursDigits = (raw: string) => raw.split(/[.,]/)[0].replace(/\D+/g, "").replace(/^0+(?=\d)/, "").slice(0, 3);
 
 export type Inputs = {
   mode: Mode;

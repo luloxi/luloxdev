@@ -62,8 +62,9 @@ test("urgency is US$100 per day in both modes, capped, off by default", () => {
 
 test("hours input: digits only, clamped 1..max per mode", async () => {
   const { clampHours, hoursDigits, maxHoursFor } = await import("../src/lib/pricing.ts");
-  assert.equal(hoursDigits("2.5"), "25");
+  assert.equal(hoursDigits("2.5"), "2");
   assert.equal(hoursDigits("1e3"), "13");
+  assert.equal(hoursDigits("3,9"), "3");
   assert.equal(hoursDigits("-4"), "4");
   assert.equal(hoursDigits("+ 7 h"), "7");
   assert.equal(hoursDigits("abc"), "");
