@@ -33,10 +33,8 @@ function GoogleMark({ className }: { className?: string }) {
   );
 }
 
-/** Sign-in card; the server passes ?error= so no Suspense/loading shell is needed. */
-export function SignInPanel({ error, next = "/blog" }: { error: string | null; next?: string }) {
-  const { t } = useLocale();
-
+/** Real Google sign-in button (Better Auth). `next` = internal path to land on after Google. */
+export function GoogleSignInButton({ next, label, testId }: { next: string; label: string; testId?: string }) {
   async function signInGoogle() {
     const origin = window.location.origin;
     try {
@@ -74,6 +72,25 @@ export function SignInPanel({ error, next = "/blog" }: { error: string | null; n
   }
 
   return (
+    <button
+      type="button"
+      onClick={() => void signInGoogle()}
+      className="sign-in-google-btn"
+      data-testid={testId}
+    >
+      <span className="sign-in-google-icon">
+        <GoogleMark />
+      </span>
+      <span className="sign-in-google-label">{label}</span>
+    </button>
+  );
+}
+
+/** Sign-in card; the server passes ?error= so no Suspense/loading shell is needed. */
+export function SignInPanel({ error, next = "/blog" }: { error: string | null; next?: string }) {
+  const { t } = useLocale();
+
+  return (
     <PageShell title={t.blog.signInTitle}>
       <div className="sign-in-plain">
         {error === "auth_not_configured" ||
@@ -91,16 +108,7 @@ export function SignInPanel({ error, next = "/blog" }: { error: string | null; n
           </p>
         ) : null}
 
-        <button
-          type="button"
-          onClick={() => void signInGoogle()}
-          className="sign-in-google-btn"
-        >
-          <span className="sign-in-google-icon">
-            <GoogleMark />
-          </span>
-          <span className="sign-in-google-label">{t.blog.signInGoogle}</span>
-        </button>
+        <GoogleSignInButton next={next} label={t.blog.signInGoogle} />
       </div>
     </PageShell>
   );

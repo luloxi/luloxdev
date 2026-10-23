@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { PageShell } from "@/components/page-shell";
 import { MagicHr } from "@/components/magic-hr";
 import { useIsAdmin } from "@/components/admin-context";
+import { GoogleSignInButton } from "@/components/views/sign-in-panel";
 import { useLocale } from "@/i18n/locale-provider";
 import { CODE_MAX, REFERRAL_PCT, checkCodeShape, formatCents, normalizeCode, type Currency, type Totals } from "@/lib/referrals";
 import type { MyReferral } from "@/lib/referrals-db";
@@ -21,8 +22,8 @@ const COPY = {
       ["Compartilo", "Pasá tu link, o armá el presupuesto en Contratar con tu código y mandáselo a tu cliente."],
       [`Ganá el ${PCT}`, `Cuando tu cliente abona, te llevás el ${PCT} de lo que pagó.`],
     ],
-    signIn: "Ingresá con Google para crear tu código",
-    signInHint: "Tu código queda atado a tu cuenta, así ves tus clientes y lo que vas sumando.",
+    signIn: "Entrar con Google",
+    signInHint: "Entrá con Google para crear tu código, compartir tu link y ver lo que vas sumando.",
     formTitle: "Creá tu código",
     name: "Nombre",
     email: "Email (de tu cuenta de Google)",
@@ -63,8 +64,8 @@ const COPY = {
       ["Share it", "Send your link, or build the quote on Hire me with your code and send it to your client."],
       [`Earn ${PCT}`, `When your client pays, you get ${PCT} of what they paid.`],
     ],
-    signIn: "Sign in with Google to create your code",
-    signInHint: "Your code is tied to your account, so you can see your clients and what you've earned.",
+    signIn: "Sign in with Google",
+    signInHint: "Sign in with Google to create your code, share your link and see what you've earned.",
     formTitle: "Create your code",
     name: "Name",
     email: "Email (from your Google account)",
@@ -117,22 +118,43 @@ export function ReferralsView({ viewer, mine, links }: { viewer: { name: string;
       ? { code: created.code, links: created.links, leads: 0, totals: null, active: true }
       : null;
 
+  const steps = (
+    <ol className="ref-steps">
+      {c.steps.map(([h, p], i) => (
+        <li key={h}>
+          <span className="ref-step-n" aria-hidden>{i + 1}</span>
+          <div>
+            <strong>{h}</strong>
+            <span>{p}</span>
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+
+  // Signed out: short pitch + the real Google button up top (no detour through /ingresar); steps below.
+  if (!viewer && !panel) {
+    return (
+      <PageShell title={title}>
+        <div className="ref" style={{ ["--cp-accent" as string]: "var(--section-referrals)" }}>
+          <p className="ref-lead">{c.lead}</p>
+          <div className="ref-signin" data-testid="ref-signin">
+            <p className="ref-hint">{c.signInHint}</p>
+            <GoogleSignInButton next={pathname || href("/referidos")} label={c.signIn} testId="ref-signin-google" />
+          </div>
+          <MagicHr />
+          {steps}
+        </div>
+      </PageShell>
+    );
+  }
+
   return (
     <PageShell title={title}>
       <div className="ref" style={{ ["--cp-accent" as string]: "var(--section-referrals)" }}>
         <p className="ref-lead">{c.lead}</p>
         <p className="ref-sub">{c.sub}</p>
-        <ol className="ref-steps">
-          {c.steps.map(([h, p], i) => (
-            <li key={h}>
-              <span className="ref-step-n" aria-hidden>{i + 1}</span>
-              <div>
-                <strong>{h}</strong>
-                <span>{p}</span>
-              </div>
-            </li>
-          ))}
-        </ol>
+        {steps}
         {isAdmin ? (
           <Link className="radm-btn ref-admin-link" href="/admin/referidos" data-testid="ref-admin-link">
             {locale === "en" ? "Referral register (admin)" : "Registro de referidos (admin)"}
@@ -141,16 +163,8 @@ export function ReferralsView({ viewer, mine, links }: { viewer: { name: string;
         <MagicHr />
         {panel ? (
           <MyPanel c={c} {...panel} quoteHref={href("/contratar")} locale={locale === "en" ? "en" : "es"} />
-        ) : viewer ? (
-          <SignupForm c={c} viewer={viewer} onCreated={setCreated} />
         ) : (
-          <div className="ref-signin">
-            <Link className="hire-btn ref-signin-btn" href={`${href("/ingresar")}?next=${encodeURIComponent(pathname || href("/referidos"))}`} data-testid="ref-signin">
-              <span className="hire-btn-label">{c.signIn}</span>
-              <span className="hire-btn-rainbow" aria-hidden />
-            </Link>
-            <p className="ref-hint">{c.signInHint}</p>
-          </div>
+          <SignupForm c={c} viewer={viewer!} onCreated={setCreated} />
         )}
       </div>
     </PageShell>
