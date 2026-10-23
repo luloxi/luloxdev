@@ -6,7 +6,8 @@ import { CALL_BOOKING_URL, site } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
 import { MagicHr } from "@/components/magic-hr";
 import { estimate, PRICING, type Complexity, type Mode } from "@/lib/pricing";
-import { MAX_MESSAGE } from "@/lib/hire-limits";
+import { charCount, clampMessage, MAX_MESSAGE } from "@/lib/hire-limits";
+import { LimitModal } from "@/components/limit-modal";
 
 const copy = {
   es: {
@@ -47,7 +48,7 @@ const copy = {
     cta: "Videollamada",
     write: "Escribime",
     contact: "Contacto",
-    form: { name: "Nombre", email: "Tu email", message: "Mensaje", ph: "Contame qué necesitás…", budget: "Presupuesto que se envía", send: "Enviar", sending: "Enviando…", limit: "Llegaste al límite de 280 caracteres.", agents: "Formulario de contacto: nombre, email y mensaje (hasta 280 caracteres). Para enviarlo hay que pasar la verificación de Cloudflare Turnstile.", trimmed: "Tu texto era más largo: lo recorté a 280 caracteres.", ok: "¡Listo! Te respondo a tu email.", err: { invalid_name: "Falta tu nombre.", invalid_email: "Revisá el email.", invalid_message: "El mensaje debe tener entre 1 y 280 caracteres.", rate_limited: "Demasiados envíos. Probá en un rato.", captcha_failed: "Falta la verificación anti-bots. Esperá el tilde y probá de nuevo.", default: "No se pudo enviar. Probá de nuevo." } as Record<string, string>, yes: "sí", no: "no" },
+    form: { name: "Nombre", email: "Tu email", message: "Mensaje", ph: "Contame qué necesitás…", budget: "Presupuesto que se envía", send: "Enviar", sending: "Enviando…", limitTitle: "¡Uy, te pasaste de 280!", limitTitleReached: "¡Tope de 280, justo!", limitTrimmed: "Tu texto superó los 280 caracteres, así que lo recorté justo ahí. Lo esencial entra, prometido.", limitReached: "Llegaste a los 280 caracteres: es el tope. Si querés contarme más, lo seguimos por email o en una llamada.", limitClose: "Entendido", limitCountdown: (n: number) => `Se cierra en ${n}…`, agents: "Formulario de contacto: nombre, email y mensaje (hasta 280 caracteres). Para enviarlo hay que pasar la verificación de Cloudflare Turnstile.",  ok: "¡Listo! Te respondo a tu email.", err: { invalid_name: "Falta tu nombre.", invalid_email: "Revisá el email.", invalid_message: "El mensaje debe tener entre 1 y 280 caracteres.", rate_limited: "Demasiados envíos. Probá en un rato.", captcha_failed: "Falta la verificación anti-bots. Esperá el tilde y probá de nuevo.", default: "No se pudo enviar. Probá de nuevo." } as Record<string, string>, yes: "sí", no: "no" },
   },
   en: {
     intro: "Your quote in seconds.",
@@ -87,7 +88,7 @@ const copy = {
     cta: "Video call",
     write: "Write me",
     contact: "Contact",
-    form: { name: "Name", email: "Your email", message: "Message", ph: "Tell me what you need…", budget: "Quote that will be sent", send: "Send", sending: "Sending…", limit: "You reached the 280-character limit.", agents: "Contact form: name, email and message (up to 280 characters). Sending it requires passing the Cloudflare Turnstile check.", trimmed: "Your text was longer: I trimmed it to 280 characters.", ok: "Done! I'll reply to your email.", err: { invalid_name: "Your name is missing.", invalid_email: "Check the email.", invalid_message: "Message must be 1–280 characters.", rate_limited: "Too many sends. Try again later.", captcha_failed: "Anti-bot check missing. Wait for the checkmark and try again.", default: "Couldn't send. Try again." } as Record<string, string>, yes: "yes", no: "no" },
+    form: { name: "Name", email: "Your email", message: "Message", ph: "Tell me what you need…", budget: "Quote that will be sent", send: "Send", sending: "Sending…", limitTitle: "Whoa, over 280!", limitTitleReached: "Bang on 280!", limitTrimmed: "Your text went past 280 characters, so I trimmed it right there. The good stuff fits, promise.", limitReached: "You hit 280 characters: that's the cap. Want to tell me more? Let's keep going by email or on a call.", limitClose: "Got it", limitCountdown: (n: number) => `Closing in ${n}…`, agents: "Contact form: name, email and message (up to 280 characters). Sending it requires passing the Cloudflare Turnstile check.",  ok: "Done! I'll reply to your email.", err: { invalid_name: "Your name is missing.", invalid_email: "Check the email.", invalid_message: "Message must be 1–280 characters.", rate_limited: "Too many sends. Try again later.", captcha_failed: "Anti-bot check missing. Wait for the checkmark and try again.", default: "Couldn't send. Try again." } as Record<string, string>, yes: "yes", no: "no" },
   },
 };
 
@@ -351,7 +352,8 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
   const [website, setWebsite] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "ok" | "error">("idle");
   const [err, setErr] = useState("");
-  const [trimmed, setTrimmed] = useState(false);
+  const [limitHit, setLimitHit] = useState<{ kind: "trimmed" | "limit"; nonce: number } | null>(null);
+  const msgRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     const res = new URLSearchParams(window.location.search).get("contacto");
     if (!res) return;
@@ -362,22 +364,20 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
     return () => cancelAnimationFrame(id);
   }, [f]);
   const { box: tsBox, token, reset: resetTs } = useTurnstile(open);
-  const used = [...message].length;
+  const used = charCount(message);
   const left = Math.max(0, MAX_MESSAGE - used);
   const atLimit = used >= MAX_MESSAGE;
-  // Hard limit in characters (code points, same as the server): typing or pasting past it gets cut.
+  // Hard limit by code point (same as the server). No native maxLength: it counts UTF-16 units
+  // (an emoji would count 2 there and 1 here). Going over or reaching it opens one modal; repeated
+  // pastes restart that modal's countdown instead of stacking new ones.
   const onMessage = (v: string) => {
-    const chars = [...v];
-    // Keep the "trimmed" warning while still at the limit; clear it once they delete something.
-    setTrimmed((prev) => (chars.length > MAX_MESSAGE ? true : chars.length < MAX_MESSAGE ? false : prev));
-    setMessage(chars.length > MAX_MESSAGE ? chars.slice(0, MAX_MESSAGE).join("") : v);
+    const r = clampMessage(message, v);
+    setMessage(r.value);
+    if (r.event) { const kind = r.event; setLimitHit((h) => ({ kind, nonce: (h?.nonce ?? 0) + 1 })); }
   };
-  // maxLength cuts pastes silently before onChange; detect it here to show the warning.
-  const onPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    const t = e.currentTarget;
-    const incoming = [...e.clipboardData.getData("text")].length;
-    const kept = [...t.value].length - [...t.value.slice(t.selectionStart, t.selectionEnd)].length;
-    if (kept + incoming > MAX_MESSAGE) setTrimmed(true);
+  const closeLimit = () => {
+    setLimitHit(null);
+    requestAnimationFrame(() => msgRef.current?.focus({ preventScroll: true }));
   };
   // Mobile: keep the focused field (and the limit alert under it) above the on-screen keyboard.
   const keepVisible = (e: React.FocusEvent<HTMLElement>) => {
@@ -407,7 +407,6 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
         setState("ok");
         reveal();
         setMessage("");
-        setTrimmed(false);
       } else {
         setState("error");
         setErr(f.err[j.error ?? ""] ?? f.err.default);
@@ -436,10 +435,9 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
       </div>
       <label className="hire-form-field" htmlFor="hire-message">
         <span className="hire-form-msg-label">
-          {f.message} <output htmlFor="hire-message" className={`hire-form-count${atLimit ? " is-over" : left <= 20 ? " is-low" : ""}`}>{left}</output>
+          {f.message} <output id="hire-message-count" htmlFor="hire-message" className={`hire-form-count${atLimit ? " is-over" : left <= 20 ? " is-low" : ""}`}>{left}</output>
         </span>
-        <textarea id="hire-message" name="message" required rows={4} maxLength={MAX_MESSAGE} autoComplete="off" enterKeyHint="send" placeholder={f.ph} value={message} aria-describedby="hire-message-limit" onFocus={keepVisible} onPaste={onPaste} onChange={(e) => onMessage(e.target.value)} />
-        <span id="hire-message-limit" className="hire-form-limit" role="alert" aria-live="assertive">{trimmed ? f.trimmed : atLimit ? f.limit : ""}</span>
+        <textarea ref={msgRef} id="hire-message" name="message" required rows={4} autoComplete="off" enterKeyHint="send" placeholder={f.ph} value={message} aria-describedby="hire-message-count" onFocus={keepVisible} onChange={(e) => onMessage(e.target.value)} />
       </label>
       {/* Honeypot: odd name so browsers never autofill it. */}
       <label className="hire-hp" aria-hidden="true">
@@ -468,6 +466,17 @@ function HireForm({ open, c, budget, rows }: { open: boolean; c: Copy; budget: R
         <p ref={status} className="hire-form-status" role="status">{state === "ok" ? f.ok : state === "error" ? err : ""}</p>
       </div>
     </form>
+    {limitHit ? (
+      <LimitModal
+        nonce={limitHit.nonce}
+        kind={limitHit.kind}
+        title={limitHit.kind === "trimmed" ? f.limitTitle : f.limitTitleReached}
+        body={limitHit.kind === "trimmed" ? f.limitTrimmed : f.limitReached}
+        close={f.limitClose}
+        countdown={f.limitCountdown}
+        onClose={closeLimit}
+      />
+    ) : null}
     </div>
   );
 }

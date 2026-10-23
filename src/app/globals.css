@@ -3,6 +3,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  /* CTA rainbow (Contratar / Escribime buttons, limit modal border). */
+  --cta-rainbow: #ff3b3b, #ff9f1c, #ffe14d, #7CFF3A, #2ec5ff, #8a5cff, #ff4fd8, #ff3b3b;
   --background: #120708;
   --foreground: #ffecef;
   --muted: #b59095;
@@ -4257,7 +4259,7 @@ body.ie-off .ie-row-pencil { display: none; }
 .hire-btn-arrow { transition: transform .2s ease; }
 .hire-btn:hover .hire-btn-arrow { transform: translateX(4px); }
 .hire-btn-rainbow { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: -1; pointer-events: none;
-  background: linear-gradient(90deg, #ff3b3b, #ff9f1c, #ffe14d, #7CFF3A, #2ec5ff, #8a5cff, #ff4fd8, #ff3b3b); background-size: 200% 100%;
+  background: linear-gradient(90deg, var(--cta-rainbow)); background-size: 200% 100%;
   animation: hire-btn-rainbow 2.4s linear infinite; }
 @keyframes hire-btn-rainbow { to { background-position: -200% 0; } }
 @keyframes hire-btn-glow { 50% { box-shadow: 0 0 20px 4px color-mix(in srgb, var(--snot) 95%, transparent), 0 0 56px 14px color-mix(in srgb, var(--snot) 55%, transparent); } }
@@ -4310,11 +4312,36 @@ body.ie-off .ie-row-pencil { display: none; }
 .hire-total strong { white-space: nowrap; }
 
 /* Contact form: limit alert, magic divider before Enviar, Enviar uses the Contratar/Escribime button style. */
-.hire-form-limit { min-height: 1.2em; font-size: .8rem; font-weight: 700; color: #e5484d; }
-.hire-form-limit:empty { min-height: 0; }
 .hire-form-hr { margin: .4rem 0 .2rem !important; }
 .hire-form-actions { flex-direction: column; align-items: stretch; }
 .hire-form .hire-form-send.hire-btn { cursor: pointer; width: 100%; padding: .95rem 1.6rem 1.05rem; border-radius: 999px; font-size: 1.05rem; color: #fff; }
 .hire-form .hire-form-send.hire-btn:disabled { cursor: not-allowed; opacity: .55; filter: saturate(.6); animation: none; transform: none; }
 /* Mobile: leave room for the on-screen keyboard and the alert under the message. */
 .hire-form-field input, .hire-form-field textarea { scroll-margin-bottom: 6rem; }
+
+/* /contratar: 280-character limit modal. Crimson card, rotating CTA-rainbow border, 5 s countdown ring.
+   Same crimson in both themes; text is white/pale pink (≥ 7:1 on #8f001c). */
+@property --limit-ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@property --p { syntax: "<number>"; inherits: true; initial-value: 1; }
+.limit-modal-backdrop { position: fixed; inset: 0; z-index: 200; display: flex; justify-content: center; align-items: flex-start;
+  padding: max(4.5rem, env(safe-area-inset-top)) 1rem 1rem; background: rgb(10 2 4 / .55); backdrop-filter: blur(2px); }
+.limit-modal { --crimson: #8f001c; position: relative; width: min(26rem, 100%); padding: 3px; border-radius: 18px;
+  background: conic-gradient(from var(--limit-ang), var(--cta-rainbow)); animation: limit-spin 3s linear infinite;
+  box-shadow: 0 18px 50px -12px rgb(143 0 28 / .7); }
+.limit-modal-inner { display: grid; grid-template-columns: auto 1fr; gap: .9rem 1rem; align-items: center; padding: 1.1rem 1.15rem 1rem;
+  border-radius: 15px; background: linear-gradient(160deg, #a50021, var(--crimson)); color: #fff; }
+.limit-modal-text h2 { margin: 0 0 .3rem; font-family: var(--font-orbitron), var(--font-display); font-size: 1.02rem; letter-spacing: .04em; line-height: 1.25; color: #fff; }
+.limit-modal-text p { margin: 0; font-size: .92rem; line-height: 1.45; color: #ffe9ee; }
+.limit-modal-text .limit-modal-count { margin-top: .35rem; font-family: var(--font-mono, monospace); font-size: .78rem; color: #ffd3dc; }
+.limit-modal-ring { position: relative; width: 3.2rem; height: 3.2rem; border-radius: 50%; display: grid; place-items: center;
+  background: rgb(255 255 255 / .16); transition: --p 1s linear; }
+.limit-modal-ring-fill { position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(#fff calc(var(--p) * 360deg), transparent 0);
+  -webkit-mask: radial-gradient(circle, transparent 58%, #000 60%); mask: radial-gradient(circle, transparent 58%, #000 60%); }
+.limit-modal-num { position: relative; font-family: var(--font-orbitron), var(--font-display); font-weight: 800; font-size: 1.15rem; color: #fff; }
+.limit-modal-close { grid-column: 1 / -1; justify-self: end; font: inherit; font-weight: 800; letter-spacing: .04em; cursor: pointer;
+  padding: .55rem 1.2rem; border-radius: 999px; border: 2px solid #fff; background: #fff; color: #8f001c; }
+.limit-modal-close:hover { background: #ffe9ee; }
+.limit-modal-close:focus-visible { outline: 3px solid #ffe14d; outline-offset: 3px; }
+@keyframes limit-spin { to { --limit-ang: 360deg; } }
+@media (prefers-reduced-motion: reduce) { .limit-modal { animation: none; } .limit-modal-ring { transition: none; } }
