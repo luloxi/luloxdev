@@ -5,7 +5,7 @@ import { pastProjectIds } from "@/content/projects";
 import { getPostBySlug, getPostBySlugEn } from "@/lib/blog";
 import { EN_PREFIX, LOCALE_HEADER, enToEsPath, localeFromPath } from "@/lib/routes";
 import type { Locale } from "@/i18n/types";
-import { editModeFromCookie } from "@/lib/edit-mode";
+import { editModeFromCookie, mayLookUpDrafts } from "@/lib/edit-mode";
 import { isPathHidden, sectionForPath } from "@/lib/site-sections";
 import { isAdminHeaders, loadSiteOrder } from "@/lib/site-order";
 import { getDb } from "@/lib/db";
@@ -135,7 +135,9 @@ async function route(request: NextRequest): Promise<NextResponse> {
   const enBlog = pathname.match(/^\/en\/blog\/([^/]+)\/?$/);
   if (enBlog) {
     const slug = decodeURIComponent(enBlog[1]);
-    const admin = Boolean(getSessionCookie(request));
+    // Drafts only for the allowlisted admin with edit mode ON (same as /blog): a signed-in
+    // non-admin gets exactly what a visitor gets, so no redirect can leak a draft's slug.
+    const admin = await mayLookUpDrafts(Boolean(getSessionCookie(request)), request.headers.get("cookie"), () => isAdminHeaders(request.headers));
     const byEn = await getPostBySlugEn(slug, { includeDrafts: admin });
     if (byEn) return rewrite(request, "en", `/blog/${encodeURIComponent(byEn.slug)}`);
     // Spanish slug under /en: 301 to the English slug (or serve it if the post has none yet).
@@ -145,7 +147,7 @@ async function route(request: NextRequest): Promise<NextResponse> {
         ? redirect(request, `${EN_PREFIX}/blog/${encodeURIComponent(byEs.slugEn)}`)
         : rewrite(request, "en", `/blog/${encodeURIComponent(byEs.slug)}`);
     }
-    // A signed-in admin may open a draft; the page checks the allowlist.
+    // Admin with edit mode ON: let the page open the draft (it re-checks).
     return admin ? rewrite(request, "en", `/blog/${encodeURIComponent(slug)}`) : notFoundRewrite(request, "en");
   }
 

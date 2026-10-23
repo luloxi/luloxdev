@@ -26,3 +26,20 @@ test("cookie written by the toggle round-trips", () => {
     assert.equal(editModeFromCookie(c.split(";")[0]), on);
   }
 });
+
+test("/en/blog draft lookup: only the admin with edit mode ON (no leak to signed-in non-admins)", async () => {
+  const { mayLookUpDrafts } = await import("../src/lib/edit-mode.ts");
+  let calls = 0;
+  const admin = (v: boolean) => async () => { calls++; return v; };
+  // Visitor (no session cookie): never asks the allowlist, no drafts.
+  assert.equal(await mayLookUpDrafts(false, "", admin(true)), false);
+  // Signed-in user who isn't on the allowlist: no drafts.
+  assert.equal(await mayLookUpDrafts(true, "lulox-edit-mode=on", admin(false)), false);
+  // Admin with edit mode OFF: like a visitor, allowlist not even checked.
+  const before = calls;
+  assert.equal(await mayLookUpDrafts(true, "lulox-edit-mode=off", admin(true)), false);
+  assert.equal(calls, before);
+  // Admin with edit mode ON (default when the cookie is missing).
+  assert.equal(await mayLookUpDrafts(true, "lulox-edit-mode=on", admin(true)), true);
+  assert.equal(await mayLookUpDrafts(true, null, admin(true)), true);
+});

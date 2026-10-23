@@ -18,3 +18,17 @@ export function canSeeDrafts(isAdmin: boolean, cookieHeader: string | null | und
 export function editModeCookie(on: boolean): string {
   return `${EDIT_MODE_KEY}=${on ? "on" : "off"}; Path=/; Max-Age=31536000; SameSite=Lax`;
 }
+
+/**
+ * Proxy-side draft gate (/en/blog/<slug>): same rule as /blog (admin AND edit mode ON).
+ * The allowlist check (isAdmin) only runs when there is a session cookie and edit mode
+ * isn't off, so visitors and plain signed-in users never trigger a draft lookup.
+ */
+export async function mayLookUpDrafts(
+  hasSessionCookie: boolean,
+  cookieHeader: string | null | undefined,
+  isAdmin: () => Promise<boolean>,
+): Promise<boolean> {
+  if (!hasSessionCookie || !editModeFromCookie(cookieHeader)) return false;
+  return isAdmin();
+}
