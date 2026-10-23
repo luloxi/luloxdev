@@ -108,19 +108,17 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div>
-          <CpRow
-            href={linkedInHref}
-            label={about.linkedInCta}
-            accent="#0A66C2"
-            Icon={LinkedInIcon}
-            iconClass="text-[#0A66C2]"
-          />
-        </div>
-
-        <section>
-          <h2 className="cp-heading">{t.tastes.title}</h2>
+        <section aria-label={t.tastes.title}>
           <div className="cp-list">
+            <CpRow
+              href={linkedInHref}
+              label={about.linkedInCta}
+              detail={about.linkedInDetail}
+              accent="#0A66C2"
+              Icon={LinkedInIcon}
+              iconClass="text-[#0A66C2]"
+              iconSize="lg"
+            />
             {platforms.map((p) => (
               <CpRow
                 key={p.id}

@@ -765,6 +765,7 @@
 .cp-row {
   --cp-accent: var(--accent);
   position: relative;
+  cursor: pointer;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
@@ -4364,5 +4365,5 @@ input[type="range"], input[type="checkbox"], input[type="radio"], input[type="su
 input[type="range"]::-webkit-slider-thumb { cursor: pointer; }
 input[type="range"]::-moz-range-thumb { cursor: pointer; }
 :is(button, input, select, textarea, [role="button"], [role="radio"], [role="switch"])[disabled],
-:is(button, input, select, textarea, [role="button"], [role="radio"], [role="switch"])[aria-disabled="true"],
+[aria-disabled="true"],
 fieldset:disabled :is(button, input, select, textarea, label) { cursor: not-allowed; }

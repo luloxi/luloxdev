@@ -64,7 +64,8 @@ export const messages = {
        * and records ("job:N" = timeline[N]). Story order follows the body; this places the jobs.
        */
       layout: "story:0,story:1,job:2,story:2,job:1,story:3,job:0,story:4,story:5",
-      linkedInCta: "Ver mi LinkedIn",
+      linkedInCta: "LinkedIn",
+      linkedInDetail: "Mi experiencia laboral y contactos profesionales",
     },
     projects: {
       title: "Proyectos",
@@ -294,7 +295,8 @@ export const messages = {
        * and records ("job:N" = timeline[N]). Story order follows the body; this places the jobs.
        */
       layout: "story:0,story:1,job:2,story:2,job:1,story:3,job:0,story:4,story:5",
-      linkedInCta: "View my LinkedIn",
+      linkedInCta: "LinkedIn",
+      linkedInDetail: "My work history and professional network",
     },
     projects: {
       title: "Projects",
