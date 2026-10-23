@@ -50,14 +50,14 @@ test("calculator defaults: low, friendly first price, nothing extra selected", (
   assert.equal(estimate({ mode: "hourly", hours: hourly.hours, complexity: project.complexity, extra: false, onSite: false }).total, 20);
 });
 
-test("urgency is US$100 per day in both modes, capped, off by default", () => {
-  assert.equal(estimate({ mode: "hourly", hours: 2, complexity: "low", extra: true, extraDays: 3 }).total, 20 + 300);
+test("urgency: flat US$100 (one day) in hourly mode, per day in project mode, capped, off by default", () => {
+  assert.equal(estimate({ mode: "hourly", hours: 2, complexity: "low", extra: true, extraDays: 3 }).total, 20 + 100);
   assert.equal(estimate({ mode: "hourly", hours: 2, complexity: "low", extra: true }).total, 20 + 100);
   assert.equal(estimate({ mode: "project", hours: 4, complexity: "low", extra: true, extraDays: 2, onSite: true, onSiteDays: 2 }).total, 40 + 100 + 200);
   assert.equal(estimate({ mode: "project", hours: 4, complexity: "low", extra: true, extraDays: 99 }).total, 40 + 1000);
   assert.equal(estimate({ mode: "project", hours: 4, complexity: "low", extra: false, extraDays: 5 }).total, 40);
   const l = estimate({ mode: "hourly", hours: 2, complexity: "low", extra: true, extraDays: 2 }).lines.find((x) => x.id === "extra");
-  assert.deepEqual(l, { id: "extra", amount: 200, days: 2 });
+  assert.deepEqual(l, { id: "extra", amount: 100, days: 1 });
 });
 
 test("hours input: digits only, clamped 1..max per mode", async () => {

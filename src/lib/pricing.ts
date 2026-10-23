@@ -1,7 +1,7 @@
 /**
  * Lulox's pricing method (public, no client data). Edit the numbers here.
- *  - Per project: (hours × hourly complexity) + on-site/day + travel/day + urgency/day
- *  - Per hour: (hours × rate) + on-site + travel + urgency/day
+ *  - Per project: (hours × hourly complexity) + on-site/day + travel/day + (urgency × day)
+ *  - Per hour: (hours × rate) + on-site + travel + urgency (hourly work counts as one day)
  */
 export type Complexity = "low" | "medium" | "high";
 export type Mode = "project" | "hourly";
@@ -12,7 +12,7 @@ export const PRICING = {
   onSiteSurcharge: 25,
   /** Always added with on-site work; may vary with distance. */
   travel: 25,
-  /** Urgency surcharge, charged per required day (both modes). */
+  /** Urgency surcharge: per required day in project mode, flat (one day) in hourly mode. */
   extra: 100,
   maxUrgencyDays: 10,
   /** Project size presets in hours (research, build, testing, polish, feedback, fixes, delivery). */
@@ -51,7 +51,7 @@ export type Inputs = {
   complexity: Complexity;
   /** Urgency toggle (field kept as `extra`). */
   extra: boolean;
-  /** Urgency days (each adds PRICING.extra). Defaults to 1. */
+  /** Project mode: urgency days (each adds PRICING.extra). Hourly mode always uses 1. */
   extraDays?: number;
   onSite?: boolean;
   /** Project mode: on-site days (each adds surcharge + travel). */
@@ -72,7 +72,7 @@ export function estimate(i: Inputs, p = PRICING): { lines: Line[]; total: number
     lines.push({ id: "travel", amount: p.travel * days, days });
   }
   if (i.extra) {
-    const days = Math.max(1, Math.min(p.maxUrgencyDays, Math.round(i.extraDays ?? 1) || 1));
+    const days = i.mode === "project" ? Math.max(1, Math.min(p.maxUrgencyDays, Math.round(i.extraDays ?? 1) || 1)) : 1;
     lines.push({ id: "extra", amount: p.extra * days, days });
   }
   const total = lines.reduce((a, l) => a + l.amount, 0);

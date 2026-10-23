@@ -139,9 +139,9 @@ test("default calculator quote is recomputed server-side to the same totals", as
   }
 });
 
-test("urgency days are recomputed server-side in both modes; client totals ignored", async () => {
+test("urgency: server forces 1 day in hourly mode, recomputes project days; client totals ignored", async () => {
   for (const [b, total, line] of [
-    [{ mode: "hourly", hours: 2, complexity: "low", onSite: false, days: 0, extra: true, extraDays: 3, total: 1 }, "US$ 320", "Urgencia: sí, 3 días"],
+    [{ mode: "hourly", hours: 2, complexity: "low", onSite: false, days: 0, extra: true, extraDays: 3, total: 1 }, "US$ 120", "Urgencia: sí\n"],
     [{ mode: "project", hours: 4, complexity: "low", onSite: true, days: 2, extra: true, extraDays: 2, total: 9999 }, "US$ 340", "Urgencia: sí, 2 días"],
     [{ mode: "project", hours: 4, complexity: "low", onSite: false, days: 1, extra: true, extraDays: 999 }, "US$ 1,040", "Urgencia: sí, 10 días"],
   ] as const) {
@@ -150,12 +150,15 @@ test("urgency days are recomputed server-side in both modes; client totals ignor
     const text = String((sent[0] as { m: { text: string } }).m.text);
     assert.match(text, new RegExp(`Total estimado: ${total.replace("$", "\\$")}\\n`));
     assert.ok(text.includes(line), text);
+    if (b.mode === "hourly") assert.ok(!/Urgencia \(|días?\b/.test(text), text);
   }
 });
 
 test("parseBudget: urgency off → 0 days; missing days → 1", () => {
   assert.equal(parseBudget({ ...budget, extra: false, extraDays: 5 })!.extraDays, 0);
   assert.equal(parseBudget({ ...budget, extra: true })!.extraDays, 1);
+  assert.equal(parseBudget({ ...budget, mode: "hourly", extra: true, extraDays: 7 })!.extraDays, 1);
+  assert.equal(parseBudget({ ...budget, mode: "project", hours: 4, extra: true, extraDays: 7 })!.extraDays, 7);
 });
 
 test("native form post: fields map to the JSON shape, Turnstile token included", () => {

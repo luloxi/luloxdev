@@ -44,8 +44,8 @@ const copy = {
     perHour: "/h",
     note: `Estimación orientativa, no es un presupuesto final. Lo ajustamos juntos en la llamada. Presupuestos válidos ${PRICING.validityDays} días; 50% de anticipo y 50% contra entrega.`,
     formula: "Cómo calculo",
-    fProject: "(horas × complejidad) + presencial/día + viático/día + urgencia/día",
-    fHourly: "(horas × complejidad) + presencial + viático + urgencia/día",
+    fProject: "(horas × complejidad) + presencial/día + viático/día + (urgencia × día)",
+    fHourly: "(horas × complejidad) + presencial + viático + urgencia",
     cta: "Videollamada",
     write: "Escribime",
     contact: "Contacto",
@@ -85,8 +85,8 @@ const copy = {
     perHour: "/h",
     note: `Ballpark estimate, not a final quote. We fine-tune it together on the call. Quotes are valid for ${PRICING.validityDays} days; 50% upfront, 50% on delivery.`,
     formula: "How I calculate",
-    fProject: "(hours × complexity) + on-site/day + travel/day + urgency/day",
-    fHourly: "(hours × complexity) + on-site + travel + urgency/day",
+    fProject: "(hours × complexity) + on-site/day + travel/day + (urgency × day)",
+    fHourly: "(hours × complexity) + on-site + travel + urgency",
     cta: "Video call",
     write: "Write me",
     contact: "Contact",
@@ -246,8 +246,8 @@ export function HireCalculator() {
               <button type="button" aria-label="+" disabled={days >= PRICING.maxOnSiteDays} onClick={() => setDays((d) => Math.min(PRICING.maxOnSiteDays, d + 1))}>+</button>
             </div>
           ) : null}
-          <Toggle on={extra} set={setExtra} label={c.extra} sub={`+US$ ${PRICING.extra} / ${c.dayUnit[0]}`} />
-          {extra ? (
+          <Toggle on={extra} set={setExtra} label={c.extra} sub={`+US$ ${PRICING.extra}${mode === "project" ? ` × ${c.dayUnit[0]}` : ""}`} />
+          {mode === "project" && extra ? (
             <div className="hire-stepper" role="group" aria-label={c.extraDays}>
               <span className="hire-stepper-label">{c.extraDays}</span>
               <button type="button" aria-label="−" disabled={extraDays <= 1} onClick={() => setExtraDays((d) => Math.max(1, d - 1))}>−</button>
@@ -270,7 +270,7 @@ export function HireCalculator() {
                 {c.lines[l.id]}
                 {l.id === "work" ? <em> {hours}h × US$ {PRICING.rates[complexity]}</em> : null}
                 {l.id === "discount" ? <em> -{l.pct}%</em> : null}
-                {l.days && (mode === "project" || l.id === "extra") ? <em> {l.days} {c.dayUnit[l.days === 1 ? 0 : 1]} × US$ {l.amount / l.days}</em> : null}
+                {l.days && mode === "project" ? <em> {l.days} {c.dayUnit[l.days === 1 ? 0 : 1]} × US$ {l.amount / l.days}</em> : null}
               </span>
               <span>{money(l.amount)}</span>
             </li>
@@ -300,13 +300,13 @@ export function HireCalculator() {
         <HireForm
           open={formOpen}
           c={c}
-          budget={{ mode, hours: Math.min(hours, maxH), complexity, onSite, days, extra, extraDays }}
+          budget={{ mode, hours: Math.min(hours, maxH), complexity, onSite, days, extra, extraDays: mode === "project" ? extraDays : 1 }}
           rows={[
             [c.total, money(r.total)],
             [c.mode, c.modes[mode]],
             [c.hours, `${Math.min(hours, maxH)}h · ${c.cx[complexity][0]} (US$ ${PRICING.rates[complexity]}${c.perHour})`],
             [c.onSite, onSite ? (mode === "project" ? `${c.form.yes}, ${days} ${c.dayUnit[days === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
-            [c.extra, extra ? `${c.form.yes}, ${extraDays} ${c.dayUnit[extraDays === 1 ? 0 : 1]}` : c.form.no],
+            [c.extra, extra ? (mode === "project" ? `${c.form.yes}, ${extraDays} ${c.dayUnit[extraDays === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
           ]}
         />
         <a className="hire-act hire-act-call" href={CALL_BOOKING_URL} target="_blank" rel="noopener noreferrer" data-testid="hire-call-cta">

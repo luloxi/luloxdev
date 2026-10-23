@@ -40,7 +40,7 @@ export function parseBudget(v: unknown): Budget | null {
   const onSite = b.onSite === true;
   const days = mode === "project" && onSite ? Math.max(1, Math.min(PRICING.maxOnSiteDays, Math.round(Number(b.days) || 1))) : onSite ? 1 : 0;
   const extra = b.extra === true;
-  const extraDays = extra ? Math.max(1, Math.min(PRICING.maxUrgencyDays, Math.round(Number(b.extraDays) || 1))) : 0;
+  const extraDays = !extra ? 0 : mode !== "project" ? 1 : Math.max(1, Math.min(PRICING.maxUrgencyDays, Math.round(Number(b.extraDays) || 1)));
   return { mode, hours, complexity, onSite, days, extra, extraDays };
 }
 
@@ -60,9 +60,9 @@ export function budgetLines(b: Budget): { summary: string[]; lines: [string, str
     `Modalidad: ${LABEL.mode[b.mode]}`,
     `Horas: ${b.hours}h · Complejidad: ${LABEL.cx[b.complexity]} (US$ ${PRICING.rates[b.complexity]}/h)`,
     `Presencial: ${b.onSite ? (b.mode === "project" ? `sí, ${b.days} ${b.days === 1 ? "día" : "días"}` : "sí") : "no"}`,
-    `Urgencia: ${b.extra ? `sí, ${b.extraDays} ${b.extraDays === 1 ? "día" : "días"}` : "no"}`,
+    `Urgencia: ${b.extra ? (b.mode === "project" ? `sí, ${b.extraDays} ${b.extraDays === 1 ? "día" : "días"}` : "sí") : "no"}`,
   ];
-  const lines = r.lines.map((l): [string, string] => [`${LABEL.lines[l.id]}${l.id === "discount" ? ` (-${l.pct}%)` : ""}${l.days && (l.id === "extra" || b.mode === "project") ? ` (${l.days} ${l.days === 1 ? "día" : "días"})` : ""}`, usd(l.amount)]);
+  const lines = r.lines.map((l): [string, string] => [`${LABEL.lines[l.id]}${l.id === "discount" ? ` (-${l.pct}%)` : ""}${l.days && b.mode === "project" ? ` (${l.days} ${l.days === 1 ? "día" : "días"})` : ""}`, usd(l.amount)]);
   return { summary, lines, total: usd(r.total), deposit: usd(r.deposit) };
 }
 
