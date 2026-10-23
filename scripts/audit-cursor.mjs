@@ -6,7 +6,11 @@ import { chromium } from "playwright-core";
 
 const BASE = process.env.AUDIT_URL ?? "http://localhost:3000";
 const WAIT = process.env.AUDIT_WAIT ?? "networkidle"; // "load" for sites with long-polling scripts
-const ROUTES = process.env.AUDIT_ROUTES ? process.env.AUDIT_ROUTES.split(",") : ["/", "/blog", "/contratar", "/sobre-mi", "/proyectos", "/contacto", "/tastes", "/privacidad", "/ingresar", "/rothko", "/no-existe"];
+// Spanish at the root, English under /en (the URL decides the language, see src/lib/routes.ts).
+const ROUTES = process.env.AUDIT_ROUTES ? process.env.AUDIT_ROUTES.split(",") : [
+  "/", "/blog", "/contratar", "/sobre-mi", "/proyectos", "/proyectos/mochi", "/contacto", "/tastes", "/privacidad", "/ingresar", "/rothko", "/no-existe",
+  "/en", "/en/blog", "/en/hire", "/en/about", "/en/projects", "/en/projects/mochi", "/en/contact", "/en/privacy", "/en/sign-in", "/en/no-existe",
+];
 
 const probe = () => {
   const SEL = 'a[href], button, [role=button], [role=radio], [role=switch], [role=tab], [role=checkbox], [onclick], label, summary, select, input:not([type=hidden]), [tabindex]:not([tabindex="-1"])';
@@ -33,17 +37,19 @@ const probe = () => {
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "/usr/bin/google-chrome", args: ["--no-sandbox"] });
 const ctx0 = await browser.newContext();
 const routes = [...ROUTES];
-if (!process.env.AUDIT_ROUTES) { // add every blog article linked from /blog
+if (!process.env.AUDIT_ROUTES) { // add every blog article linked from /blog and /en/blog
   const p = await ctx0.newPage();
-  await p.goto(BASE + "/blog", { waitUntil: WAIT });
-  routes.push(...new Set(await p.$$eval('a[href^="/blog/"]', (as) => as.map((a) => a.getAttribute("href")))));
+  for (const list of ["/blog", "/en/blog"]) {
+    await p.goto(BASE + list, { waitUntil: WAIT });
+    routes.push(...new Set(await p.$$eval('a[href^="/blog/"], a[href^="/en/blog/"]', (as) => as.map((a) => a.getAttribute("href")))));
+  }
   await ctx0.close();
 }
 const findings = new Map();
 let checked = 0;
-for (const locale of ["es", "en"]) for (const theme of ["light", "dark"]) {
+for (const theme of ["light", "dark"]) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-  await ctx.addCookies([{ name: "lulox-locale", value: locale, url: BASE }, { name: "lulox-theme", value: theme, url: BASE }]);
+  await ctx.addCookies([{ name: "lulox-theme", value: theme, url: BASE }]);
   const p = await ctx.newPage();
   for (const route of routes) {
     await p.goto(BASE + route, { waitUntil: WAIT });
@@ -56,11 +62,11 @@ for (const locale of ["es", "en"]) for (const theme of ["light", "dark"]) {
     await p.waitForTimeout(600);
     const b2 = await p.evaluate(probe);
     checked += a.checked + b2.checked;
-    for (const b of [...a.bad, ...b2.bad]) findings.set(`${route} :: ${b}`, (findings.get(`${route} :: ${b}`) ?? new Set()).add(`${locale}/${theme}`));
+    for (const b of [...a.bad, ...b2.bad]) findings.set(`${route} :: ${b}`, (findings.get(`${route} :: ${b}`) ?? new Set()).add(theme));
   }
   await ctx.close();
 }
 await browser.close();
 for (const [k, v] of findings) console.log(`✖ ${k}  [${[...v].join(", ")}]`);
-console.log(findings.size ? `\n${findings.size} element(s) without the right cursor` : `✔ cursor audit: ${routes.length} routes × 4 (ES/EN × light/dark), ${checked} element checks, clean`);
+console.log(findings.size ? `\n${findings.size} element(s) without the right cursor` : `✔ cursor audit: ${routes.length} routes (ES + /en) × 2 (light/dark), ${checked} element checks, clean`);
 process.exit(findings.size ? 1 : 0);

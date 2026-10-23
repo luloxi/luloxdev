@@ -3,7 +3,7 @@ import { Orbitron, Space_Grotesk } from "next/font/google";
 import { CosmicBg } from "@/components/cosmic-bg";
 import { SiteControls } from "@/components/site-controls";
 import { LocaleProvider } from "@/i18n/locale-provider";
-import { getMetadataLocale, getServerPrefs } from "@/lib/prefs";
+import { getRequestLocale, getServerPrefs } from "@/lib/prefs";
 import { getCopyOverrides } from "@/lib/site-copy";
 import { isAdminRequest } from "@/lib/admin-request";
 import { AdminProvider } from "@/components/admin-context";
@@ -11,6 +11,7 @@ import { PREFS_HEAD_SCRIPT } from "@/lib/prefs-shared";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { site } from "@/content/site";
 import { buildPageMetadata } from "@/lib/page-metadata";
+import { pathPair } from "@/lib/routes";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -90,15 +91,15 @@ const baseMetadata: Metadata = {
   },
 };
 
-/** Home share card stays "Lulox"; description is always ES (see getMetadataLocale). */
+/** Home share card stays "Lulox"; description in the URL's language (/ = es, /en = en). */
 const HOME_DESCRIPTION = {
   es: site.description,
   en: "I'm Luciano Oliva Bianco (Lulox). I research and build with AI, blockchain, tokenization and agentic commerce.",
 } as const;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getMetadataLocale();
-  const home = buildPageMetadata(locale, "/", { title: null, description: HOME_DESCRIPTION[locale] });
+  const locale = await getRequestLocale();
+  const home = buildPageMetadata(locale, pathPair("/"), { title: null, description: HOME_DESCRIPTION[locale] });
   // Keep the "%s | Lulox" template for routes that only set a plain title.
   return { ...baseMetadata, ...home, title: baseMetadata.title };
 }
@@ -117,7 +118,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Per-request: language + theme from cookies (else Accept-Language / dark).
+  // Per-request: language from the URL (proxy.ts header), theme from its cookie (else dark).
   const [{ locale, theme }, overrides, isAdmin] = await Promise.all([
     getServerPrefs(),
     getCopyOverrides(),

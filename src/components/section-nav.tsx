@@ -20,7 +20,7 @@ const accents: Record<SectionId, string> = {
  * Half-width angular tiles for every section (including tastes & contact).
  */
 export function SectionNav() {
-  const { t } = useLocale();
+  const { t, href } = useLocale();
 
   return (
     <nav aria-label="Sections" className="cp-nav">
@@ -31,7 +31,7 @@ export function SectionNav() {
         return (
           <Link
             key={s.href}
-            href={s.href}
+            href={href(s.href)}
             className="cp-nav-item group"
             data-section={s.id}
             style={{ ["--cp-accent" as string]: accent }}

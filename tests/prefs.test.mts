@@ -1,16 +1,7 @@
-/** Language/theme preference: Accept-Language fallback and the blocking head script. */
+/** Theme preference: the blocking head script. Language is the URL's (see routes.test.mts). */
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { localeFromAcceptLanguage } from "../src/lib/prefs.ts";
 import { PREFS_HEAD_SCRIPT, normalizeLocale, normalizeTheme } from "../src/lib/prefs-shared.ts";
-
-test("Accept-Language fallback matches the old browser rule", () => {
-  assert.equal(localeFromAcceptLanguage(null), "en");
-  assert.equal(localeFromAcceptLanguage("en-US,en;q=0.9"), "en");
-  assert.equal(localeFromAcceptLanguage("es-AR,es;q=0.9,en;q=0.8"), "es");
-  assert.equal(localeFromAcceptLanguage("en-US,es;q=0.5"), "es");
-  assert.equal(localeFromAcceptLanguage("fr-FR"), "en");
-});
 
 function run(cookie: string, ls: Record<string, string>, ssrLocale: string, ssIn: Record<string, string> | null = {}, prefersLight: boolean | "missing" = true) {
   const cls = new Set(["dark"]);
@@ -91,13 +82,13 @@ test("head script: cookie theme applied before paint", () => {
   assert.equal(run("lulox-theme=light", {}, "en").theme, "light");
 });
 
-test("head script: localStorage-only prefs migrate to cookies, reload once if language differs", () => {
+test("head script: legacy theme migrates to the cookie; language is never touched (no reload)", () => {
   const r = run("", { theme: "light", "lulox-locale": "es" }, "en");
   assert.equal(r.theme, "light");
   assert.match(r.cookie, /lulox-theme=light/);
-  assert.match(r.cookie, /lulox-locale=es/);
-  assert.equal(r.reloaded, true);
-  assert.equal(run("", { "lulox-locale": "en" }, "en").reloaded, false);
+  assert.doesNotMatch(r.cookie, /lulox-locale/);
+  assert.equal(r.reloaded, false);
+  assert.equal(r.lang, "en");
 });
 
 test("normalizers accept the real legacy formats and JSON-quoted variants", () => {
@@ -114,31 +105,17 @@ test("normalizers accept the real legacy formats and JSON-quoted variants", () =
   assert.equal(normalizeTheme("blue"), null);
 });
 
-test("head script: JSON-quoted legacy values migrate too", () => {
+test("head script: JSON-quoted legacy theme migrates too", () => {
   const r = run("", { theme: '"light"', "lulox-locale": '"es"' }, "en");
   assert.equal(r.theme, "light");
-  assert.match(r.cookie, /lulox-locale=es/);
-  assert.equal(r.reloaded, true);
-});
-
-test("head script: reload guard prevents loops but still fixes lang/theme", () => {
-  const r = run("", { theme: "light", "lulox-locale": "es" }, "en", { "lulox-lang-reload": "1" });
   assert.equal(r.reloaded, false);
-  assert.equal(r.theme, "light");
-  assert.equal(r.lang, "es");
-  assert.equal(r.status, "legacy");
 });
 
-test("head script: sessionStorage denied still reloads once (cookie then matches server)", () => {
-  const r = run("", { "lulox-locale": "es" }, "en", null);
-  assert.equal(r.reloaded, true);
-  assert.match(r.cookie, /lulox-locale=es/);
-});
-
-test("head script: cookie wins over legacy storage, no reload", () => {
-  const r = run("lulox-locale=en; lulox-theme=dark", { theme: "light", "lulox-locale": "es" }, "en");
+test("head script: a lulox-locale cookie never reloads or changes <html lang>", () => {
+  const r = run("lulox-locale=en; lulox-theme=dark", { theme: "light", "lulox-locale": "es" }, "es");
   assert.equal(r.theme, "dark");
   assert.equal(r.reloaded, false);
+  assert.equal(r.lang, "es");
   assert.equal(r.status, "cookie");
 });
 
@@ -146,14 +123,4 @@ test("head script: system theme applied but not persisted", () => {
   const r = run("", { theme: "system" }, "en");
   assert.equal(r.theme, "light");
   assert.doesNotMatch(r.cookie, /lulox-theme/);
-});
-
-test("share metadata is always ES, even with an en cookie", async () => {
-  const { metadataLocale } = await import("../src/lib/prefs-shared.ts");
-  assert.equal(metadataLocale(undefined), "es");
-  assert.equal(metadataLocale(null), "es");
-  assert.equal(metadataLocale(""), "es");
-  assert.equal(metadataLocale("es"), "es");
-  assert.equal(metadataLocale("EN"), "es");
-  assert.equal(metadataLocale("en"), "es");
 });

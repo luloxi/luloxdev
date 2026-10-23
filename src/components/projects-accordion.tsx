@@ -28,7 +28,7 @@ const pastAccents = [
 ];
 
 export function ProjectsAccordion({ projects }: { projects: PastProject[] }) {
-  const { t, locale } = useLocale();
+  const { t, locale, href } = useLocale();
   return (
     <div className="space-y-10">
       {/* Code: GitHub CTA + past projects underneath */}
@@ -49,7 +49,7 @@ export function ProjectsAccordion({ projects }: { projects: PastProject[] }) {
             return (
               <li key={project.id}>
                 <HoloLink
-                  href={`/proyectos/${project.id}`}
+                  href={href(`/proyectos/${project.id}`)}
                   className="cp-row group"
                   style={{ ["--cp-accent" as string]: accent }}
                 >

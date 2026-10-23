@@ -11,8 +11,8 @@ const nextConfig: NextConfig = {
     // Pin root so parent monorepo lockfiles don't confuse the bundler
     root: path.join(__dirname),
   },
-  // Spanish URLs are canonical. Old English paths 301 to them (same content,
-  // the language comes from the cookie, not the URL).
+  // Old English paths (from before /en existed) keep 301-ing to the Spanish
+  // pages, unchanged. The English site lives under /en (see src/lib/routes.ts).
   async redirects() {
     const r = (source: string, destination: string) => ({
       source,
@@ -29,6 +29,9 @@ const nextConfig: NextConfig = {
       r("/privacy", "/privacidad"),
       r("/auth/sign-in", "/ingresar"),
       r("/login", "/ingresar"),
+      r("/en/tastes", "/en/about"),
+      r("/en/gustos", "/en/about"),
+      r("/en/login", "/en/sign-in"),
     ];
   },
   ...(isCloudflare ? { images: { unoptimized: true } } : {}),

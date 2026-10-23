@@ -41,7 +41,7 @@ function EditablePost({ post }: { post: BlogPost }) {
 }
 
 function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
-  const { t, locale } = useLocale();
+  const { t, locale, href } = useLocale();
   const L = localizePost(post, locale);
   const articleRef = useRef<HTMLElement>(null);
   const [coverShape, setCoverShape] = useState<"square" | "wide" | "tall">("square");
@@ -126,7 +126,7 @@ function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
               {t.blog.authorHeading}
             </p>
             <CopyMarkdown copyKey="blog.authorBio" text={t.blog.authorBio} />
-            <Link href="/contacto" className="blog-author-contact">
+            <Link href={href("/contacto")} className="blog-author-contact">
               {t.blog.authorContact}
               <span aria-hidden>▸</span>
             </Link>

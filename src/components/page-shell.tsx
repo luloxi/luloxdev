@@ -30,7 +30,7 @@ export function PageShell({
   footerLabel,
   reading = false,
 }: PageShellProps) {
-  const { t } = useLocale();
+  const { t, href } = useLocale();
   const topLabel = backLabel ?? t.ui.backHome;
   const bottomHref = footerHref ?? backHref;
   const bottomLabel = footerLabel ?? (footerHref || backHref !== "/" ? topLabel : t.ui.backHomeCta);
@@ -42,7 +42,7 @@ export function PageShell({
       {/* Back link lives in the fixed top bar, opposite the language/theme controls */}
       <div className="cp-topbar-back" data-inline-editor="skip">
         <Link
-          href={backHref}
+          href={href(backHref)}
           className="cp-back-link group shrink-0"
           aria-label={`${topLabel} (${site.name})`}
         >
@@ -66,7 +66,7 @@ export function PageShell({
       <div>{children}</div>
 
       <div className="mt-12">
-        <Link href={bottomHref} className="cp-back-footer group">
+        <Link href={href(bottomHref)} className="cp-back-footer group">
           <span className="cp-nav-frame" aria-hidden>
             <span className="cp-nav-corner cp-nav-corner-tl" />
             <span className="cp-nav-corner cp-nav-corner-br" />

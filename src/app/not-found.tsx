@@ -13,7 +13,7 @@ export default async function NotFound() {
       <p className="font-mono text-xs text-accent">404</p>
       <p className="mt-2 text-sm text-muted">{t.ui.notFound}</p>
       <Link
-        href="/"
+        href={locale === "en" ? "/en" : "/"}
         className="mt-6 text-sm text-accent transition-colors hover:text-accent-2"
       >
         ← {site.name}

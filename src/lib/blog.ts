@@ -6,6 +6,7 @@ import {
   type BlogPostRow,
 } from "@/content/blog/types";
 import { getDb, nowIso, requireDb } from "@/lib/db";
+import { slugify } from "@/lib/routes";
 
 let ensurePromise: Promise<void> | null = null;
 
@@ -27,14 +28,15 @@ export async function ensureBlogSchemaAndSeed() {
           db
             .prepare(
               `INSERT INTO blog_posts (
-                slug, published_at, cover_image, tags,
+                slug, slug_en, published_at, cover_image, tags,
                 title_es, title_en, summary_es, summary_en,
                 body_es, body_en, published, updated_at
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               ON CONFLICT (slug) DO NOTHING`,
             )
             .bind(
               post.slug,
+              post.slugEn || slugify(post.title.en) || null,
               toIsoDate(post.publishedAt),
               post.coverImage,
               JSON.stringify(post.tags ?? []),
@@ -98,14 +100,17 @@ function seedPostsFiltered(includeDrafts?: boolean) {
   const posts = includeDrafts
     ? seedPosts
     : seedPosts.filter((p) => p.published !== false);
-  return sortByDateDesc(posts);
+  return sortByDateDesc(posts.map((p) => ({ ...p, slugEn: seedSlugEn(p) })));
 }
 
-function seedPostBySlug(slug: string, includeDrafts?: boolean) {
-  const post = seedPosts.find((p) => p.slug === slug) ?? null;
+const seedSlugEn = (p: BlogPost) => p.slugEn || slugify(p.title.en) || null;
+
+function seedPostBySlug(slug: string, includeDrafts?: boolean, by: "slug" | "slug_en" = "slug") {
+  const post =
+    seedPosts.find((p) => (by === "slug" ? p.slug === slug : seedSlugEn(p) === slug)) ?? null;
   if (!post) return null;
   if (!includeDrafts && post.published === false) return null;
-  return post;
+  return { ...post, slugEn: seedSlugEn(post) };
 }
 
 export async function getAllPosts(opts?: {
@@ -158,17 +163,69 @@ export async function getPostBySlug(
   }
 }
 
-export async function upsertPost(post: BlogPost) {
-  await ensureBlogSchemaAndSeed();
+/** Post by its English slug (slug_en). Missing column (migration 0007 not applied yet) -> null. */
+export async function getPostBySlugEn(
+  slugEn: string,
+  opts?: { includeDrafts?: boolean },
+): Promise<BlogPost | null> {
+  const db = await getDb();
+  if (!db) return seedPostBySlug(slugEn, opts?.includeDrafts, "slug_en");
+  try {
+    await ensureBlogSchemaAndSeed();
+    const row = await db
+      .prepare(
+        opts?.includeDrafts
+          ? "SELECT * FROM blog_posts WHERE slug_en = ? LIMIT 1"
+          : "SELECT * FROM blog_posts WHERE slug_en = ? AND published = 1 LIMIT 1",
+      )
+      .bind(slugEn)
+      .first<D1BlogRow>();
+    return row ? d1RowToPost(row) : null;
+  } catch (err) {
+    console.error("[blog] getPostBySlugEn:", err);
+    return null;
+  }
+}
+
+/**
+ * Is this English slug free for the post `slug`? It must not be another
+ * post's slug_en nor another post's Spanish slug (that would shadow the
+ * /en/blog/<slug_es> -> slug_en redirect).
+ */
+export async function isSlugEnAvailable(slugEn: string, slug: string, previousSlug = slug): Promise<boolean> {
   const db = await requireDb();
-  await db
+  const row = await db
+    .prepare(
+      "SELECT slug FROM blog_posts WHERE (slug_en = ? OR slug = ?) AND slug NOT IN (?, ?) LIMIT 1",
+    )
+    .bind(slugEn, slugEn, slug, previousSlug)
+    .first<{ slug: string }>();
+  return !row;
+}
+
+/** English slugs in use by other posts (to suggest a free one). */
+export async function takenSlugsEn(exceptSlugs: string[]): Promise<string[]> {
+  const db = await requireDb();
+  const [a, b] = [exceptSlugs[0] ?? "", exceptSlugs[1] ?? exceptSlugs[0] ?? ""];
+  const { results } = await db
+    .prepare(
+      "SELECT slug_en AS s FROM blog_posts WHERE slug NOT IN (?, ?) AND slug_en IS NOT NULL UNION SELECT slug AS s FROM blog_posts WHERE slug NOT IN (?, ?)",
+    )
+    .bind(a, b, a, b)
+    .all<{ s: string }>();
+  return results.map((r) => r.s);
+}
+
+function upsertStatement(db: Awaited<ReturnType<typeof requireDb>>, post: BlogPost) {
+  return db
     .prepare(
       `INSERT INTO blog_posts (
-        slug, published_at, cover_image, tags, topics,
+        slug, slug_en, published_at, cover_image, tags, topics,
         title_es, title_en, summary_es, summary_en,
         body_es, body_en, published, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT (slug) DO UPDATE SET
+        slug_en = excluded.slug_en,
         published_at = excluded.published_at,
         cover_image = excluded.cover_image,
         tags = excluded.tags,
@@ -184,6 +241,7 @@ export async function upsertPost(post: BlogPost) {
     )
     .bind(
       post.slug,
+      post.slugEn || null,
       toIsoDate(post.publishedAt),
       post.coverImage,
       JSON.stringify(post.tags ?? []),
@@ -196,8 +254,32 @@ export async function upsertPost(post: BlogPost) {
       post.body.en,
       post.published ? 1 : 0,
       nowIso(),
-    )
-    .run();
+    );
+}
+
+/**
+ * Insert or update a post. With `previousSlug` (Spanish slug renamed) the old
+ * row is deleted and the new one written in one batch (atomic), so its
+ * slug_en never collides with itself on the unique index.
+ */
+export async function upsertPost(post: BlogPost, previousSlug?: string) {
+  await ensureBlogSchemaAndSeed();
+  const db = await requireDb();
+  if (previousSlug && previousSlug !== post.slug) {
+    await db.batch([
+      db.prepare("DELETE FROM blog_posts WHERE slug = ?").bind(previousSlug),
+      upsertStatement(db, post),
+    ]);
+    return;
+  }
+  await upsertStatement(db, post).run();
+}
+
+/** Does a post with this Spanish slug exist (drafts included)? */
+export async function slugExists(slug: string): Promise<boolean> {
+  const db = await requireDb();
+  const row = await db.prepare("SELECT 1 AS x FROM blog_posts WHERE slug = ? LIMIT 1").bind(slug).first();
+  return Boolean(row);
 }
 
 export async function deletePost(slug: string) {

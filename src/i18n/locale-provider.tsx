@@ -1,37 +1,27 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { usePathname } from "next/navigation";
+import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from "react";
 import { getMessages, type Messages } from "./messages";
 import { applyCopy, type CopyOverrides } from "./copy-overrides";
 import type { Locale } from "./types";
-import {
-  LOCALE_COOKIE,
-  LOCALE_STORAGE_KEY,
-  normalizeLocale,
-  readCookie,
-  readStorage,
-  writePrefCookie,
-} from "@/lib/prefs-shared";
+import { LOCALE_COOKIE, LOCALE_STORAGE_KEY, writePrefCookie } from "@/lib/prefs-shared";
+import { localeFromPath, localizePath, switchLocalePath } from "@/lib/routes";
 
 type LocaleContextValue = {
   locale: Locale;
+  /** Go to the same page in the other language (and remember the choice). */
   setLocale: (locale: Locale) => void;
   toggleLocale: () => void;
+  /** Spanish site path ("/contratar") -> URL in the current language ("/en/hire"). */
+  href: (esPath: string) => string;
   t: Messages;
 };
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-function persist(locale: Locale) {
-  document.documentElement.lang = locale;
+/** The selector's memory only: nothing reads it to pick the language (the URL does). */
+function remember(locale: Locale) {
   writePrefCookie(LOCALE_COOKIE, locale);
   try {
     localStorage.setItem(LOCALE_STORAGE_KEY, locale);
@@ -41,9 +31,28 @@ function persist(locale: Locale) {
 }
 
 /**
- * The server picks the locale (cookie, else Accept-Language) and renders with
- * it, so first paint is already in the right language. Changes are saved to
- * the cookie (for the server) and localStorage (legacy).
+ * Equivalent URL in the other language. Prefer the page's own hreflang link
+ * (it knows the article's other slug); else map the path (proxy 301s fix slugs).
+ */
+function otherLanguageUrl(to: Locale): string {
+  const hreflang = to === "en" ? "en-US" : "es-AR";
+  const link = document.querySelector<HTMLLinkElement>(`link[rel="alternate"][hreflang="${hreflang}"]`);
+  const { pathname, search, hash } = window.location;
+  if (link?.href) {
+    try {
+      const u = new URL(link.href);
+      return u.pathname + search + hash;
+    } catch {
+      /* fall through */
+    }
+  }
+  return switchLocalePath(pathname, to) + search + hash;
+}
+
+/**
+ * The language is the URL's: /en/... is English, the rest Spanish. The server
+ * renders with it (x-lulox-locale from proxy.ts) and the client reads the same
+ * thing from the pathname, so soft navigations between /en pages stay in English.
  */
 export function LocaleProvider({
   initialLocale,
@@ -55,42 +64,35 @@ export function LocaleProvider({
   overrides?: CopyOverrides;
   children: ReactNode;
 }) {
-  const [locale, setLocaleState] = useState<Locale>(initialLocale);
+  const pathname = usePathname();
+  const locale: Locale = pathname ? localeFromPath(pathname) : initialLocale;
 
-  // Safety net: if the server rendered a different language than the saved
-  // preference (cookie, else legacy localStorage) — e.g. cookies blocked or
-  // the one-time reload was already used this session — switch client-side.
-  // Never writes the server default.
   useEffect(() => {
-    const fromCookie = normalizeLocale(readCookie(LOCALE_COOKIE));
-    const wanted = fromCookie ?? normalizeLocale(readStorage(LOCALE_STORAGE_KEY));
-    if (!wanted) return;
-    if (!fromCookie) writePrefCookie(LOCALE_COOKIE, wanted);
-    document.documentElement.lang = wanted;
-    if (wanted !== initialLocale) setLocaleState(wanted); // eslint-disable-line react-hooks/set-state-in-effect -- one-time correction after hydration
-  }, [initialLocale]);
+    document.documentElement.lang = locale;
+  }, [locale]);
 
-  const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next);
-    persist(next);
-  }, []);
+  const setLocale = useCallback(
+    (next: Locale) => {
+      remember(next);
+      if (next === locale) return;
+      // Full navigation: <html lang>, metadata and server-rendered text all switch together.
+      window.location.assign(otherLanguageUrl(next));
+    },
+    [locale],
+  );
 
-  const toggleLocale = useCallback(() => {
-    setLocaleState((prev) => {
-      const next = prev === "es" ? "en" : "es";
-      persist(next);
-      return next;
-    });
-  }, []);
+  const toggleLocale = useCallback(() => setLocale(locale === "es" ? "en" : "es"), [locale, setLocale]);
+  const href = useCallback((esPath: string) => localizePath(locale, esPath), [locale]);
 
   const value = useMemo(
     () => ({
       locale,
       setLocale,
       toggleLocale,
+      href,
       t: applyCopy(getMessages(locale), overrides?.[locale]),
     }),
-    [locale, setLocale, toggleLocale, overrides],
+    [locale, setLocale, toggleLocale, href, overrides],
   );
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;

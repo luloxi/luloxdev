@@ -1,6 +1,7 @@
 import { PageShell } from "@/components/page-shell";
 
 import { pageMetadata } from "@/lib/page-metadata";
+import { getRequestLocale } from "@/lib/prefs";
 
 export function generateMetadata() {
   return pageMetadata("/privacidad", {
@@ -11,9 +12,37 @@ export function generateMetadata() {
 
 const CONTACT = "lucianoolivabianco@gmail.com";
 
-export default function PrivacyPage() {
+const TEXT = {
+  es: {
+    title: "Privacidad",
+    intro: "lulox.dev es el sitio personal de Luciano Oliva Bianco. Esta página explica qué datos usa el sitio. Última actualización: 10 de octubre de 2026.",
+    blocks: [
+      ["Visitantes.", "Podés leer todo el sitio sin cuenta. No hay publicidad, trackers de analítica ni cookies de terceros, y no vendemos ni compartimos datos personales con nadie."],
+      ["Ingreso con Google.", "\u201cIngresar con Google\u201d lo usa solo el dueño del sitio para entrar al área privada donde se editan artículos y proyectos. Cuando se usa, el sitio recibe el nombre, el email y la foto de perfil de la cuenta de Google, y solo se permite el email del dueño. Las demás cuentas se rechazan y no se guardan."],
+      ["Cookies.", "Ingresar crea una única cookie de sesión, necesaria para que el admin siga logueado. El sitio también recuerda en tu navegador el idioma y el tema que elegiste. No se guarda nada más sobre los visitantes."],
+      ["Hosting.", "El sitio corre en Cloudflare, que procesa datos estándar de cada pedido (como la dirección IP) para servir y proteger el sitio, bajo su propia política de privacidad."],
+      ["Contacto.", "Preguntas o pedidos de borrado:"],
+    ],
+  },
+  en: {
+    title: "Privacy",
+    intro: "lulox.dev is the personal site of Luciano Oliva Bianco. This page explains what data the site uses. Last updated: October 10, 2026.",
+    blocks: [
+      ["Visitors.", "You can read everything on this site without an account. We don't run ads, analytics trackers or third-party cookies, and we don't sell or share personal data with anyone."],
+      ["Google sign-in.", "\u201cSign in with Google\u201d is only used by the site owner to reach the private admin area where posts and projects are edited. When used, the site receives the Google account's name, email address and profile picture, and only the owner's email is allowed in. Other accounts are rejected and not stored."],
+      ["Cookies.", "Signing in sets a single session cookie needed to keep the admin logged in. The site also remembers your language and theme choice in your browser's local storage. Nothing else is stored about visitors."],
+      ["Hosting.", "The site runs on Cloudflare, which processes standard request data (such as IP address) to deliver and protect the site, under its own privacy policy."],
+      ["Contact.", "Questions or deletion requests:"],
+    ],
+  },
+} as const;
+
+/** Body in the URL's language: /privacidad (es), /en/privacy (en). */
+export default async function PrivacyPage() {
+  const T = TEXT[await getRequestLocale()];
+  const last = T.blocks.length - 1;
   return (
-    <PageShell title="Privacy">
+    <PageShell title={T.title}>
       <div
         className="cp-panel"
         style={{ ["--cp-accent" as string]: "var(--section-about)" }}
@@ -23,42 +52,21 @@ export default function PrivacyPage() {
           <span className="cp-nav-corner cp-nav-corner-br" />
         </span>
         <div className="cp-panel-inner space-y-4">
-          <p className="cp-prose">
-            lulox.dev is the personal site of Luciano Oliva Bianco. This page
-            explains what data the site uses. Last updated: October 10, 2026.
-          </p>
-          <p className="cp-prose">
-            <strong>Visitors.</strong> You can read everything on this site
-            without an account. We don&apos;t run ads, analytics trackers or
-            third-party cookies, and we don&apos;t sell or share personal data
-            with anyone.
-          </p>
-          <p className="cp-prose">
-            <strong>Google sign-in.</strong> &quot;Sign in with Google&quot; is
-            only used by the site owner to reach the private admin area where
-            posts and projects are edited. When used, the site receives the
-            Google account&apos;s name, email address and profile picture, and
-            only the owner&apos;s email is allowed in. Other accounts are
-            rejected and not stored.
-          </p>
-          <p className="cp-prose">
-            <strong>Cookies.</strong> Signing in sets a single session cookie
-            needed to keep the admin logged in. The site also remembers your
-            language and theme choice in your browser&apos;s local storage.
-            Nothing else is stored about visitors.
-          </p>
-          <p className="cp-prose">
-            <strong>Hosting.</strong> The site runs on Cloudflare, which
-            processes standard request data (such as IP address) to deliver and
-            protect the site, under its own privacy policy.
-          </p>
-          <p className="cp-prose">
-            <strong>Contact.</strong> Questions or deletion requests:{" "}
-            <a href={`mailto:${CONTACT}`} className="cp-prose-link">
-              {CONTACT}
-            </a>
-            .
-          </p>
+          <p className="cp-prose">{T.intro}</p>
+          {T.blocks.map(([b, text], i) => (
+            <p key={b} className="cp-prose">
+              <strong>{b}</strong> {text}
+              {i === last ? (
+                <>
+                  {" "}
+                  <a href={`mailto:${CONTACT}`} className="cp-prose-link">
+                    {CONTACT}
+                  </a>
+                  .
+                </>
+              ) : null}
+            </p>
+          ))}
         </div>
       </div>
     </PageShell>

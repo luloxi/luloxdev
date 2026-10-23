@@ -1,37 +1,21 @@
 import { cookies, headers } from "next/headers";
 import type { Locale } from "@/i18n/types";
-import {
-  DEFAULT_THEME,
-  LOCALE_COOKIE,
-  THEME_COOKIE,
-  isLocale,
-  isTheme,
-  metadataLocale,
-  type Theme,
-} from "@/lib/prefs-shared";
+import { DEFAULT_THEME, THEME_COOKIE, isTheme, type Theme } from "@/lib/prefs-shared";
+import { LOCALE_HEADER } from "@/lib/routes";
 
-/** Same rule as the old client detection: any Spanish in Accept-Language -> es, else en. */
-export function localeFromAcceptLanguage(header: string | null): Locale {
-  if (!header) return "en";
-  for (const part of header.split(",")) {
-    const tag = part.split(";")[0]?.trim().toLowerCase() ?? "";
-    if (tag === "es" || tag.startsWith("es-")) return "es";
-  }
-  return "en";
+/**
+ * Language of this request = language of its URL, as set by proxy.ts in the
+ * x-lulox-locale header (/en/... -> en, the rest -> es). Never the cookie or
+ * Accept-Language: the same URL always renders (and shares) the same language.
+ */
+export async function getRequestLocale(): Promise<Locale> {
+  const h = await headers();
+  return h.get(LOCALE_HEADER) === "en" ? "en" : "es";
 }
 
 /** Reading cookies/headers makes every page dynamic (per-request, never shared). */
 export async function getServerPrefs(): Promise<{ locale: Locale; theme: Theme }> {
-  const [jar, h] = await Promise.all([cookies(), headers()]);
-  const c = jar.get(LOCALE_COOKIE)?.value;
+  const [jar, locale] = await Promise.all([cookies(), getRequestLocale()]);
   const t = jar.get(THEME_COOKIE)?.value;
-  return {
-    locale: isLocale(c) ? c : localeFromAcceptLanguage(h.get("accept-language")),
-    theme: isTheme(t) ? t : DEFAULT_THEME,
-  };
-}
-
-/** Locale for share metadata only: always ES, no cookie/header read (see metadataLocale). */
-export async function getMetadataLocale(): Promise<Locale> {
-  return metadataLocale();
+  return { locale, theme: isTheme(t) ? t : DEFAULT_THEME };
 }

@@ -119,7 +119,7 @@ function useCountUp(value: number) {
 }
 
 export function HireCalculator() {
-  const { locale } = useLocale();
+  const { locale, href } = useLocale();
   const c = copy[locale === "en" ? "en" : "es"];
   const [mode, setMode] = useState<Mode>(PRICING.defaults.mode);
   const [hours, setHours] = useState(PRICING.defaults[PRICING.defaults.mode].hours);
@@ -316,7 +316,7 @@ export function HireCalculator() {
         <a className="hire-act hire-act-call" href={CALL_BOOKING_URL} target="_blank" rel="noopener noreferrer" data-testid="hire-call-cta">
           {c.cta}
         </a>
-        <Link className="hire-act hire-act-contact" href="/contacto">
+        <Link className="hire-act hire-act-contact" href={href("/contacto")}>
           {c.contact}
         </Link>
       </div>

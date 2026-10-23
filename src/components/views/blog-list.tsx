@@ -8,6 +8,7 @@ import type { BlogPost } from "@/content/blog/types";
 import { localizePost } from "@/content/blog/types";
 import { useLocale } from "@/i18n/locale-provider";
 import { useMemo, useState } from "react";
+import { blogPostPath } from "@/lib/routes";
 
 const PAGE_SIZE = 10;
 
@@ -90,7 +91,7 @@ export function BlogList({ posts, error }: { posts: BlogPost[]; error?: boolean 
             return (
               <li key={post.slug}>
                 <Link
-                  href={`/blog/${post.slug}`}
+                  href={blogPostPath(locale, post)}
                   className={`cp-panel blog-card group block${draft ? " blog-card-draft" : ""}`}
                   style={{ ["--cp-accent" as string]: "var(--section-blog)" }}
                 >

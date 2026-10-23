@@ -1,7 +1,10 @@
 import type { Locale } from "@/i18n/types";
 
 export type BlogPost = {
+  /** Spanish URL slug (/blog/<slug>), primary key. */
   slug: string;
+  /** English URL slug (/en/blog/<slugEn>). null/missing: /en/blog/<slug> is used. */
+  slugEn?: string | null;
   /** ISO date string (YYYY-MM-DD or full ISO) */
   publishedAt: string;
   /** Cover image path under /public or absolute URL */
@@ -19,6 +22,7 @@ export type BlogPost = {
 
 export type BlogPostRow = {
   slug: string;
+  slug_en?: string | null;
   published_at: string;
   cover_image: string;
   tags: string[] | null;
@@ -36,6 +40,7 @@ export type BlogPostRow = {
 export function rowToPost(row: BlogPostRow): BlogPost {
   return {
     slug: row.slug,
+    slugEn: row.slug_en || null,
     publishedAt: row.published_at,
     coverImage: row.cover_image,
     tags: row.tags ?? [],
@@ -50,6 +55,7 @@ export function rowToPost(row: BlogPostRow): BlogPost {
 export function localizePost(post: BlogPost, locale: Locale) {
   return {
     slug: post.slug,
+    slugEn: post.slugEn ?? null,
     publishedAt: post.publishedAt,
     coverImage: post.coverImage,
     tags: post.tags,

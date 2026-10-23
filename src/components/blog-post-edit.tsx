@@ -9,28 +9,30 @@ import type { BlogPost } from "@/content/blog/types";
 import { focusTopics } from "@/content/projects";
 import { useLocale } from "@/i18n/locale-provider";
 import { pickImageFile, uploadMedia } from "@/lib/upload-media";
+import { blogPostPath, slugify } from "@/lib/routes";
 
-export async function putPost(post: BlogPost): Promise<{ slug?: string; error?: string }> {
+export async function putPost(post: BlogPost & { previousSlug?: string }): Promise<{ slug?: string; slugEn?: string | null; error?: string }> {
   const res = await fetch("/api/blog", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(post),
   });
-  if (res.ok) return (await res.json()) as { slug: string };
+  if (res.ok) return (await res.json()) as { slug: string; slugEn: string | null };
   const data = (await res.json().catch(() => ({}))) as { error?: string };
   return { error: res.status === 401 ? "session" : (data.error ?? String(res.status)) };
 }
 
-type Meta = { slug: string; publishedAt: string; coverImage: string; tags: string; topics: string[] };
+type Meta = { slug: string; slugEn: string; publishedAt: string; coverImage: string; tags: string; topics: string[] };
 const metaOf = (p: BlogPost): Meta => ({
   slug: p.slug,
+  slugEn: p.slugEn ?? "",
   publishedAt: p.publishedAt.slice(0, 10),
   coverImage: p.coverImage ?? "",
   tags: (p.tags ?? []).join(", "),
   topics: p.topics ?? [],
 });
 const sameMeta = (a: Meta, b: Meta) =>
-  a.slug === b.slug && a.publishedAt === b.publishedAt && a.coverImage === b.coverImage && a.tags === b.tags && a.topics.join() === b.topics.join();
+  a.slug === b.slug && a.slugEn === b.slugEn && a.publishedAt === b.publishedAt && a.coverImage === b.coverImage && a.tags === b.tags && a.topics.join() === b.topics.join();
 
 /** Plain-text field edited in place (title, summary): looks like the rendered text. */
 function InlineText({ as: Tag, className, value, label, onChange, onFocus, onBlur, resetKey }: {
@@ -103,6 +105,7 @@ export function useBlogPostEditor(post: BlogPost) {
   const build = (bodyMd: string, published = post.published): BlogPost => ({
     ...post,
     slug: meta.slug.trim() || post.slug,
+    slugEn: meta.slugEn.trim().toLowerCase() || null,
     publishedAt: meta.publishedAt,
     coverImage: meta.coverImage.trim(),
     tags: meta.tags.split(",").map((x) => x.trim()).filter(Boolean),
@@ -114,13 +117,19 @@ export function useBlogPostEditor(post: BlogPost) {
   });
 
   const commit = async (next: BlogPost): Promise<string | null> => {
-    const r = await putPost(next);
-    if (r.error) return r.error;
-    if (r.slug && r.slug !== post.slug) {
-      // Renamed: the new row exists, now drop the old one.
-      await fetch(`/api/blog?slug=${encodeURIComponent(post.slug)}`, { method: "DELETE" });
-      router.replace(`/blog/${r.slug}`);
+    // previousSlug: a Spanish slug rename is done server-side in one batch (new row in, old row out).
+    const r = await putPost({ ...next, previousSlug: post.slug });
+    if (r.error) {
+      const msg: Record<string, [string, string]> = {
+        invalid_slug_en: ["slug EN: solo minúsculas, números y guiones, sin tildes", "EN slug: lowercase letters, numbers and hyphens only"],
+        slug_en_taken: ["ese slug EN ya lo usa otro artículo", "that EN slug is already used by another article"],
+        slug_taken: ["ese slug ya lo usa otro artículo", "that slug is already used by another article"],
+      };
+      return msg[r.error]?.[es ? 0 : 1] ?? r.error;
     }
+    const saved = { slug: r.slug ?? post.slug, slugEn: r.slugEn ?? null };
+    const target = blogPostPath(L, saved);
+    if (target !== blogPostPath(L, post)) router.replace(target);
     router.refresh();
     return null;
   };
@@ -134,7 +143,7 @@ export function useBlogPostEditor(post: BlogPost) {
     const res = await fetch(`/api/blog?slug=${encodeURIComponent(post.slug)}`, { method: "DELETE" });
     if (!res.ok) window.alert(es ? `No se pudo borrar (${res.status})` : `Couldn't delete (${res.status})`);
     else {
-      router.push("/blog");
+      router.push(L === "en" ? "/en/blog" : "/blog");
       router.refresh();
     }
   };
@@ -196,7 +205,7 @@ export function useBlogPostEditor(post: BlogPost) {
       title={t.blog.fieldDate}
     />
   );
-  const field = (k: "slug" | "tags" | "coverImage", label: string, placeholder: string) => (
+  const field = (k: "slug" | "slugEn" | "tags" | "coverImage", label: string, placeholder: string) => (
     <label className="ie-meta-line">
       <span className="ie-meta-key">{label}</span>
       <input
@@ -211,7 +220,8 @@ export function useBlogPostEditor(post: BlogPost) {
   const metaPanel: ReactNode = (
     <div className="ie-meta-inline" data-ie-toolbar="1">
       {field("tags", t.blog.fieldTags, es ? "palabras, clave" : "some, keywords")}
-      {field("slug", "slug", "mi-articulo")}
+      {field("slug", "slug (ES)", "mi-articulo")}
+      {field("slugEn", "slug (EN)", slugify(post.title.en) || "my-article")}
       {field("coverImage", t.blog.fieldCover, "https://… / /media/…")}
       <div className="ie-meta-line" role="group" aria-label={t.blog.fieldTopics}>
         <span className="ie-meta-key">{t.blog.fieldTopics}</span>

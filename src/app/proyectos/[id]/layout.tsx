@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { pastProjects } from "@/content/projects";
 import { messages } from "@/i18n/messages";
 import { buildPageMetadata, pageMetadata } from "@/lib/page-metadata";
-import { getMetadataLocale } from "@/lib/prefs";
+import { getRequestLocale } from "@/lib/prefs";
+import { pathPair } from "@/lib/routes";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -18,9 +19,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       en: { title: "Projects", description: messages.en.sections.projects },
     });
   }
-  const locale = await getMetadataLocale();
+  const locale = await getRequestLocale();
   const m = messages[locale].projects.past[project.id];
-  return buildPageMetadata(locale, `/proyectos/${project.id}`, {
+  return buildPageMetadata(locale, pathPair(`/proyectos/${project.id}`), {
     title: m.title,
     description: m.body,
   });
