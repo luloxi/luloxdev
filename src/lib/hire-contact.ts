@@ -1,4 +1,4 @@
-import { clampHours, estimate, PRICING, type Complexity, type Mode } from "./pricing";
+import { clampHours, depositPct, estimate, PRICING, type Complexity, type Mode, type Pricing } from "./pricing";
 import { MAX_MESSAGE } from "./hire-limits";
 import { checkCodeShape } from "./referrals";
 
@@ -34,7 +34,7 @@ export type Budget = { mode: Mode; hours: number; complexity: Complexity; onSite
  * missing/undefined is false (budgets from before the option), anything else that is not
  * true/false rejects the whole budget instead of guessing.
  */
-export function parseBudget(v: unknown): Budget | null {
+export function parseBudget(v: unknown, p: Pricing = PRICING): Budget | null {
   if (!v || typeof v !== "object") return null;
   const b = v as Record<string, unknown>;
   const mode = MODES.find((m) => m === b.mode);
@@ -46,9 +46,9 @@ export function parseBudget(v: unknown): Budget | null {
   // Same rule as the hours input: whole hours, clamped to 1..max for the mode.
   const hours = clampHours(mode, rawHours);
   const onSite = b.onSite === true;
-  const days = mode === "project" && onSite ? Math.max(1, Math.min(PRICING.maxOnSiteDays, Math.round(Number(b.days) || 1))) : onSite ? 1 : 0;
+  const days = mode === "project" && onSite ? Math.max(1, Math.min(p.maxOnSiteDays, Math.round(Number(b.days) || 1))) : onSite ? 1 : 0;
   const extra = b.extra === true;
-  const extraDays = !extra ? 0 : mode !== "project" ? 1 : Math.max(1, Math.min(PRICING.maxUrgencyDays, Math.round(Number(b.extraDays) || 1)));
+  const extraDays = !extra ? 0 : mode !== "project" ? 1 : Math.max(1, Math.min(p.maxUrgencyDays, Math.round(Number(b.extraDays) || 1)));
   return { mode, hours, complexity, onSite, days, extra, extraDays, privateUse };
 }
 
@@ -62,21 +62,24 @@ const usd = (n: number) => `${n < 0 ? "-" : ""}US$ ${Math.abs(Math.round(n)).toL
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 const oneLine = (s: string) => s.replace(/[\r\n]+/g, " ").trim();
 
-/** Same estimate the calculator shows, from a parsed Budget (email and hire_leads use this). */
-export const estimateBudget = (b: Budget) =>
-  estimate({ mode: b.mode, hours: b.hours, complexity: b.complexity, extra: b.extra, onSite: b.onSite, onSiteDays: b.days, extraDays: b.extraDays, privateUse: b.privateUse });
+/**
+ * Same estimate the calculator shows, from a parsed Budget (email and hire_leads use this).
+ * `p` is the stored pricing (D1 pricing_settings over the code defaults), the same one the page shows.
+ */
+export const estimateBudget = (b: Budget, p: Pricing = PRICING) =>
+  estimate({ mode: b.mode, hours: b.hours, complexity: b.complexity, extra: b.extra, onSite: b.onSite, onSiteDays: b.days, extraDays: b.extraDays, privateUse: b.privateUse }, p);
 
-export function budgetLines(b: Budget): { summary: string[]; lines: [string, string][]; total: string; deposit: string } {
-  const r = estimateBudget(b);
+export function budgetLines(b: Budget, p: Pricing = PRICING): { summary: string[]; lines: [string, string][]; total: string; deposit: string; depositLabel: string } {
+  const r = estimateBudget(b, p);
   const summary = [
     `Modalidad: ${LABEL.mode[b.mode]}`,
-    `Horas: ${b.hours}h · Complejidad: ${LABEL.cx[b.complexity]} (US$ ${PRICING.rates[b.complexity]}/h)`,
+    `Horas: ${b.hours}h · Complejidad: ${LABEL.cx[b.complexity]} (US$ ${p.rates[b.complexity]}/h)`,
     `Presencial: ${b.onSite ? (b.mode === "project" ? `sí, ${b.days} ${b.days === 1 ? "día" : "días"}` : "sí") : "no"}`,
     `Urgencia: ${b.extra ? (b.mode === "project" ? `sí, ${b.extraDays} ${b.extraDays === 1 ? "día" : "días"}` : "sí") : "no"}`,
     `Uso privado: ${b.privateUse ? "sí (sin portfolio ni open source)" : "no (portfolio y open source ok)"}`,
   ];
   const lines = r.lines.map((l): [string, string] => [`${LABEL.lines[l.id]}${l.id === "discount" ? ` (-${l.pct}%)` : ""}${l.days && b.mode === "project" ? ` (${l.days} ${l.days === 1 ? "día" : "días"})` : ""}`, usd(l.amount)]);
-  return { summary, lines, total: usd(r.total), deposit: usd(r.deposit) };
+  return { summary, lines, total: usd(r.total), deposit: usd(r.deposit), depositLabel: `Anticipo (${depositPct(p)}%)` };
 }
 
 const SITEVERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
@@ -102,6 +105,8 @@ export type HireDeps = {
   /** Active referrer for a normalized code, or null. */
   findReferrer?: (code: string) => Promise<{ id: string; code: string; name: string } | null>;
   /** Store the lead after the email went out. Errors are logged, never shown to the visitor. */
+  /** Stored pricing (same as the page). Missing = code defaults. Never taken from the request. */
+  pricing?: Pricing;
   saveLead?: (lead: { name: string; email: string; message: string; budgetJson: string; totalUsd: number; refCode: string | null; referrerId: string | null }) => Promise<unknown>;
 };
 
@@ -117,7 +122,9 @@ export async function handleHireContact(raw: unknown, env: HireEnv, ip: string, 
   if (!name) return { status: 400, body: { error: "invalid_name" } };
   if (!EMAIL_RE.test(email) || email.length > 254) return { status: 400, body: { error: "invalid_email" } };
   if (!message || [...message].length > MAX_MESSAGE) return { status: 400, body: { error: "invalid_message" } };
-  const budget = parseBudget(body.budget);
+  // Amounts always come from the server's pricing; the browser only sends the calculator choices.
+  const pricing = deps.pricing ?? PRICING;
+  const budget = parseBudget(body.budget, pricing);
   if (!budget) return { status: 400, body: { error: "invalid_budget" } };
 
   if (env.CONTACT_RL) {
@@ -139,7 +146,7 @@ export async function handleHireContact(raw: unknown, env: HireEnv, ip: string, 
     }
   }
 
-  const b = budgetLines(budget);
+  const b = budgetLines(budget, pricing);
   const refLine = referrer ? `Referido por: ${referrer.code} (${oneLine(referrer.name)})` : null;
   const to = env.CONTACT_TO ?? "hola@lulox.com.ar";
   const from = env.CONTACT_FROM ?? "no-responder@lulox.com.ar";
@@ -153,7 +160,7 @@ export async function handleHireContact(raw: unknown, env: HireEnv, ip: string, 
     ...b.summary,
     ...b.lines.map(([k, v]) => `${k}: ${v}`),
     `Total estimado: ${b.total}`,
-    `Anticipo (50%): ${b.deposit}`,
+    `${b.depositLabel}: ${b.deposit}`,
     ...(refLine ? ["", refLine] : []),
     "",
     "--",
@@ -166,7 +173,7 @@ export async function handleHireContact(raw: unknown, env: HireEnv, ip: string, 
 <p style="font-size:17px;line-height:1.5;white-space:pre-wrap;margin:12px 0 24px">${esc(message)}</p>
 <h3 style="margin:0 0 8px;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#7A2FE0">Presupuesto calculado</h3>
 <p style="margin:0 0 8px;font-size:14px;line-height:1.6">${b.summary.map(esc).join("<br>")}</p>
-<table role="presentation" style="border-collapse:collapse;width:100%;font-size:14px">${b.lines.map(([k, v]) => row(k, v)).join("")}${row("Total estimado", b.total, true)}${row("Anticipo (50%)", b.deposit)}</table>
+<table role="presentation" style="border-collapse:collapse;width:100%;font-size:14px">${b.lines.map(([k, v]) => row(k, v)).join("")}${row("Total estimado", b.total, true)}${row(b.depositLabel, b.deposit)}</table>
 ${refLine ? `<p style="margin:16px 0 0;font-size:14px;font-weight:700;color:#0F766E">${esc(refLine)}</p>` : ""}
 <p style="font-size:12px;color:#666;margin-top:24px">Enviado desde lulox.com.ar/contratar. Respondé este email para contestarle a ${esc(email)}.</p>
 </div></body></html>`;
@@ -188,7 +195,7 @@ ${refLine ? `<p style="margin:16px 0 0;font-size:14px;font-weight:700;color:#0F7
   }
   if (deps.saveLead) {
     try {
-      const r = estimateBudget(budget);
+      const r = estimateBudget(budget, pricing);
       await deps.saveLead({
         name,
         email,

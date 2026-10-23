@@ -1,5 +1,8 @@
 /**
- * Lulox's pricing method (public, no client data). Edit the numbers here.
+ * Lulox's pricing method (public, no client data). These are the code defaults:
+ * the admin can override the amounts from /contratar in edit mode (D1
+ * pricing_settings, see src/lib/pricing-settings.ts); any missing or invalid
+ * stored value falls back to the number here.
  *  - Per project: (hours × hourly complexity) + on-site/day + travel/day + (urgency × day)
  *  - Per hour: (hours × rate) + on-site + travel + urgency (hourly work counts as one day)
  *  - Both: + private use (flat, optional): the work is not shown in the portfolio and the code is not open source.
@@ -41,6 +44,8 @@ export const PRICING = {
   validityDays: 15,
 };
 
+export type Pricing = typeof PRICING;
+
 export const maxHoursFor = (mode: Mode) => (mode === "project" ? PRICING.maxProjectHours : PRICING.maxHourlyHours);
 export const minHoursFor = (mode: Mode) => (mode === "project" ? PRICING.minProjectHours : 1);
 
@@ -76,7 +81,8 @@ export function estimate(i: Inputs, p = PRICING): { lines: Line[]; total: number
   const hours = Math.min(i.mode === "project" ? p.maxProjectHours : p.maxHourlyHours, Math.max(i.mode === "project" ? p.minProjectHours : 0, Math.round(i.hours * 2) / 2));
   const work = hours * p.rates[i.complexity];
   const lines: Line[] = [{ id: "work", amount: work }];
-  const tier = i.mode === "project" ? p.volumeTiers.find(([h]) => hours >= h) : undefined;
+  // Highest tier reached (0% tiers never add a line), whatever order they are stored in.
+  const tier = i.mode === "project" ? p.volumeTiers.filter(([, f]) => f > 0).sort((a, b) => b[0] - a[0]).find(([h]) => hours >= h) : undefined;
   if (tier) lines.push({ id: "discount", amount: -Math.round(work * tier[1]), pct: Math.round(tier[1] * 100) });
   if (i.onSite) {
     const days = i.mode === "project" ? Math.max(1, Math.min(p.maxOnSiteDays, Math.round(i.onSiteDays ?? 1))) : 1;
@@ -90,4 +96,15 @@ export function estimate(i: Inputs, p = PRICING): { lines: Line[]; total: number
   if (i.privateUse === true) lines.push({ id: "private", amount: p.privateUse[i.mode] });
   const total = lines.reduce((a, l) => a + l.amount, 0);
   return { lines, total, deposit: Math.round(total * p.deposit) };
+}
+
+/** Deposit as a whole percentage (0.5 -> 50) for labels like "Anticipo (50%)". */
+export const depositPct = (p: Pricing = PRICING) => Math.round(p.deposit * 100);
+
+/** Size discounts ascending by hours, as whole percentages: [[20, 15], [30, 20], [40, 25]]. */
+export function discountSteps(p: Pricing = PRICING): [number, number][] {
+  return p.volumeTiers
+    .map(([h, f]): [number, number] => [h, Math.round(f * 100)])
+    .filter(([, pct]) => pct > 0)
+    .sort((a, b) => a[0] - b[0]);
 }

@@ -6,7 +6,9 @@ import { CALL_BOOKING_URL, site } from "@/content/site";
 import { useSectionShown } from "@/components/site-order-context";
 import { useLocale } from "@/i18n/locale-provider";
 import { MagicHr } from "@/components/magic-hr";
-import { clampHours, estimate, hoursDigits, maxHoursFor, minHoursFor, PRICING, type Complexity, type Mode } from "@/lib/pricing";
+import { clampHours, depositPct, discountSteps, estimate, hoursDigits, maxHoursFor, minHoursFor, PRICING, type Complexity, type Mode, type Pricing } from "@/lib/pricing";
+import { useEditMode } from "@/components/admin-context";
+import { PricingAdmin } from "@/components/pricing-admin";
 import { charCount, clampMessage, MAX_MESSAGE } from "@/lib/hire-limits";
 import { LimitModal } from "@/components/limit-modal";
 import { checkCodeShape, normalizeCode, REF_PARAM, refFromCookie, CODE_MAX } from "@/lib/referrals";
@@ -45,11 +47,13 @@ const copy = {
     lines: { work: "Trabajo", discount: "Descuento por volumen", onSite: "Recargo presencial", travel: "Viático*", extra: "Urgencia", private: "Uso privado" },
     estimate: "Estimación",
     total: "Total estimado",
-    deposit: "Anticipo (50%)",
+    deposit: (pct: number) => `Anticipo (${pct}%)`,
     perHour: "/h",
-    note: `Estimación orientativa, no es un presupuesto final. Lo ajustamos juntos en la llamada. Presupuestos válidos ${PRICING.validityDays} días; 50% de anticipo y 50% contra entrega.`,
+    note: (pct: number, days: number) =>
+      `Estimación orientativa, no es un presupuesto final. Lo ajustamos juntos en la llamada. Presupuestos válidos ${days} días; ${pct >= 100 ? "100% por adelantado." : pct <= 0 ? "todo contra entrega." : `${pct}% de anticipo y ${100 - pct}% contra entrega.`}`,
     formula: "Cómo calculo",
-    fProject: "(horas × complejidad − descuento por tamaño: 20 h 15%, 30 h 20%, 40 h 25%) + presencial/día + viático/día + (urgencia × día) + uso privado",
+    fProject: (steps: [number, number][]) =>
+      `(horas × complejidad${steps.length ? ` − descuento por tamaño: ${steps.map(([h, p]) => `${h} h ${p}%`).join(", ")}` : ""}) + presencial/día + viático/día + (urgencia × día) + uso privado`,
     fHourly: "(horas × complejidad) + presencial + viático + urgencia + uso privado",
     cta: "Videollamada",
     write: "Escribime",
@@ -90,11 +94,13 @@ const copy = {
     lines: { work: "Work", discount: "Volume discount", onSite: "On-site surcharge", travel: "Travel*", extra: "Urgency", private: "Private use" },
     estimate: "Estimate",
     total: "Estimated total",
-    deposit: "Deposit (50%)",
+    deposit: (pct: number) => `Deposit (${pct}%)`,
     perHour: "/h",
-    note: `Ballpark estimate, not a final quote. We fine-tune it together on the call. Quotes are valid for ${PRICING.validityDays} days; 50% upfront, 50% on delivery.`,
+    note: (pct: number, days: number) =>
+      `Ballpark estimate, not a final quote. We fine-tune it together on the call. Quotes are valid for ${days} days; ${pct >= 100 ? "100% upfront." : pct <= 0 ? "everything on delivery." : `${pct}% upfront, ${100 - pct}% on delivery.`}`,
     formula: "How I calculate",
-    fProject: "(hours × complexity − size discount: 20 h 15%, 30 h 20%, 40 h 25%) + on-site/day + travel/day + (urgency × day) + private use",
+    fProject: (steps: [number, number][]) =>
+      `(hours × complexity${steps.length ? ` − size discount: ${steps.map(([h, p]) => `${h} h ${p}%`).join(", ")}` : ""}) + on-site/day + travel/day + (urgency × day) + private use`,
     fHourly: "(hours × complexity) + on-site + travel + urgency + private use",
     cta: "Video call",
     write: "Write me",
@@ -163,8 +169,19 @@ function useReferralCode() {
   return { code, setCode, norm, state };
 }
 
-export function HireCalculator() {
+export function HireCalculator({ pricing = PRICING }: { pricing?: Pricing }) {
   const { locale, href } = useLocale();
+  const editOn = useEditMode();
+  // Stored amounts from the server (D1 over the code defaults); the admin panel swaps them after a save.
+  const [P, setP] = useState(pricing);
+  useEffect(() => setP(pricing), [pricing]); // eslint-disable-line react-hooks/set-state-in-effect -- sync with server props after router.refresh()
+  // The amounts panel only renders after mount, once the saved edit-mode preference is applied
+  // (never in the server HTML, so edit mode off never flashes it).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
   const contactShown = useSectionShown("contact");
   const c = copy[locale === "en" ? "en" : "es"];
   const [mode, setMode] = useState<Mode>(PRICING.defaults.mode);
@@ -186,7 +203,8 @@ export function HireCalculator() {
     return () => cancelAnimationFrame(id);
   }, []);
 
-  const r = estimate({ mode, hours, complexity, extra, onSite, onSiteDays: days, extraDays, privateUse });
+  const r = estimate({ mode, hours, complexity, extra, onSite, onSiteDays: days, extraDays, privateUse }, P);
+  const depPct = depositPct(P);
   const total = useCountUp(r.total);
   const maxH = maxHoursFor(mode);
   const minH = minHoursFor(mode);
@@ -212,6 +230,7 @@ export function HireCalculator() {
   return (
     <div className="hire" data-mode={mode} data-cx={complexity}>
       <p className="hire-intro">{c.intro}</p>
+      {editOn && mounted ? <PricingAdmin pricing={P} onSaved={setP} /> : null}
 
       <fieldset className="hire-field">
         <legend className="hire-label">{c.mode}</legend>
@@ -274,7 +293,7 @@ export function HireCalculator() {
           {(["low", "medium", "high"] as Complexity[]).map((k) => (
             <button key={k} type="button" role="radio" aria-checked={complexity === k} className={`hire-cx-card hire-cx-${k}`} onClick={() => setComplexity(k)}>
               <span className="hire-cx-name">{c.cx[k][0]}</span>
-              <span className="hire-cx-rate">US$ {PRICING.rates[k]}{c.perHour}</span>
+              <span className="hire-cx-rate">US$ {P.rates[k]}{c.perHour}</span>
               <span className="hire-cx-desc">{c.cx[k][1]}</span>
             </button>
           ))}
@@ -288,7 +307,7 @@ export function HireCalculator() {
             on={onSite}
             set={setOnSite}
             label={mode === "project" ? c.projectOnSite : c.onSite}
-            sub={`+US$ ${PRICING.onSiteSurcharge} · ${c.travel} +US$ ${PRICING.travel}${mode === "project" ? ` / ${c.dayUnit[0]}` : ""}`}
+            sub={`+US$ ${P.onSiteSurcharge} · ${c.travel} +US$ ${P.travel}${mode === "project" ? ` / ${c.dayUnit[0]}` : ""}`}
           />
           {mode === "project" && onSite ? (
             <div className="hire-stepper" role="group" aria-label={c.days}>
@@ -298,7 +317,7 @@ export function HireCalculator() {
               <button type="button" aria-label="+" disabled={days >= PRICING.maxOnSiteDays} onClick={() => setDays((d) => Math.min(PRICING.maxOnSiteDays, d + 1))}>+</button>
             </div>
           ) : null}
-          <Toggle on={extra} set={setExtra} label={c.extra} sub={`+US$ ${PRICING.extra}${mode === "project" ? ` × ${c.dayUnit[0]}` : ""}`} />
+          <Toggle on={extra} set={setExtra} label={c.extra} sub={`+US$ ${P.extra}${mode === "project" ? ` × ${c.dayUnit[0]}` : ""}`} />
           {mode === "project" && extra ? (
             <div className="hire-stepper" role="group" aria-label={c.extraDays}>
               <span className="hire-stepper-label">{c.extraDays}</span>
@@ -307,7 +326,7 @@ export function HireCalculator() {
               <button type="button" aria-label="+" disabled={extraDays >= PRICING.maxUrgencyDays} onClick={() => setExtraDays((d) => Math.min(PRICING.maxUrgencyDays, d + 1))}>+</button>
             </div>
           ) : null}
-          <Toggle on={privateUse} set={setPrivateUse} label={`${c.privateUse} (+US$ ${PRICING.privateUse[mode]})`} sub={c.privateUseSub} testId="hire-private-use" />
+          <Toggle on={privateUse} set={setPrivateUse} label={`${c.privateUse} (+US$ ${P.privateUse[mode]})`} sub={c.privateUseSub} testId="hire-private-use" />
         </div>
       </fieldset>
 
@@ -321,7 +340,7 @@ export function HireCalculator() {
             <li key={l.id}>
               <span>
                 {c.lines[l.id]}
-                {l.id === "work" ? <em> {hours}h × US$ {PRICING.rates[complexity]}</em> : null}
+                {l.id === "work" ? <em> {hours}h × US$ {P.rates[complexity]}</em> : null}
                 {l.id === "discount" ? <em> -{l.pct}%</em> : null}
                 {l.days && mode === "project" ? <em> {l.days} {c.dayUnit[l.days === 1 ? 0 : 1]} × US$ {l.amount / l.days}</em> : null}
               </span>
@@ -334,14 +353,14 @@ export function HireCalculator() {
           <strong>~{money(total)}</strong>
         </div>
         <div className="hire-deposit">
-          <span>{c.deposit}</span>
+          <span>{c.deposit(depPct)}</span>
           <span>{money(r.deposit)}</span>
         </div>
         {r.lines.some((l) => l.id === "travel") ? <p className="hire-note">{c.travelNote}</p> : null}
-        <p className="hire-note">{c.note}</p>
+        <p className="hire-note">{c.note(depPct, P.validityDays)}</p>
         <p className="hire-formula">
           <span>{c.formula}:</span>
-          <code>{mode === "project" ? c.fProject : c.fHourly}</code>
+          <code>{mode === "project" ? c.fProject(discountSteps(P)) : c.fHourly}</code>
         </p>
       </section>
 
@@ -383,10 +402,10 @@ export function HireCalculator() {
           rows={[
             [c.total, money(r.total)],
             [c.mode, c.modes[mode]],
-            [c.hours, `${Math.min(hours, maxH)}h · ${c.cx[complexity][0]} (US$ ${PRICING.rates[complexity]}${c.perHour})`],
+            [c.hours, `${Math.min(hours, maxH)}h · ${c.cx[complexity][0]} (US$ ${P.rates[complexity]}${c.perHour})`],
             [c.onSite, onSite ? (mode === "project" ? `${c.form.yes}, ${days} ${c.dayUnit[days === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
             [c.extra, extra ? (mode === "project" ? `${c.form.yes}, ${extraDays} ${c.dayUnit[extraDays === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
-            [c.privateUse, privateUse ? `${c.form.yes}, +US$ ${PRICING.privateUse[mode]}` : c.form.no],
+            [c.privateUse, privateUse ? `${c.form.yes}, +US$ ${P.privateUse[mode]}` : c.form.no],
             ...(ref.state === "ok" ? [[c.ref.by, ref.norm] as [string, string]] : []),
           ]}
         />

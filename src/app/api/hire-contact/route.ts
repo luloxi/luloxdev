@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { bodyFromForm, handleHireContact, type HireDeps, type HireEnv } from "@/lib/hire-contact";
 import { getDb } from "@/lib/db";
 import { getActiveReferrer, insertLead } from "@/lib/referrals-db";
+import { loadPricing } from "@/lib/pricing-db";
 
 export async function POST(request: Request) {
   const type = request.headers.get("content-type") ?? "";
@@ -16,9 +17,11 @@ export async function POST(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
   const db = await getDb();
+  // Same stored amounts the page shows (code defaults if no rows); never the browser's numbers.
+  const pricing = await loadPricing(db);
   const deps: HireDeps = db
-    ? { findReferrer: (code) => getActiveReferrer(db, code), saveLead: (lead) => insertLead(db, lead) }
-    : {};
+    ? { pricing, findReferrer: (code) => getActiveReferrer(db, code), saveLead: (lead) => insertLead(db, lead) }
+    : { pricing };
   const r = await handleHireContact(body, env as unknown as HireEnv, ip, deps);
   if (isForm) {
     // Plain form post: send the browser back to the page with the result in the URL.

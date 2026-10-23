@@ -4558,3 +4558,40 @@ html.has-admin-strip .home-root { overflow-y: auto; }
 .radm-status[data-status="pending"] { color: var(--neon-orange); }
 .radm-note { font-size: .8rem; color: var(--muted); }
 .ref-admin-link { justify-self: start; }
+
+/* /contratar amounts panel (admin + edit mode only, src/components/pricing-admin.tsx).
+   Compact, collapsed by default: a dashed card in the calculator colors. Same layout at every
+   width (the calculator column is narrow on desktop too). */
+.price-admin { border: 1px dashed color-mix(in srgb, var(--o) 55%, transparent); border-radius: 14px; padding: .15rem .9rem; min-width: 0;
+  background: color-mix(in srgb, var(--o) 5%, transparent); }
+.price-admin[open] { padding-bottom: .9rem; }
+.price-admin > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: .55rem; padding: .6rem 0; user-select: none; }
+.price-admin > summary::-webkit-details-marker { display: none; }
+.price-admin > summary::after { content: ""; margin-left: auto; width: .5rem; height: .5rem; border-right: 2px solid var(--o); border-bottom: 2px solid var(--o); transform: rotate(45deg); transition: transform .2s; }
+.price-admin[open] > summary::after { transform: rotate(-135deg); }
+.price-admin > summary:focus-visible { outline: 2px solid var(--cy); outline-offset: 2px; border-radius: 8px; }
+.price-admin-title { font-family: var(--font-mono, monospace); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--o); font-weight: 700; }
+.price-admin-badge { font-size: .72rem; color: var(--muted); border: 1px solid color-mix(in srgb, var(--muted) 35%, transparent); border-radius: 999px; padding: .05rem .5rem; }
+.price-admin-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--o); box-shadow: 0 0 8px var(--o); }
+.price-admin-hint { margin: 0 0 .8rem; font-size: .8rem; color: var(--muted); line-height: 1.5; }
+.price-admin-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem .8rem; }
+.price-admin-group { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: .35rem; align-content: start; }
+.price-admin-group[data-group="rates"], .price-admin-group[data-group="conditions"], .price-admin-group[data-group="discounts"] { grid-column: span 2; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: .5rem; }
+.price-admin-group legend { padding: 0; margin-bottom: .35rem; font-family: var(--font-mono, monospace); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--cy); }
+.price-admin-field { display: grid; gap: .2rem; min-width: 0; cursor: text; }
+.price-admin-name { font-size: .78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.price-admin-box { display: flex; align-items: center; gap: .2rem; min-width: 0; border: 1px solid color-mix(in srgb, var(--cy) 40%, transparent); border-radius: 9px; padding: .3rem .45rem; }
+.price-admin-box:focus-within { border-color: var(--cy); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cy) 22%, transparent); }
+.price-admin-field[data-bad] .price-admin-box { border-color: #e5484d; box-shadow: 0 0 0 3px rgb(229 72 77 / .2); }
+.price-admin-box i { font-style: normal; font-size: .72rem; color: var(--muted); flex: none; }
+.price-admin-box input { width: 100%; min-width: 0; font: inherit; font-family: var(--font-mono, monospace); font-size: 1rem; font-weight: 700; color: var(--foreground); background: transparent; border: 0; outline: none; padding: 0; text-align: right; }
+.price-admin-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: .5rem; margin-top: .9rem; }
+.price-admin-status { scroll-margin-bottom: calc(var(--as-h, 0px) + 1.5rem); margin: 0 auto 0 0; font-size: .8rem; color: var(--muted); min-width: 0; flex: 1 1 12rem; }
+.price-admin-status[data-state="ok"] { color: var(--cy); font-weight: 600; }
+.price-admin-status[data-state="error"] { color: #e5484d; font-weight: 600; }
+.price-admin-btn { cursor: pointer; padding: .45rem .9rem; border-radius: 999px; font-size: .85rem; font-weight: 700; border: 1px solid color-mix(in srgb, var(--muted) 40%, transparent); color: var(--foreground); transition: all .2s; }
+.price-admin-btn:hover { border-color: var(--cy); color: var(--cy); }
+.price-admin-btn.is-primary { border-color: var(--o); background: color-mix(in srgb, var(--o) 18%, transparent); color: var(--o); }
+.price-admin-btn.is-primary:hover { background: color-mix(in srgb, var(--o) 28%, transparent); }
+.price-admin-btn:disabled { cursor: not-allowed; opacity: .5; }
+.price-admin-btn:focus-visible { outline: 2px solid var(--cy); outline-offset: 2px; }
