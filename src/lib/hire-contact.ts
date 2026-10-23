@@ -107,7 +107,7 @@ export async function handleHireContact(raw: unknown, env: HireEnv, ip: string):
   if (!(await verifyTurnstile(body.turnstileToken, env, ip))) return { status: 403, body: { error: "captcha_failed" } };
 
   const b = budgetLines(budget);
-  const to = env.CONTACT_TO ?? "lucianoolivabianco@gmail.com";
+  const to = env.CONTACT_TO ?? "hola@lulox.com.ar";
   const from = env.CONTACT_FROM ?? "no-responder@lulox.com.ar";
   const subject = `Contratar: ${name} · ${b.total} (${LABEL.mode[budget.mode]})`;
   const text = [

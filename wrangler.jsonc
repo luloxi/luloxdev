@@ -38,7 +38,7 @@
     { "pattern": "www.lulox.com.ar", "custom_domain": true }
   ],
   // Contact form: Email Routing send binding (lulox.com.ar, verified destination).
-  // Recipient is provisional until a lulox.com.ar mailbox exists.
+  // Fallback only (used when RESEND_API_KEY is not set); it can only deliver to this verified address.
   "send_email": [
     { "name": "CONTACT_EMAIL", "destination_address": "lucianoolivabianco@gmail.com" }
   ],
@@ -47,7 +47,7 @@
   ],
   // TURNSTILE_SECRET is a Worker secret (never in this file).
   "vars": {
-    "CONTACT_TO": "lucianoolivabianco@gmail.com",
+    "CONTACT_TO": "hola@lulox.com.ar",
     "CONTACT_FROM": "no-responder@lulox.com.ar",
     // With RESEND_API_KEY set: Luciano's copy goes here and the visitor gets a confirmation.
     "CONTACT_INBOX": "hola@lulox.com.ar",
