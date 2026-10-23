@@ -2239,18 +2239,6 @@
   line-height: 1.05;
 }
 
-.home-title-rule {
-  margin-top: 0.55rem;
-  height: 1px;
-  width: 3.5rem;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--accent),
-    transparent
-  );
-  opacity: 0.65;
-}
 
 .home-socials {
   margin-top: 0.55rem;
@@ -2339,9 +2327,9 @@
     justify-content: flex-end;
   }
 
+  /* Copy column is as wide as the menu, so the title centers over the buttons. */
   .home-copy {
-    align-items: flex-start;
-    text-align: left;
+    max-width: 22rem;
   }
 
   .home-title {
@@ -2351,15 +2339,6 @@
     line-height: 0.98;
   }
 
-  .home-title-rule {
-    margin-top: 0.75rem;
-    width: 5rem;
-    background: linear-gradient(
-      90deg,
-      var(--accent),
-      color-mix(in oklab, var(--accent) 20%, transparent)
-    );
-  }
 
   .home-socials {
     margin-top: 1.15rem;
@@ -2401,6 +2380,7 @@
     gap: 3rem 4rem;
   }
 
+  .home-copy,
   .home-sections {
     max-width: 24rem;
   }
@@ -3099,10 +3079,6 @@
     0 10px 24px color-mix(in oklab, #c8102e 22%, transparent);
 }
 
-:root:not(.dark) .home-title-rule {
-  height: 2px;
-  background: linear-gradient(90deg, #c8102e, color-mix(in oklab, #c8102e 30%, transparent));
-}
 
 :root:not(.dark) .cp-page-title-text {
   color: #a50021;

@@ -97,7 +97,6 @@ export default function HomePage() {
             >
               {site.name}
             </h1>
-            <div className="home-title-rule" aria-hidden />
 
             <div className="home-sections">
               <SectionNav />
