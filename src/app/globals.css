@@ -4343,3 +4343,6 @@ input[type="range"]::-moz-range-thumb { cursor: pointer; }
 :is(button, input, select, textarea, [role="button"], [role="radio"], [role="switch"])[disabled],
 [aria-disabled="true"],
 fieldset:disabled :is(button, input, select, textarea, label) { cursor: not-allowed; }
+
+/* Accordion hint rev pauses while its section is off-screen (IntersectionObserver in copy-markdown). */
+.md-acc-item.is-offscreen .md-acc-hint { animation-play-state: paused; }

@@ -218,12 +218,41 @@ function Accordion({ sections, pClass, raw, copyKey, afterSection }: { sections:
   // for reduced motion.
   const anyOpen = open.some(Boolean);
   const [peek, setPeek] = useState(false);
+  // Off-screen sections pause: CSS header rev (class) and the peek timer.
+  const listRef = useRef<HTMLDivElement>(null);
+  const [offscreen, setOffscreen] = useState<Set<number>>(() => new Set());
   useEffect(() => {
-    if (anyOpen || copyKey || sections.length === 0) return;
+    const root = listRef.current;
+    if (!root || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver((entries) => {
+      setOffscreen((prev) => {
+        const nextSet = new Set(prev);
+        for (const e of entries) {
+          const i = Number((e.target as HTMLElement).dataset.accIndex);
+          if (e.isIntersecting) nextSet.delete(i);
+          else nextSet.add(i);
+        }
+        return nextSet;
+      });
+    });
+    root.querySelectorAll<HTMLElement>(":scope > .md-acc-item").forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [sections.length]);
+  const peekVisible = !offscreen.has(0);
+  // Remaining time to the next peek survives pauses, so it stays in sync with the (paused) CSS rev.
+  const peekDue = useRef<number | null>(null);
+  useEffect(() => {
+    if (anyOpen || copyKey || sections.length === 0) {
+      peekDue.current = null;
+      return;
+    }
+    if (!peekVisible) return;
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     let next = 0;
     let close = 0;
+    let at = 0;
     const loop = (delay: number) => {
+      at = performance.now() + delay;
       next = window.setTimeout(() => {
         setPeek(true);
         close = window.setTimeout(() => setPeek(false), 1700);
@@ -231,22 +260,23 @@ function Accordion({ sections, pClass, raw, copyKey, afterSection }: { sections:
       }, delay);
     };
     // First lunge of the header lands at ~4.95s (1.2s delay + 75% of 5s).
-    loop(4950);
+    loop(peekDue.current ?? 4950);
     return () => {
+      peekDue.current = Math.max(0, at - performance.now());
       window.clearTimeout(next);
       window.clearTimeout(close);
       setPeek(false);
     };
-  }, [anyOpen, copyKey, sections.length]);
+  }, [anyOpen, copyKey, sections.length, peekVisible]);
   return (
-    <div className="md-acc-list">
+    <div className="md-acc-list" ref={listRef}>
       {afterSection?.(-1, { title: "", body: "" })}
       {sections.map((sec, i) => {
         const isOpen = open[i] ?? false;
         const id = `${base}-s${i}`;
         return (
           <Fragment key={id}>
-          <section className={`md-acc-item${isOpen ? " is-open" : ""}${peek && i === 0 && !anyOpen ? " md-acc-peek" : ""}`}>
+          <section data-acc-index={i} className={`md-acc-item${isOpen ? " is-open" : ""}${offscreen.has(i) ? " is-offscreen" : ""}${peek && i === 0 && !anyOpen ? " md-acc-peek" : ""}`}>
             {copyKey ? (
               <EditableSection
                 index={i}
