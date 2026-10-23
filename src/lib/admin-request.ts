@@ -13,3 +13,11 @@ export async function isAdminRequest(): Promise<boolean> {
     return false;
   }
 }
+
+/** Admin AND edit mode ON (cookie): only then the blog includes drafts. */
+export async function canSeeDraftsRequest(): Promise<boolean> {
+  const { canSeeDrafts } = await import("@/lib/edit-mode");
+  const cookie = (await headers()).get("cookie");
+  if (!canSeeDrafts(true, cookie)) return false;
+  return isAdminRequest();
+}

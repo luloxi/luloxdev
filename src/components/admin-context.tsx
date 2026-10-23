@@ -1,7 +1,9 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale } from "@/i18n/locale-provider";
+import { EDIT_MODE_KEY, editModeCookie, editModeFromCookie } from "@/lib/edit-mode";
 
 type AdminState = { isAdmin: boolean; editOn: boolean };
 const AdminContext = createContext<AdminState>({ isAdmin: false, editOn: false });
@@ -13,11 +15,17 @@ const AdminContext = createContext<AdminState>({ isAdmin: false, editOn: false }
  */
 export function AdminProvider({ isAdmin, children }: { isAdmin: boolean; children: ReactNode }) {
   const { locale } = useLocale();
+  const router = useRouter();
   const [editOn, setEditOn] = useState(true);
   useEffect(() => {
-    const v = window.localStorage.getItem("lulox-edit-mode");
+    const v = window.localStorage.getItem(EDIT_MODE_KEY);
     if (v === "off") setEditOn(false); // eslint-disable-line react-hooks/set-state-in-effect -- restore saved preference
-  }, []);
+    // Mirror to the cookie the server reads (blog drafts); re-render if it was out of sync.
+    if (isAdmin && editModeFromCookie(document.cookie) !== (v !== "off")) {
+      document.cookie = editModeCookie(v !== "off");
+      router.refresh();
+    }
+  }, [isAdmin, router]);
   const es = locale === "es";
   return (
     <AdminContext.Provider value={{ isAdmin, editOn: isAdmin && editOn }}>
@@ -29,12 +37,13 @@ export function AdminProvider({ isAdmin, children }: { isAdmin: boolean; childre
           aria-pressed={editOn}
           aria-label={es ? "Modo edición" : "Edit mode"}
           title={es ? "Modo edición: editar el contenido en la página" : "Edit mode: edit content in place"}
-          onClick={() =>
-            setEditOn((v) => {
-              window.localStorage.setItem("lulox-edit-mode", v ? "off" : "on");
-              return !v;
-            })
-          }
+          onClick={() => {
+            const next = !editOn;
+            window.localStorage.setItem(EDIT_MODE_KEY, next ? "on" : "off");
+            document.cookie = editModeCookie(next);
+            setEditOn(next);
+            router.refresh(); // server pages (blog) re-read the cookie: drafts hide/show
+          }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />

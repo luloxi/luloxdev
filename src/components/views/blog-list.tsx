@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
-import { useIsAdmin } from "@/components/admin-context";
+import { useEditMode, useIsAdmin } from "@/components/admin-context";
 import type { BlogPost } from "@/content/blog/types";
 import { localizePost } from "@/content/blog/types";
 import { useLocale } from "@/i18n/locale-provider";
@@ -29,6 +29,7 @@ function formatDate(iso: string, locale: string) {
 export function BlogList({ posts, error }: { posts: BlogPost[]; error?: boolean }) {
   const { t, locale } = useLocale();
   const isAdmin = useIsAdmin();
+  const editOn = useEditMode();
   const es = locale === "es";
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
@@ -37,12 +38,13 @@ export function BlogList({ posts, error }: { posts: BlogPost[]; error?: boolean 
     return [...posts]
       .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
       .filter((p) => {
+        if (p.published === false && !editOn) return false; // edit OFF: drafts hidden, as for a visitor
         if (!words.length) return true;
         // Title, summary, body (both languages) and tags.
         const hay = fold([p.title.es, p.title.en, p.summary.es, p.summary.en, p.body.es, p.body.en, ...(p.tags ?? [])].join(" "));
         return words.every((w) => hay.includes(w));
       });
-  }, [posts, query]);
+  }, [posts, query, editOn]);
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const cur = Math.min(page, pages - 1);
   const shown = filtered.slice(cur * PAGE_SIZE, cur * PAGE_SIZE + PAGE_SIZE);
