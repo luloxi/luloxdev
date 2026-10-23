@@ -6,7 +6,7 @@ import { useTheme } from "@/components/providers/theme-provider";
 
 /**
  * Foolproof theme control: small "tema"/"theme" label + two color chips
- * (light surface vs dark surface). Same chrome language as the flag toggles.
+ * (dark first, then light, like the AR → US flags). Same chrome language as the flag toggles.
  */
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -23,19 +23,6 @@ export function ThemeToggle() {
       <div className="cp-theme-swatches">
         <button
           type="button"
-          aria-pressed={!isDark}
-          aria-label={t.ui.themeLight}
-          title={t.ui.themeLight}
-          onClick={() => setTheme("light")}
-          className={cn("cp-lang-btn", !isDark && "cp-lang-btn-active")}
-        >
-          <span
-            className="cp-lang-flag-wrap cp-theme-swatch cp-theme-swatch-light"
-            aria-hidden
-          />
-        </button>
-        <button
-          type="button"
           aria-pressed={isDark}
           aria-label={t.ui.themeDark}
           title={t.ui.themeDark}
@@ -44,6 +31,19 @@ export function ThemeToggle() {
         >
           <span
             className="cp-lang-flag-wrap cp-theme-swatch cp-theme-swatch-dark"
+            aria-hidden
+          />
+        </button>
+        <button
+          type="button"
+          aria-pressed={!isDark}
+          aria-label={t.ui.themeLight}
+          title={t.ui.themeLight}
+          onClick={() => setTheme("light")}
+          className={cn("cp-lang-btn", !isDark && "cp-lang-btn-active")}
+        >
+          <span
+            className="cp-lang-flag-wrap cp-theme-swatch cp-theme-swatch-light"
             aria-hidden
           />
         </button>

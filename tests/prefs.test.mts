@@ -12,7 +12,7 @@ test("Accept-Language fallback matches the old browser rule", () => {
   assert.equal(localeFromAcceptLanguage("fr-FR"), "en");
 });
 
-function run(cookie: string, ls: Record<string, string>, ssrLocale: string, ssIn: Record<string, string> | null = {}) {
+function run(cookie: string, ls: Record<string, string>, ssrLocale: string, ssIn: Record<string, string> | null = {}, prefersLight = true) {
   const cls = new Set(["dark"]);
   let jar = cookie;
   let reloaded = false;
@@ -45,19 +45,34 @@ function run(cookie: string, ls: Record<string, string>, ssrLocale: string, ssIn
     sessionStorage: ssIn === null
       ? { getItem: () => { throw new Error("denied"); }, setItem: () => { throw new Error("denied"); } }
       : { getItem: (k: string) => ss[k] ?? null, setItem: (k: string, v: string) => void (ss[k] = v) },
-    matchMedia: () => ({ matches: true }),
+    matchMedia: () => ({ matches: prefersLight }),
     location: { protocol: "https:", href: "https://www.lulox.dev/", replace: () => void (reloaded = true) },
   };
   new Function(...Object.keys(env), PREFS_HEAD_SCRIPT)(...Object.values(env));
   return { theme: [...cls].join(","), cookie: jar, reloaded, status: attrs["data-prefs"], lang: documentElement.lang };
 }
 
-test("head script: no prefs keeps server defaults", () => {
-  const r = run("", {}, "en");
-  assert.equal(r.theme, "dark");
-  assert.equal(r.cookie, "");
-  assert.equal(r.reloaded, false);
-  assert.equal(r.status, "default");
+test("head script: no prefs follows the system theme before paint, persists nothing", () => {
+  const dark = run("", {}, "en", {}, false);
+  assert.equal(dark.theme, "dark");
+  assert.equal(dark.cookie, "");
+  assert.equal(dark.reloaded, false);
+  assert.equal(dark.status, "system");
+  const light = run("", {}, "en", {}, true);
+  assert.equal(light.theme, "light");
+  assert.equal(light.cookie, "");
+});
+
+test("head script: a saved manual theme beats the system theme", () => {
+  assert.equal(run("lulox-theme=dark", {}, "en", {}, true).theme, "dark");
+  assert.equal(run("lulox-theme=light", {}, "en", {}, false).theme, "light");
+  assert.equal(run("", { theme: "dark" }, "en", {}, true).theme, "dark");
+});
+
+test("theme toggle: dark first, then light (same order as the AR → US flags)", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync(new URL("../src/components/theme-toggle.tsx", import.meta.url), "utf8");
+  assert.ok(src.indexOf('setTheme("dark")') < src.indexOf('setTheme("light")'));
 });
 
 test("head script: cookie theme applied before paint", () => {

@@ -37,6 +37,18 @@ function subscribe(onChange: () => void) {
   return () => obs.disconnect();
 }
 
+/** Theme from prefers-color-scheme (dark when unknown). */
+export function systemTheme(mq?: { matches: boolean } | null): Theme {
+  return mq?.matches ? "light" : "dark";
+}
+
+/** True when the user picked a theme by hand (cookie, or a legacy explicit value). */
+function hasSavedTheme() {
+  if (normalizeTheme(readCookie(THEME_COOKIE))) return true;
+  const raw = readStorage(THEME_STORAGE_KEY)?.replace(/"/g, "").trim();
+  return raw === "light" || raw === "dark";
+}
+
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
   // Avoid every element animating colors during the switch.
@@ -79,14 +91,25 @@ export function ThemeProvider({
   useEffect(() => {
     const fromCookie = normalizeTheme(readCookie(THEME_COOKIE));
     const raw = readStorage(THEME_STORAGE_KEY);
-    const wanted =
-      fromCookie ??
-      normalizeTheme(raw, window.matchMedia?.("(prefers-color-scheme: light)").matches);
-    if (!wanted) return;
+    const mq = window.matchMedia?.("(prefers-color-scheme: light)");
+    const wanted = fromCookie ?? normalizeTheme(raw, mq?.matches) ?? systemTheme(mq);
     if (readDomTheme() !== wanted) applyTheme(wanted);
-    if (!fromCookie && raw?.replace(/"/g, "").trim() !== "system") {
+    // Only migrate an explicit legacy pick; the system theme is never persisted.
+    if (!fromCookie && hasSavedTheme()) {
       writePrefCookie(THEME_COOKIE, wanted);
     }
+  }, []);
+
+  // No saved choice: follow the system live (OS switches dark/light while the page is open).
+  useEffect(() => {
+    const mq = window.matchMedia?.("(prefers-color-scheme: light)");
+    if (!mq) return;
+    const onChange = () => {
+      if (hasSavedTheme()) return; // a manual pick always wins
+      applyTheme(systemTheme(mq));
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
   }, []);
 
   const value = useMemo(
