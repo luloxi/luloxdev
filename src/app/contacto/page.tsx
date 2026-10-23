@@ -11,6 +11,7 @@ import {
 import { PageShell } from "@/components/page-shell";
 import { HireButton } from "@/components/hire-button";
 import { contactSocials } from "@/content/site";
+import { useSectionShown } from "@/components/site-order-context";
 import { useLocale } from "@/i18n/locale-provider";
 
 const socialIcons: Record<
@@ -40,6 +41,7 @@ const socialIcons: Record<
 
 export default function ContactPage() {
   const { t } = useLocale();
+  const hireShown = useSectionShown("hire");
 
   return (
     <PageShell title={t.contact.title}>
@@ -61,7 +63,7 @@ export default function ContactPage() {
         })}
       </div>
 
-      <HireButton className="contact-hire" />
+      {hireShown ? <HireButton className="contact-hire" /> : null}
     </PageShell>
   );
 }

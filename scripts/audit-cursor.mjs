@@ -2,6 +2,7 @@
 // Usage: start the site (pnpm dev or pnpm preview), then
 //   AUDIT_URL=http://localhost:3000 node scripts/audit-cursor.mjs
 // Needs playwright-core and a Chromium/Chrome (CHROME_PATH, default /usr/bin/google-chrome). Exit 1 on findings.
+// Optional AUDIT_COOKIE="name=value" adds a cookie to every page (e.g. a LOCAL admin session to audit the edit-mode strip).
 import { chromium } from "playwright-core";
 
 const BASE = process.env.AUDIT_URL ?? "http://localhost:3000";
@@ -14,7 +15,7 @@ const ROUTES = process.env.AUDIT_ROUTES ? process.env.AUDIT_ROUTES.split(",") : 
 
 const probe = () => {
   const SEL = 'a[href], button, [role=button], [role=radio], [role=switch], [role=tab], [role=checkbox], [onclick], label, summary, select, input:not([type=hidden]), [tabindex]:not([tabindex="-1"])';
-  const TEXTY = new Set(["text", "email", "search", "url", "tel", "password", "number", ""]);
+  const TEXTY = new Set(["text", "email", "search", "url", "tel", "password", "number", "date", ""]); // typed fields (date: its picker icon has the pointer)
   const bad = [];
   let checked = 0;
   for (const el of document.querySelectorAll(SEL)) {
@@ -23,7 +24,7 @@ const probe = () => {
     if (!r.width || !r.height || cs.visibility === "hidden" || cs.display === "none" || el.closest("[aria-hidden=true], [inert]")) continue;
     const tag = el.tagName.toLowerCase();
     if (tag === "textarea" || (tag === "input" && TEXTY.has(el.getAttribute("type") ?? ""))) continue; // text fields keep the I-beam
-    if (tag === "label" && !el.htmlFor && !el.querySelector("input:not([type=text]):not([type=email]), select")) continue; // wraps a text field
+    if (tag === "label" && !el.htmlFor && !el.querySelector("input:not([type=text]):not([type=email]):not([type=search]), select")) continue; // wraps a text field
     if (el.matches("[contenteditable], .sec-reorder-handle, .avatar-hud")) continue; // drag handles / easter egg: intentional
     if (el.closest("iframe")) continue;
     checked++;
@@ -35,7 +36,9 @@ const probe = () => {
 };
 
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "/usr/bin/google-chrome", args: ["--no-sandbox"] });
+const EXTRA = process.env.AUDIT_COOKIE ? (([name, ...v]) => [{ name, value: v.join("="), url: BASE }])(process.env.AUDIT_COOKIE.split("=")) : [];
 const ctx0 = await browser.newContext();
+await ctx0.addCookies(EXTRA);
 const routes = [...ROUTES];
 if (!process.env.AUDIT_ROUTES) { // add every blog article linked from /blog and /en/blog
   const p = await ctx0.newPage();
@@ -49,7 +52,7 @@ const findings = new Map();
 let checked = 0;
 for (const theme of ["light", "dark"]) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-  await ctx.addCookies([{ name: "lulox-theme", value: theme, url: BASE }]);
+  await ctx.addCookies([{ name: "lulox-theme", value: theme, url: BASE }, ...EXTRA]);
   const p = await ctx.newPage();
   for (const route of routes) {
     await p.goto(BASE + route, { waitUntil: WAIT });

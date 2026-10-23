@@ -8,6 +8,7 @@ import { ResearchTopics } from "@/components/research-topics";
 import type { BlogPost } from "@/content/blog/types";
 import { localizePost } from "@/content/blog/types";
 import Link from "next/link";
+import { useSectionShown } from "@/components/site-order-context";
 import { useLocale } from "@/i18n/locale-provider";
 import { useEditMode } from "@/components/admin-context";
 import { useBlogPostEditor } from "@/components/blog-post-edit";
@@ -42,6 +43,7 @@ function EditablePost({ post }: { post: BlogPost }) {
 
 function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
   const { t, locale, href } = useLocale();
+  const contactShown = useSectionShown("contact");
   const L = localizePost(post, locale);
   const articleRef = useRef<HTMLElement>(null);
   const [coverShape, setCoverShape] = useState<"square" | "wide" | "tall">("square");
@@ -126,10 +128,12 @@ function PostLayout({ post, slots }: { post: BlogPost; slots?: Slots }) {
               {t.blog.authorHeading}
             </p>
             <CopyMarkdown copyKey="blog.authorBio" text={t.blog.authorBio} />
-            <Link href={href("/contacto")} className="blog-author-contact">
-              {t.blog.authorContact}
-              <span aria-hidden>▸</span>
-            </Link>
+            {contactShown ? (
+              <Link href={href("/contacto")} className="blog-author-contact">
+                {t.blog.authorContact}
+                <span aria-hidden>▸</span>
+              </Link>
+            ) : null}
           </div>
         </aside>
       </article>

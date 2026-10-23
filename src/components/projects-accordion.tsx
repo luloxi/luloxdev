@@ -7,6 +7,8 @@ import { GitHubIcon } from "@/components/icons/social";
 import type { PastProject } from "@/content/projects";
 import { github } from "@/content/site";
 import { useLocale } from "@/i18n/locale-provider";
+import { useSiteOrder } from "@/components/site-order-context";
+import { orderRecords } from "@/lib/site-sections";
 import { useHoloTilt } from "@/lib/use-holo-tilt";
 import type { ComponentProps } from "react";
 
@@ -27,8 +29,12 @@ const pastAccents = [
   "var(--section-projects)",
 ];
 
-export function ProjectsAccordion({ projects }: { projects: PastProject[] }) {
+export function ProjectsAccordion({ projects: all }: { projects: PastProject[] }) {
   const { t, locale, href } = useLocale();
+  // The server already dropped hidden projects for visitors; this applies live reorders/hides from the admin strip.
+  const order = useSiteOrder();
+  const projects = order.projects.length ? orderRecords(all, order.projects, order.showHidden) : all;
+  const hidden = new Set(order.projects.filter((p) => !p.visible).map((p) => p.key));
   return (
     <div className="space-y-10">
       {/* Code: GitHub CTA + past projects underneath */}
@@ -50,7 +56,8 @@ export function ProjectsAccordion({ projects }: { projects: PastProject[] }) {
               <li key={project.id}>
                 <HoloLink
                   href={href(`/proyectos/${project.id}`)}
-                  className="cp-row group"
+                  className={`cp-row group${hidden.has(project.id) ? " is-section-hidden" : ""}`}
+                  data-hidden={hidden.has(project.id) ? "true" : undefined}
                   style={{ ["--cp-accent" as string]: accent }}
                 >
                   <span className="cp-nav-frame" aria-hidden>

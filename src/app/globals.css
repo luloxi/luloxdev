@@ -4346,3 +4346,109 @@ fieldset:disabled :is(button, input, select, textarea, label) { cursor: not-allo
 
 /* Accordion hint rev pauses while its section is off-screen (IntersectionObserver in copy-markdown). */
 .md-acc-item.is-offscreen .md-acc-hint { animation-play-state: paused; }
+
+/* ---------- Admin strip (edit mode ON): order + visibility of sections and projects ----------
+   One glass line at the bottom: Secciones/Proyectos switch, the titles (text only, sideways
+   scroll with soft edge fades, no scrollbar), a small search and ← → for the selected title. */
+:root { --as-h: 0px; }
+html.has-admin-strip { --as-h: 104px; }
+@media (min-width: 900px) { html.has-admin-strip { --as-h: 76px; } }
+html.has-admin-strip body { padding-bottom: var(--as-h); }
+html.has-admin-strip .home-root { bottom: var(--as-h); }
+html.has-admin-strip .ie-toggle { bottom: calc(var(--as-h) + 4px); }
+html.as-dragging, html.as-dragging * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
+
+.admin-strip {
+  position: fixed; z-index: 62; left: 50%; bottom: 10px; transform: translateX(-50%);
+  width: min(960px, calc(100vw - 20px)); box-sizing: border-box;
+  display: grid; gap: 6px 8px; padding: 8px 10px; align-items: center;
+  grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "switch search search" "scroll scroll move" "error error error";
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--background) 72%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid color-mix(in oklab, var(--neon-crimson) 28%, var(--border));
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.28), 0 0 0 1px color-mix(in oklab, var(--foreground) 4%, transparent) inset;
+}
+:root:not(.dark) .admin-strip {
+  background: color-mix(in oklab, #ffffff 80%, transparent);
+  box-shadow: 0 10px 28px color-mix(in oklab, #1d2027 14%, transparent);
+}
+.as-row { display: contents; }
+.as-switch { grid-area: switch; }
+.as-search { grid-area: search; }
+.as-move { grid-area: move; }
+@media (min-width: 900px) {
+  .admin-strip { grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "switch scroll search move" "error error error error"; gap: 10px; padding: 8px 12px; }
+}
+@media (min-width: 1200px) { .admin-strip { width: min(1120px, calc(100vw - 180px)); } }
+/* The home is locked to the viewport; with the strip open it may scroll instead of clipping the menu. */
+html.has-admin-strip .home-root { overflow-y: auto; }
+
+.as-switch { display: inline-flex; flex: none; padding: 2px; border-radius: 999px; border: 1px solid var(--border); background: color-mix(in oklab, var(--foreground) 4%, transparent); }
+.as-switch-btn {
+  min-height: 32px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--muted);
+  font-family: var(--font-orbitron), ui-sans-serif, system-ui, sans-serif; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  cursor: pointer; transition: color .15s, background-color .15s;
+}
+.as-switch-btn:hover { color: var(--foreground); }
+.as-switch-btn[aria-selected="true"] { color: #fff; background: var(--neon-crimson); box-shadow: 0 0 12px var(--glow-crimson); }
+
+.as-search {
+  min-width: 0; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 10px;
+  border-radius: 999px; border: 1px solid var(--border); color: var(--muted); cursor: text;
+  background: color-mix(in oklab, var(--foreground) 3%, transparent); transition: border-color .15s;
+}
+@media (min-width: 900px) { .as-search { width: 150px; } }
+.as-search:focus-within { border-color: color-mix(in oklab, var(--neon-crimson) 60%, transparent); color: var(--foreground); }
+.as-search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--foreground); font-size: 16px; line-height: 1; }
+@media (min-width: 900px) { .as-search input { font-size: 0.8rem; } }
+.as-search input::placeholder { color: var(--muted); opacity: 0.8; }
+.as-search input::-webkit-search-cancel-button { cursor: pointer; }
+
+.as-move { display: inline-flex; flex: none; gap: 2px; }
+.as-move-btn {
+  width: 34px; height: 34px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--foreground);
+  font-size: 0.95rem; line-height: 1; cursor: pointer; transition: background-color .15s, opacity .15s;
+}
+.as-move-btn:hover:not(:disabled) { background: color-mix(in oklab, var(--neon-crimson) 14%, transparent); }
+.as-move-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.as-scroll { grid-area: scroll; position: relative; min-width: 0; --fl: 0px; --fr: 0px;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fl), #000 calc(100% - var(--fr)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fl), #000 calc(100% - var(--fr)), transparent 100%);
+}
+.as-scroll.fade-l { --fl: 28px; }
+.as-scroll.fade-r { --fr: 28px; }
+.as-track {
+  display: flex; align-items: center; gap: 2px; margin: 0; padding: 2px 4px; list-style: none;
+  overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; overscroll-behavior-x: contain;
+  scrollbar-width: none; -ms-overflow-style: none; touch-action: pan-x;
+}
+.as-track::-webkit-scrollbar { display: none; }
+.as-track > li { flex: none; display: flex; align-items: center; }
+.as-track > li + li::before { content: ""; width: 3px; height: 3px; margin: 0 6px 0 4px; border-radius: 50%; background: color-mix(in oklab, var(--foreground) 28%, transparent); }
+
+.as-item {
+  position: relative; min-height: 34px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--foreground);
+  font-family: var(--font-orbitron), ui-sans-serif, system-ui, sans-serif; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
+  cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: pan-x;
+  transition: color .15s, opacity .15s, background-color .15s, transform .15s;
+}
+.as-item:hover { background: color-mix(in oklab, var(--neon-crimson) 12%, transparent); }
+.as-item:active { cursor: grab; }
+.as-item:focus-visible { outline: 1px solid var(--neon-crimson); outline-offset: 1px; }
+.as-item.is-selected::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 4px; height: 2px; border-radius: 2px; background: var(--neon-crimson); box-shadow: 0 0 8px var(--glow-crimson); }
+.as-item.is-hidden { color: var(--muted); opacity: 0.55; text-decoration: line-through; text-decoration-thickness: 1.5px; text-decoration-color: color-mix(in oklab, var(--neon-crimson) 70%, transparent); }
+.as-item.is-dragging { opacity: 0.4; transform: scale(0.96); cursor: grabbing; }
+.as-item.drop-before { box-shadow: inset 2px 0 0 var(--neon-crimson); }
+.as-item.drop-after { box-shadow: inset -2px 0 0 var(--neon-crimson); }
+.as-item.as-home { cursor: not-allowed; color: var(--muted); }
+.as-item.as-home:hover { background: transparent; }
+.as-item.as-home::before { content: "⌂"; margin-right: 5px; font-size: 0.85rem; letter-spacing: 0; }
+.as-empty { padding: 0 8px; color: var(--muted); font-size: 0.75rem; white-space: nowrap; min-height: 34px; display: flex; align-items: center; }
+.as-error { grid-area: error; margin: 0; color: var(--neon-crimson); font-size: 0.75rem; }
+
+/* Hidden section/project while the admin edits: still on the page, clearly marked. */
+.is-section-hidden { opacity: 0.45; filter: grayscale(0.7); outline: 1px dashed color-mix(in oklab, var(--neon-crimson) 55%, transparent); outline-offset: 2px; }
+.is-section-hidden:hover { opacity: 0.7; }

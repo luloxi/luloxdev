@@ -3,6 +3,8 @@ import { pastProjects } from "@/content/projects";
 import { site } from "@/content/site";
 import { getPublishedPosts } from "@/lib/blog";
 import { blogPostPath, pathPair } from "@/lib/routes";
+import { isPathHidden, orderRecords } from "@/lib/site-sections";
+import { getSiteOrder } from "@/lib/site-order";
 import type { Locale } from "@/i18n/types";
 
 export const dynamic = "force-dynamic";
@@ -18,19 +20,22 @@ function both(paths: Record<Locale, string>, rest: Omit<Entry, "url" | "alternat
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const pages = ["/", "/sobre-mi", "/proyectos", "/blog", "/contacto", "/contratar", "/privacidad"].flatMap((path) =>
+  // Hidden sections and projects (admin strip) are out of the sitemap, both languages.
+  const order = await getSiteOrder();
+  const shown = (esPath: string) => !isPathHidden(esPath, order.sections, order.projects);
+  const pages = ["/", "/sobre-mi", "/proyectos", "/blog", "/contacto", "/contratar", "/privacidad"].filter(shown).flatMap((path) =>
     both(pathPair(path), {
       lastModified: now,
       changeFrequency: path === "/blog" ? "weekly" : "monthly",
       priority: path === "/" ? 1 : 0.7,
     }),
   );
-  const projects = pastProjects.flatMap((p) =>
+  const projects = orderRecords(pastProjects, order.projects).filter((p) => shown(`/proyectos/${p.id}`)).flatMap((p) =>
     both(pathPair(`/proyectos/${p.id}`), { changeFrequency: "yearly", priority: 0.5 }),
   );
   let posts: MetadataRoute.Sitemap = [];
   try {
-    posts = (await getPublishedPosts()).flatMap((p) =>
+    posts = (shown("/blog") ? await getPublishedPosts() : []).flatMap((p) =>
       both(
         { es: blogPostPath("es", p), en: blogPostPath("en", p) },
         { lastModified: new Date(p.publishedAt), changeFrequency: "monthly", priority: 0.8 },

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CALL_BOOKING_URL, site } from "@/content/site";
+import { useSectionShown } from "@/components/site-order-context";
 import { useLocale } from "@/i18n/locale-provider";
 import { MagicHr } from "@/components/magic-hr";
 import { clampHours, estimate, hoursDigits, maxHoursFor, minHoursFor, PRICING, type Complexity, type Mode } from "@/lib/pricing";
@@ -120,6 +121,7 @@ function useCountUp(value: number) {
 
 export function HireCalculator() {
   const { locale, href } = useLocale();
+  const contactShown = useSectionShown("contact");
   const c = copy[locale === "en" ? "en" : "es"];
   const [mode, setMode] = useState<Mode>(PRICING.defaults.mode);
   const [hours, setHours] = useState(PRICING.defaults[PRICING.defaults.mode].hours);
@@ -316,9 +318,11 @@ export function HireCalculator() {
         <a className="hire-act hire-act-call" href={CALL_BOOKING_URL} target="_blank" rel="noopener noreferrer" data-testid="hire-call-cta">
           {c.cta}
         </a>
-        <Link className="hire-act hire-act-contact" href={href("/contacto")}>
-          {c.contact}
-        </Link>
+        {contactShown ? (
+          <Link className="hire-act hire-act-contact" href={href("/contacto")}>
+            {c.contact}
+          </Link>
+        ) : null}
       </div>
 
     </div>

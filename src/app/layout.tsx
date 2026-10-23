@@ -7,6 +7,9 @@ import { getRequestLocale, getServerPrefs } from "@/lib/prefs";
 import { getCopyOverrides } from "@/lib/site-copy";
 import { isAdminRequest } from "@/lib/admin-request";
 import { AdminProvider } from "@/components/admin-context";
+import { SiteOrderProvider } from "@/components/site-order-context";
+import { AdminStripGate } from "@/components/admin-strip-gate";
+import { getSiteOrder } from "@/lib/site-order";
 import { PREFS_HEAD_SCRIPT } from "@/lib/prefs-shared";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { site } from "@/content/site";
@@ -119,11 +122,20 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Per-request: language from the URL (proxy.ts header), theme from its cookie (else dark).
-  const [{ locale, theme }, overrides, isAdmin] = await Promise.all([
+  const [{ locale, theme }, overrides, isAdmin, order] = await Promise.all([
     getServerPrefs(),
     getCopyOverrides(),
     isAdminRequest(),
+    getSiteOrder(),
   ]);
+  // Project titles for the admin strip (admin only: visitors never pay for this read).
+  let projectLabels: Record<string, { es: string; en: string }> = {};
+  if (isAdmin) {
+    const { getMergedPastProjects } = await import("@/lib/projects");
+    projectLabels = Object.fromEntries(
+      (await getMergedPastProjects()).map((p) => [p.id, { es: p.copy.es.title, en: p.copy.en.title }]),
+    );
+  }
   return (
     <html
       lang={locale}
@@ -144,7 +156,10 @@ export default async function RootLayout({
             <CosmicBg />
             <SiteControls isAdmin={isAdmin} />
             <AdminProvider isAdmin={isAdmin}>
-              <div className="relative z-10">{children}</div>
+              <SiteOrderProvider initial={order}>
+                <div className="relative z-10">{children}</div>
+                {isAdmin ? <AdminStripGate projectLabels={projectLabels} /> : null}
+              </SiteOrderProvider>
             </AdminProvider>
           </LocaleProvider>
         </ThemeProvider>

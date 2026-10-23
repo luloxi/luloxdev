@@ -5,6 +5,9 @@ import { pastProjectIds } from "@/content/projects";
 import { getPostBySlug, getPostBySlugEn } from "@/lib/blog";
 import { EN_PREFIX, LOCALE_HEADER, enToEsPath, localeFromPath } from "@/lib/routes";
 import type { Locale } from "@/i18n/types";
+import { editModeFromCookie } from "@/lib/edit-mode";
+import { isPathHidden, sectionForPath } from "@/lib/site-sections";
+import { isAdminHeaders, loadSiteOrder } from "@/lib/site-order";
 
 /**
  * Every page request passes through here and gets the x-lulox-locale request
@@ -50,9 +53,28 @@ function notFoundRewrite(request: NextRequest, locale: Locale) {
   return NextResponse.rewrite(url, { status: 404, request: { headers: withLocale(request, locale) } });
 }
 
+/**
+ * Sections and projects hidden from the admin strip are out of the public
+ * site: their pages (es and /en, subpages included) answer 404. Only an
+ * allowlisted admin with edit mode ON still opens them (marked as hidden).
+ * D1 is read only for paths that belong to a section.
+ */
+async function hiddenFromVisitor(request: NextRequest, esPath: string | null): Promise<boolean> {
+  if (!esPath || !sectionForPath(esPath)) return false;
+  const order = await loadSiteOrder();
+  if (!isPathHidden(esPath, order.sections, order.projects)) return false;
+  if (!getSessionCookie(request) || !editModeFromCookie(request.headers.get("cookie"))) return true;
+  return !(await isAdminHeaders(request.headers));
+}
+
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const locale = localeFromPath(pathname);
+
+  // Hidden section/project (admin strip): 404 for visitors, before any rewrite.
+  // /en/blog/<slug> maps to /blog/<slug> here: only the section matters.
+  const esPath = locale === "en" ? enToEsPath(pathname) : pathname;
+  if (await hiddenFromVisitor(request, esPath)) return notFoundRewrite(request, locale);
 
   // The old admin (/rothko) is gone: articles are created and edited on /blog.
   if (pathname === "/rothko" || pathname.startsWith("/rothko/")) {
