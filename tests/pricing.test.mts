@@ -83,17 +83,17 @@ test("hours input: digits only, clamped 1..6 per hour, 8..40 per project", async
   assert.equal(maxHoursFor("hourly"), 6);
 });
 
-test("private use: flat +US$ 500 in both modes, own line, not discounted, counts toward the deposit", () => {
+test("private use: flat +US$ 500 per project, +US$ 200 per hour, own line, not discounted, counts toward the deposit", () => {
   const off = estimate({ mode: "project", hours: 20, complexity: "low", extra: false });
   const on = estimate({ mode: "project", hours: 20, complexity: "low", extra: false, privateUse: true });
-  assert.equal(PRICING.privateUse, 500);
+  assert.deepEqual(PRICING.privateUse, { project: 500, hourly: 200 });
   assert.equal(on.total, off.total + 500); // 170 + 500: the 15% volume discount stays on hours × rate only
   assert.equal(on.deposit, Math.round((off.total + 500) / 2));
   assert.deepEqual(on.lines.at(-1), { id: "private", amount: 500 });
   assert.ok(!off.lines.some((l) => l.id === "private"));
   const h = estimate({ mode: "hourly", hours: 2, complexity: "low", extra: true, onSite: true, privateUse: true });
-  assert.equal(h.total, 20 + 25 + 25 + 100 + 500);
-  assert.equal(h.deposit, 335);
+  assert.equal(h.total, 20 + 25 + 25 + 100 + 200);
+  assert.equal(h.deposit, 185);
   // Old callers without the field: no line, same totals as before.
   assert.equal(estimate({ mode: "hourly", hours: 2, complexity: "low", extra: false }).total, 20);
 });

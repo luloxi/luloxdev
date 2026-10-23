@@ -17,7 +17,7 @@ export const PRICING = {
   extra: 100,
   maxUrgencyDays: 10,
   /** Optional flat fee (both modes): by default the work can be shown and the code is open source; this keeps it private. */
-  privateUse: 500,
+  privateUse: { project: 500, hourly: 200 } as Record<Mode, number>,
   /** Project size presets in hours (research, build, testing, polish, feedback, fixes, delivery). */
   sizes: { s: 20, m: 30, l: 40 },
   /** Calculator starting values: a low, friendly first price. No on-site, no extras. */
@@ -66,7 +66,7 @@ export type Inputs = {
   onSite?: boolean;
   /** Project mode: on-site days (each adds surcharge + travel). */
   onSiteDays?: number;
-  /** Private use: flat PRICING.privateUse, never discounted. Missing = false (old budgets). */
+  /** Private use: flat PRICING.privateUse[mode] (project 500, hourly 200), never discounted. Missing = false (old budgets). */
   privateUse?: boolean;
 };
 
@@ -87,7 +87,7 @@ export function estimate(i: Inputs, p = PRICING): { lines: Line[]; total: number
     const days = i.mode === "project" ? Math.max(1, Math.min(p.maxUrgencyDays, Math.round(i.extraDays ?? 1) || 1)) : 1;
     lines.push({ id: "extra", amount: p.extra * days, days });
   }
-  if (i.privateUse === true) lines.push({ id: "private", amount: p.privateUse });
+  if (i.privateUse === true) lines.push({ id: "private", amount: p.privateUse[i.mode] });
   const total = lines.reduce((a, l) => a + l.amount, 0);
   return { lines, total, deposit: Math.round(total * p.deposit) };
 }

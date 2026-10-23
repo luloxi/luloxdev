@@ -198,18 +198,18 @@ test("parseBudget privateUse: strict boolean, missing (old payload) = false, any
   for (const bad of ["true", "yes", 1, 0, null, {}, []]) assert.equal(parseBudget({ ...budget, privateUse: bad }), null, JSON.stringify(bad));
 });
 
-test("private use: +US$ 500 recomputed server-side in both modes, own line in the email, invalid flag → 400", async () => {
-  for (const [b, total, deposit] of [
+test("private use: +US$ 500 per project / +US$ 200 per hour recomputed server-side, own line in the email, invalid flag → 400", async () => {
+  for (const [b, total, deposit, fee] of [
     // 20h × 18 = 360, -15% = -54, on-site 2 days = 100, private 500 → 906
-    [{ ...budget, privateUse: true, total: 1 }, "US$ 906", "US$ 453"],
-    [{ mode: "hourly", hours: 2, complexity: "low", onSite: false, days: 0, extra: false, privateUse: true }, "US$ 520", "US$ 260"],
+    [{ ...budget, privateUse: true, total: 1 }, "US$ 906", "US$ 453", "US$ 500"],
+    [{ mode: "hourly", hours: 2, complexity: "low", onSite: false, days: 0, extra: false, privateUse: true }, "US$ 220", "US$ 110", "US$ 200"],
   ] as const) {
     const { env, sent } = mkEnv({ resend: true });
     assert.equal((await handleHireContact({ ...ok, budget: b }, env, "x")).status, 200);
     const { text, html } = (sent[0] as { m: { text: string; html: string } }).m;
     assert.match(text, new RegExp(`Total estimado: ${total.replace("$", "\\$")}\\n`));
     assert.match(text, new RegExp(`Anticipo \\(50%\\): ${deposit.replace("$", "\\$")}\\n`));
-    assert.match(text, /\nUso privado: US\$ 500\n/);
+    assert.match(text, new RegExp(`\\nUso privado: ${fee.replace("$", "\\$")}\\n`));
     assert.match(text, /Uso privado: sí/);
     assert.match(html, /Uso privado/);
   }

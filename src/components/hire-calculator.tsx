@@ -307,7 +307,7 @@ export function HireCalculator() {
               <button type="button" aria-label="+" disabled={extraDays >= PRICING.maxUrgencyDays} onClick={() => setExtraDays((d) => Math.min(PRICING.maxUrgencyDays, d + 1))}>+</button>
             </div>
           ) : null}
-          <Toggle on={privateUse} set={setPrivateUse} label={`${c.privateUse} (+US$ ${PRICING.privateUse})`} sub={c.privateUseSub} testId="hire-private-use" />
+          <Toggle on={privateUse} set={setPrivateUse} label={`${c.privateUse} (+US$ ${PRICING.privateUse[mode]})`} sub={c.privateUseSub} testId="hire-private-use" />
         </div>
       </fieldset>
 
@@ -386,7 +386,7 @@ export function HireCalculator() {
             [c.hours, `${Math.min(hours, maxH)}h · ${c.cx[complexity][0]} (US$ ${PRICING.rates[complexity]}${c.perHour})`],
             [c.onSite, onSite ? (mode === "project" ? `${c.form.yes}, ${days} ${c.dayUnit[days === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
             [c.extra, extra ? (mode === "project" ? `${c.form.yes}, ${extraDays} ${c.dayUnit[extraDays === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
-            [c.privateUse, privateUse ? `${c.form.yes}, +US$ ${PRICING.privateUse}` : c.form.no],
+            [c.privateUse, privateUse ? `${c.form.yes}, +US$ ${PRICING.privateUse[mode]}` : c.form.no],
             ...(ref.state === "ok" ? [[c.ref.by, ref.norm] as [string, string]] : []),
           ]}
         />
