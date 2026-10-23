@@ -31,7 +31,7 @@ export async function getServerPrefs(): Promise<{ locale: Locale; theme: Theme }
   };
 }
 
-/** Locale for share metadata only: ES unless the cookie explicitly says "en" (see metadataLocale). */
+/** Locale for share metadata only: always ES, no cookie/header read (see metadataLocale). */
 export async function getMetadataLocale(): Promise<Locale> {
-  return metadataLocale((await cookies()).get(LOCALE_COOKIE)?.value);
+  return metadataLocale();
 }

@@ -87,9 +87,12 @@ if(!done){try{sessionStorage.setItem('lulox-lang-reload','1')}catch(e){}d.setAtt
 }catch(e){st='error'}d.setAttribute('data-prefs',st)})();`;
 
 /**
- * Share-card (og/twitter) locale: EN only when the cookie explicitly says "en", otherwise ES.
- * Crawlers (X, Slack, WhatsApp) send no cookie and often an English Accept-Language, so it's ignored here.
+ * Share-card (og/twitter/<title>) locale: ALWAYS ES, whatever the cookie or Accept-Language say.
+ * Slugs are Spanish and crawlers (X, Slack, WhatsApp) must always see the Spanish card.
+ * The lulox-locale cookie only changes the page body (see getServerPrefs).
  */
-export function metadataLocale(cookie: string | undefined | null): Locale {
-  return cookie === "en" ? "en" : "es";
+export const METADATA_LOCALE: Locale = "es";
+export function metadataLocale(_cookie?: string | null): Locale {
+  void _cookie;
+  return METADATA_LOCALE;
 }

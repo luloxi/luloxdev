@@ -90,7 +90,7 @@ const baseMetadata: Metadata = {
   },
 };
 
-/** Home share card stays "Lulox"; description is ES unless the cookie says en. */
+/** Home share card stays "Lulox"; description is always ES (see getMetadataLocale). */
 const HOME_DESCRIPTION = {
   es: site.description,
   en: "I'm Luciano Oliva Bianco (Lulox). I research and build with AI, blockchain, tokenization and agentic commerce.",

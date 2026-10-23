@@ -4,8 +4,8 @@ import type { Locale } from "@/i18n/types";
 import { getMetadataLocale } from "@/lib/prefs";
 
 /**
- * Per-route share metadata (og:* + twitter:*), localized by the same
- * ES by default; EN only with an explicit lulox-locale=en cookie (crawlers send none; see getMetadataLocale).
+ * Per-route share metadata (og:* + twitter:*). Always ES (og:locale es_AR),
+ * regardless of the lulox-locale cookie or Accept-Language (see getMetadataLocale).
  *
  * Child openGraph/twitter objects REPLACE the root ones (no deep merge),
  * so every field the card needs (image, siteName, url) is repeated here.
@@ -53,7 +53,7 @@ export function buildPageMetadata(
   };
 }
 
-/** Static route: pick ES/EN copy from the request locale. */
+/** Static route: always the ES copy (the EN copy is kept for reference/body parity). */
 export async function pageMetadata(path: string, copy: PageCopy): Promise<Metadata> {
   const locale = await getMetadataLocale();
   return buildPageMetadata(locale, path, copy[locale]);
