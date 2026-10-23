@@ -17,6 +17,7 @@ export const messages = {
       stealPortfolio: "¡Robate este portfolio!",
       social: "Social",
       experience: "Experiencia",
+      publications: "Publicaciones",
       notFound: "Nada por acá.",
       themeLabel: "tema",
       themeLight: "Modo claro",
@@ -63,9 +64,9 @@ export const messages = {
       ],
       /**
        * Page order: one list mixing story sections ("story:N" = Nth "## " section of body)
-       * and records ("job:N" = timeline[N]). Story order follows the body; this places the jobs.
+       * and records ("job:N" = timeline[N], "pubs:0" = the Publications block). Story order follows the body; this places the records.
        */
-      layout: "story:0,story:1,job:2,story:2,job:1,story:3,job:0,story:4,story:5",
+      layout: "story:0,story:1,job:2,story:2,job:1,story:3,job:0,story:4,pubs:0,story:5",
       linkedInCta: "LinkedIn",
       linkedInDetail: "Mi experiencia laboral y contactos profesionales",
     },
@@ -250,6 +251,7 @@ export const messages = {
       stealPortfolio: "Steal this portfolio!",
       social: "Social",
       experience: "Experience",
+      publications: "Publications",
       notFound: "Nothing here.",
       themeLabel: "theme",
       themeLight: "Light mode",
@@ -296,9 +298,9 @@ export const messages = {
       ],
       /**
        * Page order: one list mixing story sections ("story:N" = Nth "## " section of body)
-       * and records ("job:N" = timeline[N]). Story order follows the body; this places the jobs.
+       * and records ("job:N" = timeline[N], "pubs:0" = the Publications block). Story order follows the body; this places the records.
        */
-      layout: "story:0,story:1,job:2,story:2,job:1,story:3,job:0,story:4,story:5",
+      layout: "story:0,story:1,job:2,story:2,job:1,story:3,job:0,story:4,pubs:0,story:5",
       linkedInCta: "LinkedIn",
       linkedInDetail: "My work history and professional network",
     },
