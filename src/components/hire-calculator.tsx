@@ -40,15 +40,17 @@ const copy = {
     travelNote: "*El viático puede variar según la distancia.",
     extra: "Urgencia",
     extraDays: "Días de urgencia",
-    lines: { work: "Trabajo", discount: "Descuento por volumen", onSite: "Recargo presencial", travel: "Viático*", extra: "Urgencia" },
+    privateUse: "Uso privado",
+    privateUseSub: "Por defecto puedo mostrar el trabajo en mi portfolio y el código queda open source. Con esta opción queda solo para vos.",
+    lines: { work: "Trabajo", discount: "Descuento por volumen", onSite: "Recargo presencial", travel: "Viático*", extra: "Urgencia", private: "Uso privado" },
     estimate: "Estimación",
     total: "Total estimado",
     deposit: "Anticipo (50%)",
     perHour: "/h",
     note: `Estimación orientativa, no es un presupuesto final. Lo ajustamos juntos en la llamada. Presupuestos válidos ${PRICING.validityDays} días; 50% de anticipo y 50% contra entrega.`,
     formula: "Cómo calculo",
-    fProject: "(horas × complejidad − descuento por tamaño: 20 h 15%, 30 h 20%, 40 h 25%) + presencial/día + viático/día + (urgencia × día)",
-    fHourly: "(horas × complejidad) + presencial + viático + urgencia",
+    fProject: "(horas × complejidad − descuento por tamaño: 20 h 15%, 30 h 20%, 40 h 25%) + presencial/día + viático/día + (urgencia × día) + uso privado",
+    fHourly: "(horas × complejidad) + presencial + viático + urgencia + uso privado",
     cta: "Videollamada",
     write: "Escribime",
     contact: "Contacto",
@@ -83,15 +85,17 @@ const copy = {
     travelNote: "*Travel may vary with distance.",
     extra: "Urgency",
     extraDays: "Urgency days",
-    lines: { work: "Work", discount: "Volume discount", onSite: "On-site surcharge", travel: "Travel*", extra: "Urgency" },
+    privateUse: "Private use",
+    privateUseSub: "By default I can show the work in my portfolio and the code stays open source. With this option it's just for you.",
+    lines: { work: "Work", discount: "Volume discount", onSite: "On-site surcharge", travel: "Travel*", extra: "Urgency", private: "Private use" },
     estimate: "Estimate",
     total: "Estimated total",
     deposit: "Deposit (50%)",
     perHour: "/h",
     note: `Ballpark estimate, not a final quote. We fine-tune it together on the call. Quotes are valid for ${PRICING.validityDays} days; 50% upfront, 50% on delivery.`,
     formula: "How I calculate",
-    fProject: "(hours × complexity − size discount: 20 h 15%, 30 h 20%, 40 h 25%) + on-site/day + travel/day + (urgency × day)",
-    fHourly: "(hours × complexity) + on-site + travel + urgency",
+    fProject: "(hours × complexity − size discount: 20 h 15%, 30 h 20%, 40 h 25%) + on-site/day + travel/day + (urgency × day) + private use",
+    fHourly: "(hours × complexity) + on-site + travel + urgency + private use",
     cta: "Video call",
     write: "Write me",
     contact: "Contact",
@@ -170,6 +174,7 @@ export function HireCalculator() {
   const [days, setDays] = useState(1);
   const [extra, setExtra] = useState(false);
   const [extraDays, setExtraDays] = useState(1);
+  const [privateUse, setPrivateUse] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const ref = useReferralCode();
   // Text being typed in the hours box (null = show the committed value).
@@ -181,7 +186,7 @@ export function HireCalculator() {
     return () => cancelAnimationFrame(id);
   }, []);
 
-  const r = estimate({ mode, hours, complexity, extra, onSite, onSiteDays: days, extraDays });
+  const r = estimate({ mode, hours, complexity, extra, onSite, onSiteDays: days, extraDays, privateUse });
   const total = useCountUp(r.total);
   const maxH = maxHoursFor(mode);
   const minH = minHoursFor(mode);
@@ -302,6 +307,7 @@ export function HireCalculator() {
               <button type="button" aria-label="+" disabled={extraDays >= PRICING.maxUrgencyDays} onClick={() => setExtraDays((d) => Math.min(PRICING.maxUrgencyDays, d + 1))}>+</button>
             </div>
           ) : null}
+          <Toggle on={privateUse} set={setPrivateUse} label={`${c.privateUse} (+US$ ${PRICING.privateUse})`} sub={c.privateUseSub} testId="hire-private-use" />
         </div>
       </fieldset>
 
@@ -372,7 +378,7 @@ export function HireCalculator() {
         <HireForm
           open={formOpen}
           c={c}
-          budget={{ mode, hours: Math.min(hours, maxH), complexity, onSite, days, extra, extraDays: mode === "project" ? extraDays : 1 }}
+          budget={{ mode, hours: Math.min(hours, maxH), complexity, onSite, days, extra, extraDays: mode === "project" ? extraDays : 1, privateUse }}
           refCode={ref.state === "ok" ? ref.norm : ""}
           rows={[
             [c.total, money(r.total)],
@@ -380,6 +386,7 @@ export function HireCalculator() {
             [c.hours, `${Math.min(hours, maxH)}h · ${c.cx[complexity][0]} (US$ ${PRICING.rates[complexity]}${c.perHour})`],
             [c.onSite, onSite ? (mode === "project" ? `${c.form.yes}, ${days} ${c.dayUnit[days === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
             [c.extra, extra ? (mode === "project" ? `${c.form.yes}, ${extraDays} ${c.dayUnit[extraDays === 1 ? 0 : 1]}` : c.form.yes) : c.form.no],
+            [c.privateUse, privateUse ? `${c.form.yes}, +US$ ${PRICING.privateUse}` : c.form.no],
             ...(ref.state === "ok" ? [[c.ref.by, ref.norm] as [string, string]] : []),
           ]}
         />
@@ -397,9 +404,9 @@ export function HireCalculator() {
   );
 }
 
-function Toggle({ on, set, label, sub, disabled }: { on: boolean; set: (v: boolean) => void; label: string; sub: string; disabled?: boolean }) {
+function Toggle({ on, set, label, sub, disabled, testId }: { on: boolean; set: (v: boolean) => void; label: string; sub: string; disabled?: boolean; testId?: string }) {
   return (
-    <button type="button" role="switch" aria-checked={on} disabled={disabled} className="hire-toggle" onClick={() => set(!on)}>
+    <button type="button" role="switch" aria-checked={on} disabled={disabled} className="hire-toggle" onClick={() => set(!on)} data-testid={testId}>
       <span className="hire-toggle-knob" aria-hidden />
       <span className="hire-toggle-text">
         <span>{label}</span>

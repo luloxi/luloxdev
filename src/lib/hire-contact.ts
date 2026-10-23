@@ -27,8 +27,13 @@ const EMAIL_RE = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]{2,}$/;
 const MODES: Mode[] = ["project", "hourly"];
 const CX: Complexity[] = ["low", "medium", "high"];
 
-export type Budget = { mode: Mode; hours: number; complexity: Complexity; onSite: boolean; days: number; extra: boolean; extraDays: number };
+export type Budget = { mode: Mode; hours: number; complexity: Complexity; onSite: boolean; days: number; extra: boolean; extraDays: number; privateUse: boolean };
 
+/**
+ * Calculator inputs -> Budget, or null (invalid_budget). `privateUse` is a strict boolean:
+ * missing/undefined is false (budgets from before the option), anything else that is not
+ * true/false rejects the whole budget instead of guessing.
+ */
 export function parseBudget(v: unknown): Budget | null {
   if (!v || typeof v !== "object") return null;
   const b = v as Record<string, unknown>;
@@ -36,32 +41,39 @@ export function parseBudget(v: unknown): Budget | null {
   const complexity = CX.find((c) => c === b.complexity);
   const rawHours = Number(b.hours);
   if (!mode || !complexity || !Number.isFinite(rawHours)) return null;
+  if (b.privateUse !== undefined && typeof b.privateUse !== "boolean") return null;
+  const privateUse = b.privateUse === true;
   // Same rule as the hours input: whole hours, clamped to 1..max for the mode.
   const hours = clampHours(mode, rawHours);
   const onSite = b.onSite === true;
   const days = mode === "project" && onSite ? Math.max(1, Math.min(PRICING.maxOnSiteDays, Math.round(Number(b.days) || 1))) : onSite ? 1 : 0;
   const extra = b.extra === true;
   const extraDays = !extra ? 0 : mode !== "project" ? 1 : Math.max(1, Math.min(PRICING.maxUrgencyDays, Math.round(Number(b.extraDays) || 1)));
-  return { mode, hours, complexity, onSite, days, extra, extraDays };
+  return { mode, hours, complexity, onSite, days, extra, extraDays, privateUse };
 }
 
 const LABEL = {
   mode: { project: "Por proyecto", hourly: "Por hora" },
   cx: { low: "Baja", medium: "Media", high: "Alta" },
-  lines: { work: "Trabajo", discount: "Descuento por volumen", onSite: "Recargo presencial", travel: "Viático", extra: "Urgencia" },
+  lines: { work: "Trabajo", discount: "Descuento por volumen", onSite: "Recargo presencial", travel: "Viático", extra: "Urgencia", private: "Uso privado" },
 } as const;
 
 const usd = (n: number) => `${n < 0 ? "-" : ""}US$ ${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 const oneLine = (s: string) => s.replace(/[\r\n]+/g, " ").trim();
 
+/** Same estimate the calculator shows, from a parsed Budget (email and hire_leads use this). */
+export const estimateBudget = (b: Budget) =>
+  estimate({ mode: b.mode, hours: b.hours, complexity: b.complexity, extra: b.extra, onSite: b.onSite, onSiteDays: b.days, extraDays: b.extraDays, privateUse: b.privateUse });
+
 export function budgetLines(b: Budget): { summary: string[]; lines: [string, string][]; total: string; deposit: string } {
-  const r = estimate({ mode: b.mode, hours: b.hours, complexity: b.complexity, extra: b.extra, onSite: b.onSite, onSiteDays: b.days, extraDays: b.extraDays });
+  const r = estimateBudget(b);
   const summary = [
     `Modalidad: ${LABEL.mode[b.mode]}`,
     `Horas: ${b.hours}h · Complejidad: ${LABEL.cx[b.complexity]} (US$ ${PRICING.rates[b.complexity]}/h)`,
     `Presencial: ${b.onSite ? (b.mode === "project" ? `sí, ${b.days} ${b.days === 1 ? "día" : "días"}` : "sí") : "no"}`,
     `Urgencia: ${b.extra ? (b.mode === "project" ? `sí, ${b.extraDays} ${b.extraDays === 1 ? "día" : "días"}` : "sí") : "no"}`,
+    `Uso privado: ${b.privateUse ? "sí (sin portfolio ni open source)" : "no (portfolio y open source ok)"}`,
   ];
   const lines = r.lines.map((l): [string, string] => [`${LABEL.lines[l.id]}${l.id === "discount" ? ` (-${l.pct}%)` : ""}${l.days && b.mode === "project" ? ` (${l.days} ${l.days === 1 ? "día" : "días"})` : ""}`, usd(l.amount)]);
   return { summary, lines, total: usd(r.total), deposit: usd(r.deposit) };
@@ -176,7 +188,7 @@ ${refLine ? `<p style="margin:16px 0 0;font-size:14px;font-weight:700;color:#0F7
   }
   if (deps.saveLead) {
     try {
-      const r = estimate({ mode: budget.mode, hours: budget.hours, complexity: budget.complexity, extra: budget.extra, onSite: budget.onSite, onSiteDays: budget.days, extraDays: budget.extraDays });
+      const r = estimateBudget(budget);
       await deps.saveLead({
         name,
         email,

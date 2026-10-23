@@ -2,6 +2,7 @@
  * Lulox's pricing method (public, no client data). Edit the numbers here.
  *  - Per project: (hours × hourly complexity) + on-site/day + travel/day + (urgency × day)
  *  - Per hour: (hours × rate) + on-site + travel + urgency (hourly work counts as one day)
+ *  - Both: + private use (flat, optional): the work is not shown in the portfolio and the code is not open source.
  */
 export type Complexity = "low" | "medium" | "high";
 export type Mode = "project" | "hourly";
@@ -15,6 +16,8 @@ export const PRICING = {
   /** Urgency surcharge: per required day in project mode, flat (one day) in hourly mode. */
   extra: 100,
   maxUrgencyDays: 10,
+  /** Optional flat fee (both modes): by default the work can be shown and the code is open source; this keeps it private. */
+  privateUse: 500,
   /** Project size presets in hours (research, build, testing, polish, feedback, fixes, delivery). */
   sizes: { s: 20, m: 30, l: 40 },
   /** Calculator starting values: a low, friendly first price. No on-site, no extras. */
@@ -63,9 +66,11 @@ export type Inputs = {
   onSite?: boolean;
   /** Project mode: on-site days (each adds surcharge + travel). */
   onSiteDays?: number;
+  /** Private use: flat PRICING.privateUse, never discounted. Missing = false (old budgets). */
+  privateUse?: boolean;
 };
 
-export type Line = { id: "work" | "discount" | "onSite" | "travel" | "extra"; amount: number; pct?: number; days?: number };
+export type Line = { id: "work" | "discount" | "onSite" | "travel" | "extra" | "private"; amount: number; pct?: number; days?: number };
 
 export function estimate(i: Inputs, p = PRICING): { lines: Line[]; total: number; deposit: number } {
   const hours = Math.min(i.mode === "project" ? p.maxProjectHours : p.maxHourlyHours, Math.max(i.mode === "project" ? p.minProjectHours : 0, Math.round(i.hours * 2) / 2));
@@ -82,6 +87,7 @@ export function estimate(i: Inputs, p = PRICING): { lines: Line[]; total: number
     const days = i.mode === "project" ? Math.max(1, Math.min(p.maxUrgencyDays, Math.round(i.extraDays ?? 1) || 1)) : 1;
     lines.push({ id: "extra", amount: p.extra * days, days });
   }
+  if (i.privateUse === true) lines.push({ id: "private", amount: p.privateUse });
   const total = lines.reduce((a, l) => a + l.amount, 0);
   return { lines, total, deposit: Math.round(total * p.deposit) };
 }

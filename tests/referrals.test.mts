@@ -225,6 +225,14 @@ test("hire form: valid active code is attributed, stored with the server budget 
   assert.equal(row.ref_code, "ana");
   assert.equal(row.total_usd, 306); // 20 h x 18 = 360, -15% (Chico) = 306: the server's number, not the client's "total: 1"
   assert.equal(JSON.parse(row.budget_json).total, 306);
+  assert.equal(JSON.parse(row.budget_json).privateUse, false); // stored inside budget_json, no migration
+
+  // Private use: +500 in the stored total and flag inside budget_json; the referral base is that total.
+  await handleHireContact({ ...base, budget: { ...base.budget, privateUse: true }, refCode: "ana" }, env, "1.1.1.1", deps);
+  const priv = db.raw.prepare("SELECT total_usd, budget_json FROM hire_leads ORDER BY rowid DESC LIMIT 1").get() as { total_usd: number; budget_json: string };
+  assert.equal(priv.total_usd, 806);
+  assert.deepEqual([JSON.parse(priv.budget_json).privateUse, JSON.parse(priv.budget_json).total, JSON.parse(priv.budget_json).deposit], [true, 806, 403]);
+  assert.match(sent.at(-1)!.text, /Uso privado: US\$ 500/);
 
   // Paused or unknown code: still sent and stored, just not attributed.
   for (const code of ["beto", "nadie", "<x>"]) {

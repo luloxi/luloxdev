@@ -189,3 +189,40 @@ test("server clamps hours like the input: 9h per hour → 6h, 0 → 1, project o
   assert.equal(parseBudget({ ...budget, hours: 4 })?.hours, 8);
   assert.equal(parseBudget({ ...budget, hours: 0 })?.hours, 8);
 });
+
+test("parseBudget privateUse: strict boolean, missing (old payload) = false, anything else rejects", () => {
+  assert.equal(parseBudget(budget)!.privateUse, false); // old payload without the key
+  assert.equal(parseBudget({ ...budget, privateUse: false })!.privateUse, false);
+  assert.equal(parseBudget({ ...budget, privateUse: true })!.privateUse, true);
+  assert.equal(parseBudget({ ...budget, privateUse: undefined })!.privateUse, false);
+  for (const bad of ["true", "yes", 1, 0, null, {}, []]) assert.equal(parseBudget({ ...budget, privateUse: bad }), null, JSON.stringify(bad));
+});
+
+test("private use: +US$ 500 recomputed server-side in both modes, own line in the email, invalid flag → 400", async () => {
+  for (const [b, total, deposit] of [
+    // 20h × 18 = 360, -15% = -54, on-site 2 days = 100, private 500 → 906
+    [{ ...budget, privateUse: true, total: 1 }, "US$ 906", "US$ 453"],
+    [{ mode: "hourly", hours: 2, complexity: "low", onSite: false, days: 0, extra: false, privateUse: true }, "US$ 520", "US$ 260"],
+  ] as const) {
+    const { env, sent } = mkEnv({ resend: true });
+    assert.equal((await handleHireContact({ ...ok, budget: b }, env, "x")).status, 200);
+    const { text, html } = (sent[0] as { m: { text: string; html: string } }).m;
+    assert.match(text, new RegExp(`Total estimado: ${total.replace("$", "\\$")}\\n`));
+    assert.match(text, new RegExp(`Anticipo \\(50%\\): ${deposit.replace("$", "\\$")}\\n`));
+    assert.match(text, /\nUso privado: US\$ 500\n/);
+    assert.match(text, /Uso privado: sí/);
+    assert.match(html, /Uso privado/);
+  }
+  const { env, sent } = mkEnv({ resend: true });
+  assert.equal((await handleHireContact(ok, env, "x")).status, 200);
+  assert.match(String((sent[0] as { m: { text: string } }).m.text), /Uso privado: no/);
+  assert.doesNotMatch(String((sent[0] as { m: { text: string } }).m.text), /Uso privado: US\$/);
+  const r = await handleHireContact({ ...ok, budget: { ...budget, privateUse: "true" } }, env, "x");
+  assert.deepEqual([r.status, r.body.error], [400, "invalid_budget"]);
+  assert.equal(sent.length, 1);
+});
+
+test("native form post carries budget.privateUse as a boolean", () => {
+  assert.deepEqual(bodyFromForm([["budget.privateUse", "true"]]).budget, { privateUse: true });
+  assert.deepEqual(bodyFromForm([["budget.privateUse", "false"]]).budget, { privateUse: false });
+});
