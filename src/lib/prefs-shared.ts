@@ -63,7 +63,8 @@ export function readStorage(key: string): string | null {
  *   localStorage "lulox-locale" = "es" | "en"   (LocaleProvider, plain string)
  *   localStorage "theme" = "light" | "dark" | "system"  (next-themes 0.4.6 default storageKey, plain string)
  * - theme: cookie, else legacy value (light/dark migrated into the cookie),
- *   else the system theme (prefers-color-scheme), applied but never persisted
+ *   else the system theme: light only if (prefers-color-scheme: light) matches;
+ *   no-preference or no matchMedia -> dark. Applied but never persisted
  * - lang: cookie, else legacy value -> cookie; if it differs from what the
  *   server rendered, reload once (sessionStorage guard) so text matches.
  * Sets <html data-prefs> to what happened, for debugging.
@@ -74,7 +75,7 @@ function sc(n,v){document.cookie=n+'='+v+'; Path=/; Max-Age=${ONE_YEAR}; SameSit
 function ls(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function cl(v){return typeof v==='string'?v.trim().replace(/^"|"$/g,'').trim().toLowerCase():''}
 function nl(v){v=cl(v);return v.indexOf('es')===0?'es':v.indexOf('en')===0?'en':null}
-function nt(v){v=cl(v);if(v==='light'||v==='dark')return v;if(v==='system'){try{return matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}catch(e){return 'dark'}}return null}
+function nt(v){v=cl(v);if(v==='light'||v==='dark')return v;if(v==='system'){try{return typeof matchMedia==='function'&&matchMedia('(prefers-color-scheme: light)').matches===true?'light':'dark'}catch(e){return 'dark'}}return null}
 var t=nt(gc('${THEME_COOKIE}'));
 if(t){st='cookie'}else{var lr=cl(ls('${THEME_STORAGE_KEY}'));t=nt(lr);if(t){st='legacy';if(lr==='light'||lr==='dark')sc('${THEME_COOKIE}',t)}}
 if(!t){t=nt('system');st='system'}

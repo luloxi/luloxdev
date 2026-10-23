@@ -37,9 +37,9 @@ function subscribe(onChange: () => void) {
   return () => obs.disconnect();
 }
 
-/** Theme from prefers-color-scheme (dark when unknown). */
+/** Light only when (prefers-color-scheme: light) explicitly matches; no-preference / no matchMedia → dark. */
 export function systemTheme(mq?: { matches: boolean } | null): Theme {
-  return mq?.matches ? "light" : "dark";
+  return mq?.matches === true ? "light" : "dark";
 }
 
 /** True when the user picked a theme by hand (cookie, or a legacy explicit value). */

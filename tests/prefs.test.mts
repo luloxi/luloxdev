@@ -12,7 +12,7 @@ test("Accept-Language fallback matches the old browser rule", () => {
   assert.equal(localeFromAcceptLanguage("fr-FR"), "en");
 });
 
-function run(cookie: string, ls: Record<string, string>, ssrLocale: string, ssIn: Record<string, string> | null = {}, prefersLight = true) {
+function run(cookie: string, ls: Record<string, string>, ssrLocale: string, ssIn: Record<string, string> | null = {}, prefersLight: boolean | "missing" = true) {
   const cls = new Set(["dark"]);
   let jar = cookie;
   let reloaded = false;
@@ -45,7 +45,7 @@ function run(cookie: string, ls: Record<string, string>, ssrLocale: string, ssIn
     sessionStorage: ssIn === null
       ? { getItem: () => { throw new Error("denied"); }, setItem: () => { throw new Error("denied"); } }
       : { getItem: (k: string) => ss[k] ?? null, setItem: (k: string, v: string) => void (ss[k] = v) },
-    matchMedia: () => ({ matches: prefersLight }),
+    matchMedia: prefersLight === "missing" ? undefined : () => ({ matches: prefersLight }),
     location: { protocol: "https:", href: "https://www.lulox.dev/", replace: () => void (reloaded = true) },
   };
   new Function(...Object.keys(env), PREFS_HEAD_SCRIPT)(...Object.values(env));
@@ -61,6 +61,18 @@ test("head script: no prefs follows the system theme before paint, persists noth
   const light = run("", {}, "en", {}, true);
   assert.equal(light.theme, "light");
   assert.equal(light.cookie, "");
+});
+
+test("no system preference (no-preference or no matchMedia) falls back to dark everywhere", async () => {
+  // no-preference: (prefers-color-scheme: light) does not match
+  assert.equal(run("", {}, "en", {}, false).theme, "dark");
+  // matchMedia missing entirely
+  const r = run("", {}, "en", {}, "missing");
+  assert.equal(r.theme, "dark");
+  assert.equal(r.cookie, "");
+  assert.equal(normalizeTheme("system", false), "dark");
+  const { DEFAULT_THEME } = await import("../src/lib/prefs-shared.ts");
+  assert.equal(DEFAULT_THEME, "dark");
 });
 
 test("head script: a saved manual theme beats the system theme", () => {
